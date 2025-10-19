@@ -1,0 +1,26 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Model đầu tiên: Category
+model Category {
+  id          String    @id @default(cuid()) // primal key, tự động tạo ID unique
+  name        String
+  slug        String    @unique
+  description String?           // có thể null
+  createdAt   DateTime  @default(now())
+  
+  @@map("categories")     // tên table trong DB
+}
