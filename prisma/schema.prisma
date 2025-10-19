@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../app/generated/prisma"
@@ -14,13 +8,143 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Model đầu tiên: Category
+// ===== CATEGORIES =====
 model Category {
-  id          String    @id @default(cuid()) // primal key, tự động tạo ID unique
+  id          String    @id @default(cuid())
   name        String
   slug        String    @unique
-  description String?           // có thể null
+  description String?
+  imageUrl    String?
   createdAt   DateTime  @default(now())
   
-  @@map("categories")     // tên table trong DB
+  products    Product[]
+  
+  @@map("categories")
+}
+
+// ===== PRODUCTS =====
+model Product {
+  id            String    @id @default(cuid())
+  name          String
+  slug          String    @unique
+  description   String    @db.Text
+  price         Decimal   @db.Decimal(10, 2)
+  comparePrice  Decimal?  @db.Decimal(10, 2)
+  stockQuantity Int       @default(0)
+  images        String[]
+  isActive      Boolean   @default(true)
+  featured      Boolean   @default(false)
+  
+  categoryId    String
+  category      Category  @relation(fields: [categoryId], references: [id])
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  cartItems     CartItem[]
+  orderItems    OrderItem[]
+  
+  @@map("products")
+}
+
+// ===== USERS =====
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  fullName     String
+  phone        String?
+  role         Role     @default(CUSTOMER)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  orders       Order[]
+  cartItems    CartItem[]
+  
+  @@map("users")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+// ===== CART =====
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  quantity  Int      @default(1)
+  addedAt   DateTime @default(now())
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, productId])
+  @@map("cart_items")
+}
+
+// ===== ORDERS =====
+model Order {
+  id              String      @id @default(cuid())
+  orderNumber     String      @unique
+  userId          String?
+  
+  customerName    String
+  customerEmail   String?
+  customerPhone   String
+  shippingAddress String      @db.Text
+  
+  totalAmount     Decimal     @db.Decimal(10, 2)
+  status          OrderStatus @default(PENDING)
+  paymentMethod   String?
+  note            String?     @db.Text
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  
+  user            User?       @relation(fields: [userId], references: [id])
+  orderItems      OrderItem[]
+  
+  @@map("orders")
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  PREPARING
+  SHIPPING
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+// ===== ORDER ITEMS =====
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+  
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+  
+  @@map("order_items")
+}
+
+// ===== ADMIN =====
+model Admin {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  fullName     String
+  email        String   @unique
+  isActive     Boolean  @default(true)
+  
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@map("admins")
 }
