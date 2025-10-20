@@ -8,106 +8,115 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ===== CATEGORIES =====
 model Category {
   id          String    @id @default(cuid())
   name        String
   slug        String    @unique
   description String?
-  imageUrl    String?
   createdAt   DateTime  @default(now())
-  
+  imageUrl    String?
   products    Product[]
-  
+
   @@map("categories")
 }
 
-// ===== PRODUCTS =====
 model Product {
-  id            String    @id @default(cuid())
+  id            String      @id @default(cuid())
   name          String
-  slug          String    @unique
-  description   String    @db.Text
-  price         Decimal   @db.Decimal(10, 2)
-  comparePrice  Decimal?  @db.Decimal(10, 2)
-  stockQuantity Int       @default(0)
+  slug          String      @unique
+  description   String
+  price         Decimal     @db.Decimal(10, 2)
+  comparePrice  Decimal?    @db.Decimal(10, 2)
+  stockQuantity Int         @default(0)
   images        String[]
-  isActive      Boolean   @default(true)
-  featured      Boolean   @default(false)
-  
+  isActive      Boolean     @default(true)
+  featured      Boolean     @default(false)
   categoryId    String
-  category      Category  @relation(fields: [categoryId], references: [id])
-  
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
   cartItems     CartItem[]
   orderItems    OrderItem[]
-  
+  category      Category    @relation(fields: [categoryId], references: [id])
+
   @@map("products")
 }
 
-// ===== USERS =====
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
+  id           String     @id @default(cuid())
+  email        String     @unique
   passwordHash String
   fullName     String
   phone        String?
-  role         Role     @default(CUSTOMER)
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  orders       Order[]
+  role         Role       @default(CUSTOMER)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
   cartItems    CartItem[]
-  
+  orders       Order[]
+
   @@map("users")
 }
 
-enum Role {
-  CUSTOMER
-  ADMIN
-}
-
-// ===== CART =====
 model CartItem {
   id        String   @id @default(cuid())
   userId    String
   productId String
   quantity  Int      @default(1)
   addedAt   DateTime @default(now())
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@unique([userId, productId])
   @@map("cart_items")
 }
 
-// ===== ORDERS =====
 model Order {
   id              String      @id @default(cuid())
   orderNumber     String      @unique
   userId          String?
-  
   customerName    String
   customerEmail   String?
   customerPhone   String
-  shippingAddress String      @db.Text
-  
+  shippingAddress String
   totalAmount     Decimal     @db.Decimal(10, 2)
   status          OrderStatus @default(PENDING)
   paymentMethod   String?
-  note            String?     @db.Text
-  
+  note            String?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
-  
-  user            User?       @relation(fields: [userId], references: [id])
   orderItems      OrderItem[]
-  
+  user            User?       @relation(fields: [userId], references: [id])
+
   @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  username     String   @unique
+  passwordHash String
+  fullName     String
+  email        String   @unique
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@map("admins")
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
 }
 
 enum OrderStatus {
@@ -118,33 +127,4 @@ enum OrderStatus {
   DELIVERED
   COMPLETED
   CANCELLED
-}
-
-// ===== ORDER ITEMS =====
-model OrderItem {
-  id        String  @id @default(cuid())
-  orderId   String
-  productId String
-  quantity  Int
-  price     Decimal @db.Decimal(10, 2)
-  
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id])
-  
-  @@map("order_items")
-}
-
-// ===== ADMIN =====
-model Admin {
-  id           String   @id @default(cuid())
-  username     String   @unique
-  passwordHash String
-  fullName     String
-  email        String   @unique
-  isActive     Boolean  @default(true)
-  
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  @@map("admins")
 }
