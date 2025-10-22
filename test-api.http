@@ -1,0 +1,70 @@
+### Test Registration API - Success Case
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@gmail.com",
+  "password": "12345678",
+  "fullName": "Nguyen Van A",
+  "phone": "0912345678"
+}
+
+### Test Registration API - Duplicate Email
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "test@gmail.com",
+  "password": "87654321",
+  "fullName": "Tran Van B",
+  "phone": "0987654321"
+}
+
+### Test Registration API - Invalid Email
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "invalid-email",
+  "password": "12345678",
+  "fullName": "Le Van C",
+  "phone": "0901234567"
+}
+
+### Test Registration API - Weak Password
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "weak@gmail.com",
+  "password": "123",
+  "fullName": "Pham Van D",
+  "phone": "0912345678"
+}
+
+### Test Registration API - Invalid Phone
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "invalidphone@gmail.com",
+  "password": "12345678",
+  "fullName": "Hoang Van E",
+  "phone": "0212345678"
+}
+
+### Test Registration API - Without Phone (Optional)
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "nophone@gmail.com",
+  "password": "12345678",
+  "fullName": "Vo Van F"
+}
+
+### Get All Categories
+GET http://localhost:3000/api/categories
+
+### Get All Products
+GET http://localhost:3000/api/products?page=1&limit=10
