@@ -23,7 +23,7 @@ const registerSchema = z.object({
         
     phone: z
         .string()
-        .regex(/^(03[2-9]|05[2|6|8|9]|07[0|6|7|8|9]|08[1-9]|09[0-9])\d{7}$/, 'Phone must be 10 digits') // giới hạn các đầu số của nhà mạng Việt Nam
+        .regex(/^(03[2-9]|05[2|6|8|9]|07[0|6|7|8|9]|08[1-9]|09[0-9])\d{7}$/, 'Số điện thoại di động không hợp lệ') // giới hạn các đầu số của nhà mạng Việt Nam
         .optional()
         .or(z.literal('')), // cho phép để trống
 })

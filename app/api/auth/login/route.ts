@@ -55,9 +55,9 @@ export async function POST(request: Request) {
                 email: user.email,
                 role: user.role
             },
-            process.env.JWT_SECRET_KEY!, // secret key
+            process.env.JWT_SECRET!, // secret key
             {
-            expiresIn: '7d' // tạo token có hạn trong 7 ngày
+                expiresIn: '7d' // tạo token có hạn trong 7 ngày
             }
         )
 
