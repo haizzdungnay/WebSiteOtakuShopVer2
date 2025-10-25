@@ -1,10 +1,12 @@
-import './globals.css'
 import type { Metadata } from 'next'
-import { AuthProvider } from '@/contexts/AuthContext'
+import { Inter } from 'next/font/google'
+import './globals.css'
+
+const inter = Inter({ subsets: ['latin', 'vietnamese'] })
 
 export const metadata: Metadata = {
-  title: 'Otaku Shop - Anime & Manga Store',
-  description: 'Your one-stop shop for anime, manga, and otaku merchandise',
+  title: 'Figure Store - Anime & Manga Collectibles',
+  description: 'Shop for authentic anime figures',
 }
 
 export default function RootLayout({
@@ -13,11 +15,9 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en">
-      <body className="font-sans antialiased">
-        <AuthProvider>
-          {children}
-        </AuthProvider>
+    <html lang="vi">
+      <body className={inter.className}>
+        {children}
       </body>
     </html>
   )
