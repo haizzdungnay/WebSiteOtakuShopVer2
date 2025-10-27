@@ -1,20 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getUserFromRequest } from '@/lib/auth'
-import { success, z } from 'zod'
-
-// ==========================================
-// PUT /api/cart/[id] - Update quantity
-// ==========================================
+import { z } from 'zod'
 
 const updateQuantitySchema = z.object({
     quantity: z.number().int().positive('Quantity must be a positive number')
 })
 
 // PATCH /api/cart/[id] - Update cart item quantity
-export async function PATCH(
-})
-
 export async function PATCH(
     request: NextRequest,
     { params }: { params: { id: string } }

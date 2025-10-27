@@ -2,11 +2,6 @@ import { NextResponse, NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getUserFromRequest } from '@/lib/auth'
 import { z } from 'zod'
-import { get } from 'http'
-
-// ==========================================
-// POST /api/cart - Add to cart
-// ==========================================
 
 const addToCartSchema = z.object({
     productId: z.string().min(1, 'Product ID is required'),
@@ -14,9 +9,6 @@ const addToCartSchema = z.object({
 })
 
 // POST /api/cart - Thêm sản phẩm vào giỏ hàng
-export async function POST(request: NextRequest) {
-})
-
 export async function POST(request: NextRequest) {
     try {
         // Check authentication

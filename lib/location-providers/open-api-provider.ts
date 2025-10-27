@@ -6,8 +6,7 @@
  * Data may not be up-to-date with latest Vietnam administrative changes
  */
 
-import { id, th } from 'zod/locales'
-import { Location, LocationProvider } from '../location-service'
+import { Location, LocationProvider } from '../location-types'
 
 const BASE_URL = 'https://provinces.open-api.vn/api'
 const CACHE_DURATION = 86400 // 1 day in seconds

@@ -6,7 +6,7 @@
  * Only includes: HCM, Hanoi, Da Nang + their main districts
  */
 
-import { Location, LocationProvider } from '../location-service'
+import { Location, LocationProvider } from '../location-types'
 
 export class FallbackProvider implements LocationProvider {
     name = 'Fallback VietNam Provinces' // Hardcoded data

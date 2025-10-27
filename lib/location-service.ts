@@ -10,23 +10,11 @@
  *   const wards = await LocationService.getWards(districtId)
  */
 
-export interface Location {
-    id: string
-    code: number | string
-    name: string
-    nameEn?: string | null
-}
-
-export interface LocationProvider {
-    name: string
-    getCities(): Promise<Location[]>
-    getDistricts(cityId: string): Promise<Location[]>
-    getWards(districtId: string): Promise<Location[]>
-}
-
-import { OpenAPIProvider } from './location-providers/openapi-provider'
+import { Location, LocationProvider } from './location-types'
+import { OpenAPIProvider } from './location-providers/open-api-provider'
 import { FallbackProvider } from './location-providers/fallback-provider'
-import { resumeToPipeableStream } from 'react-dom/server'
+
+export type { Location, LocationProvider }
 
 class LocationServiceClass {
     private providers: LocationProvider[]
