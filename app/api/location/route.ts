@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { LocationService } from '@/lib/location-service'
+import type { Location } from '@/lib/location-types'
 
 /**
  * Locations API
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
 
     try {
         // Validate type parameter
-        if (!type || !['citites', 'districts', 'wards'].includes(type)) {
+        if (!type || !['cities', 'districts', 'wards'].includes(type)) {
             return NextResponse.json(
                 {
                     success: false,
@@ -50,7 +51,7 @@ export async function GET(request: NextRequest) {
             )
         }
 
-        let data = []
+        let data: Location[] = []
 
         // Handle different types
         switch (type) {
@@ -96,11 +97,13 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         console.error('Locations API error:', error)
 
-        return NextResponse.json({
-            success: false,
-            error: error instanceof Error ? error.message : 'Failed to get locations',
-            details: 'Please try again later or contact support if the issue persists.'
-        },
-        { status: 500 }
-    )
+        return NextResponse.json(
+            {
+                success: false,
+                error: error instanceof Error ? error.message : 'Failed to get locations',
+                details: 'Please try again later or contact support if the issue persists.'
+            },
+            { status: 500 }
+        )
+    }
 }
