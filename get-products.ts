@@ -13,7 +13,7 @@ async function main() {
     }
   })
 
-  console.log('\n📦 PRODUCTS IN DATABASE:\n')
+  console.log('\nPRODUCTS IN DATABASE:\n')
   products.forEach(p => {
     console.log(`ID: ${p.id}`)
     console.log(`Name: ${p.name}`)

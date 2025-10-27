@@ -10,7 +10,11 @@ import { get } from 'http'
 
 const addToCartSchema = z.object({
     productId: z.string().min(1, 'Product ID is required'),
-    quantity: z.number().int().min(1, 'Quantity must be at least 1').max(100, 'Quantity is too large')
+    quantity: z.number().int().positive('Quantity must be a positive number')
+})
+
+// POST /api/cart - Thêm sản phẩm vào giỏ hàng
+export async function POST(request: NextRequest) {
 })
 
 export async function POST(request: NextRequest) {
@@ -181,10 +185,7 @@ export async function POST(request: NextRequest) {
     }
 }
 
-// ==========================================
 // GET /api/cart - Get cart items
-// ==========================================
-
 export async function GET(request: NextRequest) {
     try {
         // 1 Check authentication
@@ -259,10 +260,7 @@ export async function GET(request: NextRequest) {
     }
 }
 
-// ==========================================
-// DELETE /api/cart - Clear cart
-// ==========================================
-
+// DELETE /api/cart - Clear all cart items
 export async function DELETE(request: NextRequest) {
     try {
         // 1 Check authentication

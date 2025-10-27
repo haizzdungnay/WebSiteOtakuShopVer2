@@ -8,7 +8,11 @@ import { success, z } from 'zod'
 // ==========================================
 
 const updateQuantitySchema = z.object({
-    quantity: z.number().int().min(1, 'Quantity must be at least 1').max(100, 'Quantity is too large')
+    quantity: z.number().int().positive('Quantity must be a positive number')
+})
+
+// PATCH /api/cart/[id] - Update cart item quantity
+export async function PATCH(
 })
 
 export async function PATCH(
@@ -131,10 +135,7 @@ export async function PATCH(
     }
 }
 
-// ==========================================
 // DELETE /api/cart/[id] - Remove item
-// ==========================================
-
 export async function DELETE(
     request: NextRequest,
     { params }: { params: { id: string } }
