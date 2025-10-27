@@ -11,18 +11,18 @@ const updateQuantitySchema = z.object({
     quantity: z.number().int().min(1, 'Quantity must be at least 1').max(100, 'Quantity is too large')
 })
 
-export async function PUT(
+export async function PATCH(
     request: NextRequest,
     { params }: { params: { id: string } }
 ) {
     try {
         // 1 Check authentication
-        const user = getUserFromRequest(request)
+        const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Please Login'
+                    error: 'Unauthorized'
                 },
                 { status: 401 }
             )
@@ -141,12 +141,12 @@ export async function DELETE(
 ) {
     try {
         // 1 Check authentication
-        const user = getUserFromRequest(request)
+        const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Please Login'
+                    error: 'Unauthorized'
                 },
                 { status: 401 }
             )

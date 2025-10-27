@@ -15,7 +15,7 @@ export async function DELETE(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Please Login'
+                    error: 'Unauthorized'
                 },
                 { status: 401 }
             )

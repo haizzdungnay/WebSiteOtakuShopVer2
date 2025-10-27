@@ -16,12 +16,12 @@ const addToCartSchema = z.object({
 export async function POST(request: NextRequest) {
     try {
         // Check authentication
-        const user = getUserFromRequest(request)
+        const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Please login to add items to cart',
+                    error: 'Unauthorized',
                 },
                 { status: 401 }
             )
@@ -174,7 +174,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to add to cart'
+                error: 'Failed to add item to cart'
             },
             { status: 500 }
         )
@@ -188,12 +188,12 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
     try {
         // 1 Check authentication
-        const user = getUserFromRequest(request)
+        const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Please login to view cart'
+                    error: 'Unauthorized'
                 },
                 { status: 401 }
             )
@@ -266,12 +266,12 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
     try {
         // 1 Check authentication
-        const user = getUserFromRequest(request)
+        const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Please Login'
+                    error: 'Unauthorized'
                 },
                 { status: 401 }
             )

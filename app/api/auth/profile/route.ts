@@ -5,14 +5,14 @@ import { getUserFromRequest } from '@/lib/auth'
 export async function GET(request: NextRequest) {
     try {
         // Lấy user từ request
-        const tokenUser = getUserFromRequest(request)
+        const tokenUser = await getUserFromRequest(request)
 
         // Case 1: Không có token hoặc token không hợp lệ
         if (!tokenUser) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Unauthorized - Please login'
+                    error: 'Unauthorized'
                 },
                 { status: 401 } // Unauthorized
             )

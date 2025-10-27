@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         if (!user) {
             return NextResponse.json({
                 success: false,
-                error: 'Please login to add items to wishlist'
+                error: 'Unauthorized'
             },
                 { status: 401 }
             )
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to add to wishlist'
+                error: 'Failed to add item to wishlist'
             },
                 { status: 500 }
         )
@@ -132,14 +132,14 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
     try {
         // 1 Check authentication
-        const user = getUserFromRequest(request)
+        const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
                 {
                 success: false,
-                error: 'Please login to view wishlist'
+                error: 'Unauthorized'
             },
-            { status: 400 }
+            { status: 401 }
         )
         }
 
