@@ -5,13 +5,20 @@ import { z } from 'zod'
 
 // Schema validation
 const updateAddressSchema = z.object({
-    label: z.string().optional(),
-    fullName: z.string().min(2).max(100).optional(),
-    phone: z.string().regex(/^(0|\+84)(3|5|7|8|9)\d{8}$/).optional(),
-    city: z.string().min(1).optional(),
-    district: z.string().min(1).optional(),
-    ward: z.string().optional(),
-    address: z.string().min(5).optional(),
+    label: z.string().max(50, 'Label too long').optional(),
+    fullName: z.string().min(1, 'Full name is required').max(100, 'Name too long').optional(),
+    phone: z.string()
+        .regex(/^(03[2-9]|05[2|6|8|9]|07[0|6|7|8|9]|08[1-9]|09[0-9])\d{7}$/, 'Invalid Vietnamese mobile phone number')
+        .refine(val => val.length === 10, 'Phone must be exactly 10 digits')
+        .optional(),
+    city: z.string().min(1, 'Please select a city').max(100, 'City name too long').optional(),
+    district: z.string().min(1, 'Please select a district').max(100, 'District name too long').optional(),
+    ward: z.string().max(100, 'Ward name too long').optional().nullable(),
+    address: z.string()
+        .min(5, 'Please enter street address')
+        .max(200, 'Address too long')
+        .refine(val => val.trim().length >= 5, 'Street address cannot be only spaces')
+        .optional(),
     isDefault: z.boolean().optional()
 })
 
