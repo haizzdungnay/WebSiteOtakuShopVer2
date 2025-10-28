@@ -1,12 +1,9 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
 import './globals.css';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import FloatingButtons from '@/components/FloatingButtons';
 import { AuthProvider } from '@/contexts/AuthContext';
-
-const inter = Inter({ subsets: ['latin', 'vietnamese'] });
 
 export const metadata: Metadata = {
   title: 'JH Figure Store - Chuyên Figure, Mô hình Anime chính hãng',
@@ -19,7 +16,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="vi">
-      <body className={inter.className}>
+      <body>
         <AuthProvider>
           <Header />
           <main className="min-h-screen">{children}</main>

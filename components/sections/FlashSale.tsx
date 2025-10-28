@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import ProductCard from './ProductCard'
+import ProductCard from '@/components/ProductCard'
 import Link from 'next/link'
 
 const flashSaleProducts = [
@@ -11,7 +11,7 @@ const flashSaleProducts = [
     price: 850000,
     discountPrice: 595000,
     image: '/images/products/product1.jpg',
-    badge: { text: '-30%', type: 'sale' as const },
+    salePercentage: 30,
     slug: 'nendoroid-doll-sailor-uniform',
   },
   {
@@ -20,7 +20,7 @@ const flashSaleProducts = [
     price: 950000,
     discountPrice: 712500,
     image: '/images/products/product2.jpg',
-    badge: { text: '-25%', type: 'sale' as const },
+    salePercentage: 25,
     slug: 'popup-parade-miku-lam',
   },
   {
@@ -29,7 +29,7 @@ const flashSaleProducts = [
     price: 1850000,
     discountPrice: 1480000,
     image: '/images/products/product3.jpg',
-    badge: { text: '-20%', type: 'sale' as const },
+    salePercentage: 20,
     slug: 'figma-ai-hoshino',
   },
   {
@@ -38,7 +38,7 @@ const flashSaleProducts = [
     price: 1200000,
     discountPrice: 780000,
     image: '/images/products/product4.jpg',
-    badge: { text: '-35%', type: 'sale' as const },
+    salePercentage: 35,
     slug: 'nendoroid-miku-magical-mirai',
   },
   {
@@ -47,7 +47,7 @@ const flashSaleProducts = [
     price: 950000,
     discountPrice: 570000,
     image: '/images/products/product5.jpg',
-    badge: { text: '-40%', type: 'sale' as const },
+    salePercentage: 40,
     slug: 'nendoroid-snow-miku',
   },
 ]

@@ -10,7 +10,7 @@ export interface JwtPayload {
 }
 
 export const generateToken = (payload: JwtPayload): string => {
-  // @ts-ignore - jwt.sign has complex overloads
+  // @ts-expect-error - jwt.sign has complex overloads
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
 }
 
