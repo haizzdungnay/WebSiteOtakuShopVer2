@@ -51,6 +51,9 @@
 
 ## 🚀 Quick Start
 
+> **📌 TL;DR:** Muốn chạy ngay? Đọc [QUICK_START.md](QUICK_START.md) - Chỉ 3 bước, 5 phút!
+> **📌 Developer?** Đọc [DEVELOPMENT.md](DEVELOPMENT.md) để hiểu codebase và best practices.
+
 ### Prerequisites
 
 - **Node.js** 18+ 
@@ -85,8 +88,8 @@ npm install
 cp .env.example .env.local
 # Edit .env.local with your database credentials
 
-# 6. Import database
-mysql -u root -p < database.sql
+# 6. Database auto-initialized by Docker
+# PostgreSQL will automatically run init.sql on first start
 
 # 7. Run development server
 npm run dev
@@ -112,16 +115,16 @@ chmod +x hybrid-setup.sh
 # 3. Install dependencies
 npm install
 
-# 4. Import database
-mysql -u root -p < public/php/database.sql
+# 4. Database auto-initialized by Docker
+# PostgreSQL will automatically run init.sql on first start
 
-# 5. Run both Next.js and PHP
-npm run dev:all
+# 5. Run development server
+npm run dev
 ```
 
 Access at:
 - Next.js: **http://localhost:3000**
-- PHP Shop: **http://localhost:3000/php/index.php**
+- PHP Legacy: **http://localhost:8080** (if using Docker)
 
 #### 🐳 Method 3: Docker Setup
 
@@ -489,7 +492,7 @@ docker-compose exec postgres psql -U postgres
 ```bash
 # Development
 npm run dev              # Start dev server
-npm run dev:all          # Start Next.js + PHP
+npm run dev:turbo        # Start with Turbopack (faster)
 
 # Build
 npm run build            # Build for production
@@ -497,18 +500,23 @@ npm run start            # Start production server
 
 # Code Quality
 npm run lint             # Run ESLint
+npm run lint:fix         # Fix ESLint errors automatically
 npm run format           # Format with Prettier
-npm run type-check       # TypeScript check
+npm run format:check     # Check formatting without modifying
+npm run type-check       # TypeScript type checking
+npm run validate         # Run all checks (lint + format + type-check)
 
 # Docker
 npm run docker:build     # Build Docker images
 npm run docker:up        # Start containers
 npm run docker:down      # Stop containers
 npm run docker:logs      # View logs
+npm run docker:clean     # Clean all containers and volumes
+npm run docker:restart   # Restart all services
 
 # Database
-npm run db:migrate       # Run migrations
-npm run db:seed          # Seed database
+npm run db:studio        # Open PostgreSQL shell
+npm run db:logs          # View PostgreSQL logs
 ```
 
 ---
@@ -567,14 +575,18 @@ npm run db:seed          # Seed database
 
 | Document | Description |
 |----------|-------------|
-| [FULL-NEXTJS-QUICK-START.md](docs/FULL-NEXTJS-QUICK-START.md) | ⭐ Quick start for full Next.js setup |
+| [QUICK_START.md](QUICK_START.md) | ⭐⭐⭐ Quick start guide (5 minutes!) |
+| [DEVELOPMENT.md](DEVELOPMENT.md) | ⭐⭐ Development best practices |
+| [SETUP.md](SETUP.md) | ⭐ Detailed setup instructions |
+| [FULL-NEXTJS-QUICK-START.md](docs/FULL-NEXTJS-QUICK-START.md) | Quick start for full Next.js setup |
 | [FULL-NEXTJS-GUIDE-PART1.md](docs/FULL-NEXTJS-GUIDE-PART1.md) | Detailed setup guide part 1 |
 | [FULL-NEXTJS-GUIDE-PART2.md](docs/FULL-NEXTJS-GUIDE-PART2.md) | Component creation guide part 2 |
 | [HYBRID-GUIDE.md](docs/HYBRID-GUIDE.md) | PHP + Next.js hybrid approach |
 | [HYBRID-QUICK-REF.md](docs/HYBRID-QUICK-REF.md) | Quick reference for hybrid |
-| [WINDOWS-SETUP-GUIDE.md](docs/WINDOWS-SETUP-GUIDE.md) | ⭐ Windows-specific setup |
+| [WINDOWS-SETUP-GUIDE.md](docs/WINDOWS-SETUP-GUIDE.md) | Windows-specific setup |
 | [SECURITY.md](SECURITY.md) | Security best practices |
-| [DOCUMENTATION.md](DOCUMENTATION.md) | Complete documentation |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Contributing guidelines |
+| [PROJECT_SUMMARY.md](PROJECT_SUMMARY.md) | Project summary |
 
 ---
 
