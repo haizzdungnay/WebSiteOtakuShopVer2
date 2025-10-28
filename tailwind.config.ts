@@ -10,19 +10,25 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#FF6B9D',
-          light: '#FF8FAB',
-          dark: '#FF4578',
+          DEFAULT: '#FFB6C1',
+          light: '#FFC0CB',
+          dark: '#FF8FAB',
           50: '#FFE5ED',
-          100: '#FFB6C1',
+          100: '#FFD5DC',
         },
         accent: {
+          red: '#FF4444',
           orange: '#FF9966',
           pink: '#FFB6C1',
           coral: '#FFE5ED',
         },
         text: {
-          dark: '#2C2C2C',
+          dark: '#333333',
+          gray: '#666666',
+        },
+        background: {
+          light: '#F5F5F5',
+          white: '#FFFFFF',
         },
       },
       container: {
