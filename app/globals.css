@@ -4,7 +4,7 @@
 
 @layer base {
   body {
-    @apply bg-background-light text-text-dark;
+    @apply bg-[#F5F5F5] text-[#333333];
   }
 }
 
@@ -16,8 +16,8 @@
   }
 
   .btn-secondary {
-    @apply border-2 border-primary text-primary px-6 py-3 rounded
-           font-semibold hover:bg-primary hover:text-white
+    @apply border-2 border-[#FFB6C1] text-[#FFB6C1] px-6 py-3 rounded
+           font-semibold hover:bg-[#FFB6C1] hover:text-white
            transition-all duration-300;
   }
 
@@ -42,7 +42,7 @@
   }
 
   .badge-hot {
-    @apply bg-accent-red text-white;
+    @apply bg-[#FF4444] text-white;
   }
 
   .badge-new {
@@ -58,7 +58,7 @@
   }
 
   .nav-link {
-    @apply flex items-center gap-2 px-4 py-3 text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors rounded;
+    @apply flex items-center gap-2 px-4 py-3 text-gray-700 hover:text-[#FFB6C1] hover:bg-gray-50 transition-colors rounded;
   }
 
   .sidebar-link {

@@ -4,7 +4,6 @@ const nextConfig = {
   output: 'standalone',
 
   // Performance optimizations
-  swcMinify: true,
   compress: true,
 
   // Image optimization
