@@ -698,17 +698,17 @@ copyright notice and this permission notice appear in all copies.
 <td align="center">
 <img src="https://via.placeholder.com/100" width="100px;" alt=""/>
 <br /><b>Dương</b>
-<br />Backend Development
+<br />Full-Stack Development
 </td>
 <td align="center">
 <img src="https://via.placeholder.com/100" width="100px;" alt=""/>
 <br /><b>Nguyên</b>
-<br />Frontend Development
+<br />Backend Development
 </td>
 <td align="center">
 <img src="https://via.placeholder.com/100" width="100px;" alt=""/>
 <br /><b>Lâm</b>
-<br />Full-Stack Development
+<br />Frontend Development
 </td>
 </tr>
 </table>
