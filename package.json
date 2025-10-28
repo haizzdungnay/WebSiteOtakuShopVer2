@@ -1,81 +1,40 @@
 {
-  "name": "websiteotakushopver2",
+  "name": "otakushop",
   "version": "1.0.0",
-  "description": "đây là một đồ án môn lập trình web của team Dương - Nguyên - Lâm",
-  "main": "index.js",
+  "description": "Cửa hàng figure anime - Next.js + PostgreSQL",
   "scripts": {
     "dev": "next dev",
-    "dev:turbo": "next dev --turbo",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "lint:fix": "next lint --fix",
-    "format": "prettier --write \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "format:check": "prettier --check \"**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "type-check": "tsc --noEmit",
     "docker:build": "docker-compose build",
     "docker:up": "docker-compose up -d",
-    "docker:down": "docker-compose down",
-    "docker:logs": "docker-compose logs -f",
-    "docker:clean": "docker-compose down -v && docker system prune -f",
-    "docker:restart": "docker-compose restart",
-    "db:studio": "docker exec -it otakushop-db psql -U postgres -d otakushop",
-    "db:logs": "docker-compose logs -f postgres",
-    "test": "echo \"No tests configured yet\" && exit 0",
-    "validate": "npm run type-check && npm run lint && npm run format:check"
+    "docker:down": "docker-compose down"
   },
-  "keywords": [
-    "nextjs",
-    "postgresql",
-    "jwt",
-    "authentication",
-    "otaku",
-    "shop"
-  ],
-  "author": "Team Dương - Nguyên - Lâm",
-  "license": "ISC",
   "dependencies": {
-    "@tailwindcss/postcss": "^4.1.14",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/pg": "^8.15.5",
     "bcryptjs": "^3.0.2",
-    "clsx": "^2.1.1",
     "cookie": "^1.0.2",
-    "csrf": "^3.1.0",
     "js-cookie": "^3.0.5",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.548.0",
     "next": "^15.5.6",
     "pg": "^8.16.3",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0",
-    "tailwind-merge": "^3.3.1"
+    "react-dom": "^19.2.0"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.1.16",
+    "@types/bcryptjs": "^2.4.6",
     "@types/js-cookie": "^3.0.6",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.8.1",
+    "@types/pg": "^8.15.5",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
     "autoprefixer": "^10.4.21",
     "eslint": "^9.37.0",
     "eslint-config-next": "^15.5.6",
     "postcss": "^8.5.6",
-    "prettier": "^3.2.5",
-    "tailwindcss": "^4.1.16",
+    "tailwindcss": "^3.4.17",
     "typescript": "^5.9.3"
-  },
-  "directories": {
-    "lib": "lib"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/haizzdungnay/WebSiteOtakuShopVer2.git"
-  },
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/haizzdungnay/WebSiteOtakuShopVer2/issues"
-  },
-  "homepage": "https://github.com/haizzdungnay/WebSiteOtakuShopVer2#readme"
+  }
 }

@@ -2,70 +2,66 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply bg-background-light text-text-dark;
-  }
+/* Simple global styles - no @apply to avoid build errors */
+
+body {
+  background-color: #f5f5f5;
+  color: #333;
+  font-family: system-ui, -apple-system, sans-serif;
 }
 
-@layer components {
-  .btn-primary {
-    @apply bg-black text-white px-6 py-3 rounded font-semibold
-           hover:bg-gray-800 transition-all duration-300
-           active:scale-95;
-  }
-
-  .btn-secondary {
-    @apply border-2 border-primary text-primary px-6 py-3 rounded
-           font-semibold hover:bg-primary hover:text-white
-           transition-all duration-300;
-  }
-
-  .btn-social-google {
-    @apply bg-[#DB4437] text-white px-6 py-3 rounded font-semibold
-           hover:bg-[#C33527] transition-all duration-300;
-  }
-
-  .btn-social-facebook {
-    @apply bg-[#4267B2] text-white px-6 py-3 rounded font-semibold
-           hover:bg-[#365899] transition-all duration-300;
-  }
-
-  .product-card {
-    @apply bg-white rounded-lg overflow-hidden shadow-sm
-           hover:shadow-md transition-all duration-300
-           cursor-pointer border border-gray-100;
-  }
-
-  .badge {
-    @apply px-2 py-1 text-xs font-bold rounded-sm uppercase;
-  }
-
-  .badge-hot {
-    @apply bg-accent-red text-white;
-  }
-
-  .badge-new {
-    @apply bg-green-500 text-white;
-  }
-
-  .badge-sale {
-    @apply bg-orange-500 text-white;
-  }
-
-  .container-custom {
-    @apply container mx-auto px-4 max-w-[1400px];
-  }
-
-  .nav-link {
-    @apply flex items-center gap-2 px-4 py-3 text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors rounded;
-  }
-
-  .sidebar-link {
-    @apply flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer;
-  }
+/* Custom utility classes using plain CSS */
+.btn-primary {
+  background-color: #000;
+  color: #fff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  transition: background-color 0.3s;
 }
 
+.btn-primary:hover {
+  background-color: #374151;
+}
+
+.product-card {
+  background-color: #fff;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: box-shadow 0.3s;
+}
+
+.product-card:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+}
+
+.badge {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 0.25rem;
+  text-transform: uppercase;
+}
+
+.badge-hot {
+  background-color: #ff4444;
+  color: #fff;
+}
+
+.badge-new {
+  background-color: #22c55e;
+  color: #fff;
+}
+
+.badge-sale {
+  background-color: #f97316;
+  color: #fff;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -76,7 +72,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #FF6B9D;
+  background: #FFB6C1;
   border-radius: 4px;
 }
 
