@@ -2,27 +2,67 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-background-light text-text-dark;
+  }
+}
+
 @layer components {
   .btn-primary {
-    @apply bg-primary text-white px-6 py-3 rounded-full font-semibold 
-           hover:bg-primary-light transition-all duration-300 
-           active:scale-95 shadow-md hover:shadow-lg;
+    @apply bg-black text-white px-6 py-3 rounded font-semibold
+           hover:bg-gray-800 transition-all duration-300
+           active:scale-95;
   }
 
   .btn-secondary {
-    @apply border-2 border-primary text-primary px-6 py-3 rounded-full 
-           font-semibold hover:bg-primary hover:text-white 
+    @apply border-2 border-primary text-primary px-6 py-3 rounded
+           font-semibold hover:bg-primary hover:text-white
            transition-all duration-300;
   }
 
+  .btn-social-google {
+    @apply bg-[#DB4437] text-white px-6 py-3 rounded font-semibold
+           hover:bg-[#C33527] transition-all duration-300;
+  }
+
+  .btn-social-facebook {
+    @apply bg-[#4267B2] text-white px-6 py-3 rounded font-semibold
+           hover:bg-[#365899] transition-all duration-300;
+  }
+
   .product-card {
-    @apply bg-white rounded-2xl overflow-hidden shadow-md 
-           hover:shadow-xl hover:-translate-y-2 transition-all duration-300 
-           cursor-pointer;
+    @apply bg-white rounded-lg overflow-hidden shadow-sm
+           hover:shadow-md transition-all duration-300
+           cursor-pointer border border-gray-100;
+  }
+
+  .badge {
+    @apply px-2 py-1 text-xs font-bold rounded-sm uppercase;
+  }
+
+  .badge-hot {
+    @apply bg-accent-red text-white;
+  }
+
+  .badge-new {
+    @apply bg-green-500 text-white;
+  }
+
+  .badge-sale {
+    @apply bg-orange-500 text-white;
   }
 
   .container-custom {
     @apply container mx-auto px-4 max-w-[1400px];
+  }
+
+  .nav-link {
+    @apply flex items-center gap-2 px-4 py-3 text-gray-700 hover:text-primary hover:bg-gray-50 transition-colors rounded;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer;
   }
 }
 
