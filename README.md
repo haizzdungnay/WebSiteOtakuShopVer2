@@ -157,7 +157,7 @@ cd WebSiteOtakuShopVer2
 npm install
 
 # 3. Setup environment
-cp .env.example .env.local
+copy .env.example .env.local
 # Sửa .env.local với thông tin database của bạn
 
 # 4. Start database (Docker)
