@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
   ShoppingCart,
@@ -17,11 +17,38 @@ import {
   Calculator,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
+import CartDropdown from './CartDropdown';
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [showCartDropdown, setShowCartDropdown] = useState(false);
   const { user, logout } = useAuth();
+  const { getTotalItems } = useCart();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const cartDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowUserDropdown(false);
+      }
+      if (cartDropdownRef.current && !cartDropdownRef.current.contains(event.target as Node)) {
+        setShowCartDropdown(false);
+      }
+    };
+
+    if (showUserDropdown || showCartDropdown) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showUserDropdown, showCartDropdown]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -93,17 +120,66 @@ export default function Header() {
 
               {/* Đăng nhập / Đăng ký */}
               {user ? (
-                <div className="flex items-center gap-2 text-gray-800">
-                  <User size={20} />
-                  <div className="hidden lg:block">
-                    <div className="text-xs text-gray-600">Xin chào</div>
-                    <button
-                      onClick={logout}
-                      className="text-sm font-semibold hover:text-accent-red"
-                    >
-                      Đăng xuất
-                    </button>
-                  </div>
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setShowUserDropdown(!showUserDropdown)}
+                    className="flex items-center gap-2 text-gray-800 hover:text-accent-red transition-colors"
+                  >
+                    <div className="w-8 h-8 bg-accent-red rounded-full flex items-center justify-center text-white font-semibold">
+                      {user.username?.[0]?.toUpperCase() || 'U'}
+                    </div>
+                    <div className="hidden lg:block">
+                      <div className="text-xs text-gray-600">Xin chào</div>
+                      <div className="text-sm font-semibold">{user.username}</div>
+                    </div>
+                  </button>
+
+                  {/* User Dropdown */}
+                  {showUserDropdown && (
+                    <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
+                      <div className="p-4 border-b border-gray-200">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-accent-red rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {user.username?.[0]?.toUpperCase() || 'U'}
+                          </div>
+                          <div className="flex-1">
+                            <div className="font-semibold text-gray-900">{user.username}</div>
+                            <div className="text-sm text-gray-600">{user.email}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="p-2">
+                        <Link
+                          href="/profile"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors text-gray-700"
+                          onClick={() => setShowUserDropdown(false)}
+                        >
+                          <User size={18} />
+                          <span className="font-medium">Xem chi tiết</span>
+                        </Link>
+                        <Link
+                          href="/orders"
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors text-gray-700"
+                          onClick={() => setShowUserDropdown(false)}
+                        >
+                          <Package size={18} />
+                          <span className="font-medium">Đơn hàng của tôi</span>
+                        </Link>
+                        <button
+                          onClick={() => {
+                            logout();
+                            setShowUserDropdown(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 rounded-lg transition-colors text-accent-red font-medium"
+                        >
+                          <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                          </svg>
+                          <span>Đăng xuất</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <Link
@@ -119,20 +195,29 @@ export default function Header() {
               )}
 
               {/* Giỏ hàng */}
-              <Link
-                href="/cart"
-                className="relative flex items-center gap-2 bg-white px-4 py-2 rounded-full hover:bg-gray-50 transition-colors"
-              >
-                <div className="relative">
-                  <ShoppingCart size={20} className="text-accent-red" />
-                  <span className="absolute -top-2 -right-2 bg-accent-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                    0
+              <div className="relative" ref={cartDropdownRef}>
+                <button
+                  onClick={() => setShowCartDropdown(!showCartDropdown)}
+                  className="relative flex items-center gap-2 bg-white px-4 py-2 rounded-full hover:bg-gray-50 transition-colors"
+                >
+                  <div className="relative">
+                    <ShoppingCart size={20} className="text-accent-red" />
+                    {getTotalItems() > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-accent-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                        {getTotalItems()}
+                      </span>
+                    )}
+                  </div>
+                  <span className="hidden lg:block text-sm font-semibold text-gray-800">
+                    Giỏ hàng
                   </span>
-                </div>
-                <span className="hidden lg:block text-sm font-semibold text-gray-800">
-                  Giỏ hàng
-                </span>
-              </Link>
+                </button>
+
+                {/* Cart Dropdown */}
+                {showCartDropdown && (
+                  <CartDropdown onClose={() => setShowCartDropdown(false)} />
+                )}
+              </div>
             </div>
           </div>
         </div>
