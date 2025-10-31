@@ -4,6 +4,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import FloatingButtons from '@/components/FloatingButtons';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { CartProvider } from '@/contexts/CartContext';
 
 export const metadata: Metadata = {
   title: 'Otaku Shop - Cửa hàng Figure Anime',
@@ -15,10 +16,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="vi">
       <body>
         <AuthProvider>
-          <Header />
-          <main className="min-h-screen">{children}</main>
-          <Footer />
-          <FloatingButtons />
+          <CartProvider>
+            <Header />
+            <main className="min-h-screen">{children}</main>
+            <Footer />
+            <FloatingButtons />
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

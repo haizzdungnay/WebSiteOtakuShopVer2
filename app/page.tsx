@@ -85,21 +85,90 @@ export default function Home() {
   return (
     <div className="bg-background-light">
       {/* Hero Banner */}
-      <section className="bg-gradient-to-r from-primary to-primary-light py-12 text-center">
+      <section className="bg-gradient-to-br from-primary via-primary-light to-primary py-16 relative overflow-hidden">
         <div className="container-custom">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
-            JOIN US
-          </h1>
-          <p className="text-lg text-gray-700 mb-6">
-            Khám phá bộ sưu tập figure anime chính hãng
-          </p>
-          <Link
-            href="/products"
-            className="inline-block bg-black text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
-          >
-            Xem tất cả sản phẩm
-          </Link>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* Left: Content */}
+            <div className="text-center lg:text-left space-y-6">
+              <div className="inline-block lg:block">
+                <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-2 drop-shadow-lg">
+                  JOIN US
+                </h1>
+                <div className="h-2 w-32 bg-accent-red rounded-full mx-auto lg:mx-0"></div>
+              </div>
+              <p className="text-xl md:text-2xl text-gray-800 font-medium">
+                Cộng đồng yêu thích Figure & Anime
+              </p>
+              <div className="space-y-3">
+                <p className="text-base text-gray-700">
+                  ✨ Sản phẩm chính hãng 100%
+                </p>
+                <p className="text-base text-gray-700">
+                  🎁 Ưu đãi độc quyền cho thành viên
+                </p>
+                <p className="text-base text-gray-700">
+                  🚀 Cập nhật sản phẩm mới hàng tuần
+                </p>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+                <Link
+                  href="/products"
+                  className="inline-block bg-accent-red text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-red-600 transition-all hover:scale-105 shadow-lg"
+                >
+                  Khám phá ngay
+                </Link>
+                <Link
+                  href="/register"
+                  className="inline-block bg-white text-gray-900 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-lg"
+                >
+                  Đăng ký thành viên
+                </Link>
+              </div>
+            </div>
+
+            {/* Right: QR Code & Info */}
+            <div className="flex justify-center lg:justify-end">
+              <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full">
+                <div className="text-center mb-6">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                    Kết nối với chúng tôi
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    Quét mã QR để tham gia nhóm Zalo
+                  </p>
+                </div>
+
+                {/* QR Code Placeholder */}
+                <div className="bg-gray-100 rounded-xl p-6 mb-6 aspect-square flex items-center justify-center">
+                  <div className="text-center">
+                    <div className="w-48 h-48 bg-white rounded-lg shadow-inner mb-3 flex items-center justify-center border-4 border-gray-300">
+                      <div className="text-gray-400 text-6xl font-bold">QR</div>
+                    </div>
+                    <p className="text-sm text-gray-600 font-medium">
+                      Quét để tham gia ngay
+                    </p>
+                  </div>
+                </div>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-4 text-white text-center">
+                    <div className="text-2xl font-bold">2.2K+</div>
+                    <div className="text-xs opacity-90">Thành viên</div>
+                  </div>
+                  <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-4 text-white text-center">
+                    <div className="text-2xl font-bold">1.5K+</div>
+                    <div className="text-xs opacity-90">Sản phẩm</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Decorative Elements */}
+        <div className="absolute top-0 left-0 w-64 h-64 bg-white opacity-10 rounded-full -translate-x-32 -translate-y-32"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white opacity-10 rounded-full translate-x-48 translate-y-48"></div>
       </section>
 
       {/* Main Content with Sidebar */}
