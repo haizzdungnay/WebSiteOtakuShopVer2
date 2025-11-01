@@ -175,12 +175,7 @@ export default function Home() {
       <section className="py-8">
         <div className="container-custom">
           <div className="flex gap-6">
-            {/* Sidebar - Desktop */}
-            <div className="hidden lg:block">
-              <Sidebar />
-            </div>
-
-            {/* Mobile Sidebar */}
+            {/* Sidebar */}
             <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             {/* Main Content */}
