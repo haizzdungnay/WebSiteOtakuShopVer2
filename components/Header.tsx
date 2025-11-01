@@ -8,13 +8,17 @@ import {
   Phone,
   MapPin,
   User,
-  Menu,
   Package,
   HelpCircle,
   Newspaper,
   Grid3x3,
   Truck,
   Calculator,
+  Gift,
+  ShoppingBag,
+  Box,
+  Boxes,
+  Backpack,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
@@ -22,13 +26,14 @@ import CartDropdown from './CartDropdown';
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
+  const [showMenuDropdown, setShowMenuDropdown] = useState(false);
   const { user, logout } = useAuth();
   const { getTotalItems } = useCart();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const cartDropdownRef = useRef<HTMLDivElement>(null);
+  const menuDropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -39,16 +44,19 @@ export default function Header() {
       if (cartDropdownRef.current && !cartDropdownRef.current.contains(event.target as Node)) {
         setShowCartDropdown(false);
       }
+      if (menuDropdownRef.current && !menuDropdownRef.current.contains(event.target as Node)) {
+        setShowMenuDropdown(false);
+      }
     };
 
-    if (showUserDropdown || showCartDropdown) {
+    if (showUserDropdown || showCartDropdown || showMenuDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showUserDropdown, showCartDropdown]);
+  }, [showUserDropdown, showCartDropdown, showMenuDropdown]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -224,17 +232,93 @@ export default function Header() {
       </div>
 
       {/* Black Navigation Bar */}
-      <nav className="bg-black text-white">
+      <nav className="bg-black text-white relative">
         <div className="container-custom">
           <div className="flex items-center gap-1 overflow-x-auto">
-            {/* Menu Button */}
-            <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="flex items-center gap-2 px-4 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
-            >
-              <Grid3x3 size={18} />
-              <span>MENU</span>
-            </button>
+            {/* Menu Button with Dropdown */}
+            <div className="relative" ref={menuDropdownRef}>
+              <button
+                onClick={() => setShowMenuDropdown(!showMenuDropdown)}
+                className="flex items-center gap-2 px-4 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
+              >
+                <Grid3x3 size={18} />
+                <span>MENU</span>
+              </button>
+
+              {/* Menu Dropdown */}
+              {showMenuDropdown && (
+                <div className="absolute left-0 top-full mt-0 w-72 bg-white rounded-b-lg shadow-xl border border-gray-200 z-50">
+                  <nav className="p-2">
+                    <Link
+                      href="/new-releases"
+                      onClick={() => setShowMenuDropdown(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                    >
+                      <Gift size={20} className="text-accent-red" />
+                      <span className="flex-1 font-medium">NEW RELEASES !!!</span>
+                      <span className="bg-accent-red text-white text-xs px-2 py-1 rounded-full font-bold">HOT</span>
+                    </Link>
+                    <Link
+                      href="/in-stock"
+                      onClick={() => setShowMenuDropdown(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                    >
+                      <Package size={20} className="text-green-600" />
+                      <span className="flex-1 font-medium">NOW In Stock!</span>
+                    </Link>
+                    <Link
+                      href="/products"
+                      onClick={() => setShowMenuDropdown(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                    >
+                      <ShoppingBag size={20} className="text-blue-600" />
+                      <span className="flex-1 font-medium">ALL PRODUCTS</span>
+                    </Link>
+                    <div className="border-t border-gray-200 my-2"></div>
+                    <Link
+                      href="/pvc-figure"
+                      onClick={() => setShowMenuDropdown(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                    >
+                      <Box size={20} />
+                      <span className="flex-1 font-medium">PVC Figure</span>
+                    </Link>
+                    <Link
+                      href="/resin-figure"
+                      onClick={() => setShowMenuDropdown(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                    >
+                      <Box size={20} />
+                      <span className="flex-1 font-medium">RESIN Figure</span>
+                    </Link>
+                    <Link
+                      href="/blindbox"
+                      onClick={() => setShowMenuDropdown(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                    >
+                      <Boxes size={20} />
+                      <span className="flex-1 font-medium">Blindbox Arttoy</span>
+                    </Link>
+                    <Link
+                      href="/gundam"
+                      onClick={() => setShowMenuDropdown(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                    >
+                      <Boxes size={20} />
+                      <span className="flex-1 font-medium">Gundam / Plastic Model</span>
+                    </Link>
+                    <Link
+                      href="/goods"
+                      onClick={() => setShowMenuDropdown(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                    >
+                      <Backpack size={20} />
+                      <span className="flex-1 font-medium">Balo / Character Goods</span>
+                    </Link>
+                  </nav>
+                </div>
+              )}
+            </div>
 
             {/* Nav Items */}
             <NavLink href="/giao-hang" icon={<Truck size={18} />}>
@@ -255,14 +339,6 @@ export default function Header() {
           </div>
         </div>
       </nav>
-
-      {/* Mobile Menu Overlay */}
-      {showMobileMenu && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-          onClick={() => setShowMobileMenu(false)}
-        />
-      )}
     </header>
   );
 }
