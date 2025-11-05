@@ -1,0 +1,189 @@
+### Variables
+@baseUrl = http://localhost:3001
+@token = your_token_here
+
+### **✅ TEST CÀ SYSTEM:**
+
+### **Test Case 1: Normal - External API Works**
+
+**Request:**
+
+GET {{baseUrl}}/api/location?type=cities
+
+**Console Log:**
+
+[LocationService] getCities using OpenAPI Vietnam Provinces
+
+
+### **Test Case 2: Get Districts (HCM)**
+
+GET {{baseUrl}}/api/location?type=districts&cityId=79
+
+
+### **Test Case 3: Get Wards (Quận 7)**
+
+GET {{baseUrl}}/api/location?type=wards&districtId=769
+
+
+### ===== AUTHENTICATION =====
+
+### **1. Login to get token**
+
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "nguyentn1650@gmail.com",
+  "password": "88888888"
+}
+
+
+### ===== ADDRESS API =====
+
+### **2. Create Address - Valid (Home)**
+
+POST {{baseUrl}}/api/addresses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "label": "Nhà riêng",
+  "fullName": "Nguyễn Văn A",
+  "phone": "0901234567",
+  "address": "123 Nguyễn Văn Linh",
+  "ward": "Phường Tân Phú",
+  "district": "Quận 7",
+  "city": "Hồ Chí Minh",
+  "isDefault": true
+}
+
+
+### **3. Create Address - Valid (Office)**
+
+POST {{baseUrl}}/api/addresses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "label": "Văn phòng",
+  "fullName": "Nguyễn Văn B",
+  "phone": "0987654321",
+  "address": "456 Lê Văn Việt",
+  "ward": "Phường Tăng Nhơn Phú A",
+  "district": "Quận 9",
+  "city": "Hồ Chí Minh",
+  "isDefault": false
+}
+
+
+### **4. Create Address - Invalid Phone (should fail)**
+
+POST {{baseUrl}}/api/addresses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "label": "Test",
+  "fullName": "Test User",
+  "phone": "123456",
+  "address": "123 Test Street",
+  "district": "Quận 1",
+  "city": "Hồ Chí Minh"
+}
+
+
+### **5. Create Address - Missing Required Fields (should fail)**
+
+POST {{baseUrl}}/api/addresses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "label": "Test",
+  "fullName": "Test User"
+}
+
+
+### **6. Create Address - Address Too Short (should fail)**
+
+POST {{baseUrl}}/api/addresses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "label": "Test",
+  "fullName": "Test User",
+  "phone": "0901234567",
+  "address": "123",
+  "district": "Quận 1",
+  "city": "Hồ Chí Minh"
+}
+
+
+### **7. Get All Addresses**
+
+GET {{baseUrl}}/api/addresses
+Authorization: Bearer {{token}}
+
+
+### **8. Update Address - Valid**
+# Thay ADDRESS_ID bằng ID thực từ response Create
+
+PATCH {{baseUrl}}/api/addresses/ADDRESS_ID
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "label": "Nhà cũ",
+  "phone": "0912345678",
+  "isDefault": true
+}
+
+
+### **9. Update Address - Invalid Phone (should fail)**
+
+PATCH {{baseUrl}}/api/addresses/ADDRESS_ID
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "phone": "invalid_phone"
+}
+
+
+### **10. Update Address - Not Owner (should fail)**
+
+PATCH {{baseUrl}}/api/addresses/999999
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "label": "Hacked"
+}
+
+
+### **11. Delete Address - Valid**
+
+DELETE {{baseUrl}}/api/addresses/ADDRESS_ID
+Authorization: Bearer {{token}}
+
+
+### **12. Delete Address - Not Found (should fail)**
+
+DELETE {{baseUrl}}/api/addresses/999999
+Authorization: Bearer {{token}}
+
+
+### **13. Create Address - Without Auth (should fail)**
+
+POST {{baseUrl}}/api/addresses
+Content-Type: application/json
+
+{
+  "label": "Test",
+  "fullName": "Test User",
+  "phone": "0901234567",
+  "address": "123 Test Street",
+  "district": "Quận 1",
+  "city": "Hồ Chí Minh"
+}
