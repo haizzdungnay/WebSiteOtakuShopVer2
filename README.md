@@ -1,4 +1,4 @@
-# JH Figure Store - Otaku Shop
+# OTAKU Figure Store - Otaku Shop
 
 Cửa hàng figure anime chính hãng - E-commerce platform
 
