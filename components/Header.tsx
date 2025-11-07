@@ -233,8 +233,8 @@ export default function Header() {
 
       {/* Black Navigation Bar */}
       <nav className="bg-black text-white relative">
-        <div className="container-custom">
-          <div className="flex items-center gap-1 overflow-x-auto">
+        <div className="container-custom overflow-visible">
+          <div className="flex items-center gap-1 overflow-x-auto overflow-y-visible">
             {/* Menu Button with Dropdown */}
             <div className="relative" ref={menuDropdownRef}>
               <button
@@ -247,7 +247,7 @@ export default function Header() {
 
               {/* Menu Dropdown */}
               {showMenuDropdown && (
-                <div className="absolute left-0 top-full mt-0 w-72 bg-white rounded-b-lg shadow-xl border border-gray-200 z-50">
+                <div className="absolute left-0 top-full mt-0 min-w-[280px] max-w-sm bg-white rounded-b-lg shadow-2xl border border-gray-200 z-[100]">
                   <nav className="p-2">
                     <Link
                       href="/new-releases"
