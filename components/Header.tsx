@@ -19,18 +19,52 @@ import {
   Box,
   Boxes,
   Backpack,
+  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import CartDropdown from './CartDropdown';
+
+type SubItem = { label: string; href: string; count?: number };
+const submenuData: Record<string, SubItem[]> = {
+  '/pvc-figure': [
+    { label: 'Nendoroid', href: '/pvc-figure/nendoroid', count: 150 },
+    { label: 'figma', href: '/pvc-figure/figma', count: 85 },
+    { label: 'Pop Up Parade', href: '/pvc-figure/pop-up-parade', count: 42 },
+    { label: 'Scale Figure 1/7', href: '/pvc-figure/scale-1-7', count: 120 },
+    { label: 'Scale Figure 1/8', href: '/pvc-figure/scale-1-8', count: 95 },
+    { label: 'Prize Figure', href: '/pvc-figure/prize', count: 68 },
+  ],
+  '/resin-figure': [
+    { label: 'GK Model Kit', href: '/resin-figure/gk-model', count: 45 },
+    { label: 'Statue', href: '/resin-figure/statue', count: 32 },
+    { label: 'Diorama', href: '/resin-figure/diorama', count: 28 },
+    { label: 'Bust', href: '/resin-figure/bust', count: 15 },
+    { label: 'Custom Figure', href: '/resin-figure/custom', count: 22 },
+  ],
+};
+
+const menuItems = [
+  { href: '/new-releases', icon: <Gift size={20} className="text-accent-red" />, label: 'NEW RELEASES !!!', badge: 'hot' as const },
+  { href: '/in-stock', icon: <Package size={20} className="text-green-600" />, label: 'NOW In Stock!' },
+  { href: '/products', icon: <ShoppingBag size={20} className="text-blue-600" />, label: 'ALL PRODUCTS' },
+  { href: '/pvc-figure', icon: <Box size={20} />, label: 'PVC Figure', hasSubmenu: true },
+  { href: '/resin-figure', icon: <Box size={20} />, label: 'RESIN Figure', hasSubmenu: true },
+  { href: '/blindbox', icon: <Boxes size={20} />, label: 'Blindbox Arttoy' },
+  { href: '/gundam', icon: <Boxes size={20} />, label: 'Gundam / Plastic Model / Tokusatsu Toys' },
+  { href: '/goods', icon: <Backpack size={20} />, label: 'Balo / Character Goods' },
+];
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
   const [showMenuDropdown, setShowMenuDropdown] = useState(false);
+  const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
+
   const { user, logout } = useAuth();
   const { getTotalItems } = useCart();
+
   const dropdownRef = useRef<HTMLDivElement>(null);
   const cartDropdownRef = useRef<HTMLDivElement>(null);
   const menuDropdownRef = useRef<HTMLDivElement>(null);
@@ -46,24 +80,20 @@ export default function Header() {
       }
       if (menuDropdownRef.current && !menuDropdownRef.current.contains(event.target as Node)) {
         setShowMenuDropdown(false);
+        setHoveredMenu(null);
       }
     };
 
     if (showUserDropdown || showCartDropdown || showMenuDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showUserDropdown, showCartDropdown, showMenuDropdown]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/products?search=${encodeURIComponent(
-        searchQuery
-      )}`;
+      window.location.href = `/products?search=${encodeURIComponent(searchQuery)}`;
     }
   };
 
@@ -82,10 +112,7 @@ export default function Header() {
             </Link>
 
             {/* Search Bar */}
-            <form
-              onSubmit={handleSearch}
-              className="flex-1 max-w-xl order-3 lg:order-2 w-full"
-            >
+            <form onSubmit={handleSearch} className="flex-1 max-w-xl order-3 lg:order-2 w-full">
               <div className="flex bg-white rounded-lg overflow-hidden border-2 border-white">
                 <input
                   type="text"
@@ -142,7 +169,6 @@ export default function Header() {
                     </div>
                   </button>
 
-                  {/* User Dropdown */}
                   {showUserDropdown && (
                     <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
                       <div className="p-4 border-b border-gray-200">
@@ -221,10 +247,7 @@ export default function Header() {
                   </span>
                 </button>
 
-                {/* Cart Dropdown */}
-                {showCartDropdown && (
-                  <CartDropdown onClose={() => setShowCartDropdown(false)} />
-                )}
+                {showCartDropdown && <CartDropdown onClose={() => setShowCartDropdown(false)} />}
               </div>
             </div>
           </div>
@@ -234,108 +257,120 @@ export default function Header() {
       {/* Black Navigation Bar */}
       <nav className="bg-black text-white relative">
         <div className="container-custom">
-          <div className="flex items-center gap-1 overflow-x-auto">
-            {/* Menu Button with Dropdown */}
-            <div className="relative" ref={menuDropdownRef}>
+          <div className="flex items-center">
+            {/* MENU button + dropdown (hover to open) */}
+            <div
+              className="relative"
+              ref={menuDropdownRef}
+              onMouseEnter={() => setShowMenuDropdown(true)}
+              onMouseLeave={() => {
+                setShowMenuDropdown(false);
+                setHoveredMenu(null);
+              }}
+            >
               <button
-                onClick={() => setShowMenuDropdown(!showMenuDropdown)}
+                onClick={() => setShowMenuDropdown((v) => !v)} // fallback cho mobile/touch
+                aria-expanded={showMenuDropdown}
                 className="flex items-center gap-2 px-4 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
               >
                 <Grid3x3 size={18} />
                 <span>MENU</span>
               </button>
 
-              {/* Menu Dropdown */}
               {showMenuDropdown && (
-                <div className="absolute left-0 top-full mt-0 w-72 bg-white rounded-b-lg shadow-xl border border-gray-200 z-50">
-                  <nav className="p-2">
-                    <Link
-                      href="/new-releases"
-                      onClick={() => setShowMenuDropdown(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                    >
-                      <Gift size={20} className="text-accent-red" />
-                      <span className="flex-1 font-medium">NEW RELEASES !!!</span>
-                      <span className="bg-accent-red text-white text-xs px-2 py-1 rounded-full font-bold">HOT</span>
-                    </Link>
-                    <Link
-                      href="/in-stock"
-                      onClick={() => setShowMenuDropdown(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                    >
-                      <Package size={20} className="text-green-600" />
-                      <span className="flex-1 font-medium">NOW In Stock!</span>
-                    </Link>
-                    <Link
-                      href="/products"
-                      onClick={() => setShowMenuDropdown(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                    >
-                      <ShoppingBag size={20} className="text-blue-600" />
-                      <span className="flex-1 font-medium">ALL PRODUCTS</span>
-                    </Link>
-                    <div className="border-t border-gray-200 my-2"></div>
-                    <Link
-                      href="/pvc-figure"
-                      onClick={() => setShowMenuDropdown(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                    >
-                      <Box size={20} />
-                      <span className="flex-1 font-medium">PVC Figure</span>
-                    </Link>
-                    <Link
-                      href="/resin-figure"
-                      onClick={() => setShowMenuDropdown(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                    >
-                      <Box size={20} />
-                      <span className="flex-1 font-medium">RESIN Figure</span>
-                    </Link>
-                    <Link
-                      href="/blindbox"
-                      onClick={() => setShowMenuDropdown(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                    >
-                      <Boxes size={20} />
-                      <span className="flex-1 font-medium">Blindbox Arttoy</span>
-                    </Link>
-                    <Link
-                      href="/gundam"
-                      onClick={() => setShowMenuDropdown(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                    >
-                      <Boxes size={20} />
-                      <span className="flex-1 font-medium">Gundam / Plastic Model</span>
-                    </Link>
-                    <Link
-                      href="/goods"
-                      onClick={() => setShowMenuDropdown(false)}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
-                    >
-                      <Backpack size={20} />
-                      <span className="flex-1 font-medium">Balo / Character Goods</span>
-                    </Link>
-                  </nav>
+                <div className="absolute left-0 top-full mt-0 w-[720px] bg-white text-gray-800 rounded-b-lg shadow-xl border border-gray-200 z-50">
+                  <div className="flex">
+                    {/* Left column: main categories */}
+                    <aside className="w-72 p-2 border-r border-gray-200">
+                      <nav>
+                        <ul className="space-y-1">
+                          {menuItems.map((item, idx) => (
+                            <li key={idx}>
+                              <Link
+                                href={item.href}
+                                onMouseEnter={() => setHoveredMenu(item.href)}
+                                onClick={() => setShowMenuDropdown(false)}
+                                className={`flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors ${
+                                  item.badge === 'hot' ? 'bg-pink-50' : ''
+                                }`}
+                              >
+                                {item.icon}
+                                <span className="flex-1 font-medium">{item.label}</span>
+                                {item.badge === 'hot' && (
+                                  <span className="bg-accent-red text-white text-xs px-2 py-1 rounded-full font-bold">HOT</span>
+                                )}
+                                {item.hasSubmenu && (
+                                  <ChevronRight size={16} className="text-gray-400" />
+                                )}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </nav>
+                    </aside>
+
+                    {/* Right column: submenu */}
+                    <section className="flex-1 p-3">
+                      {hoveredMenu && submenuData[hoveredMenu] ? (
+                        <>
+                          <div className="mb-2 px-2 py-1 border-b border-gray-200 font-bold text-sm">
+                            {menuItems.find((m) => m.href === hoveredMenu)?.label}
+                          </div>
+                          <ul className="space-y-1">
+                            {submenuData[hoveredMenu].map((sub, i) => (
+                              <li key={i}>
+                                <Link
+                                  href={sub.href}
+                                  className="flex items-center justify-between px-2 py-2 rounded hover:bg-gray-50 transition-colors"
+                                  onClick={() => setShowMenuDropdown(false)}
+                                >
+                                  <span className="text-sm text-gray-700">{sub.label}</span>
+                                  {sub.count && (
+                                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                                      {sub.count}
+                                    </span>
+                                  )}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        </>
+                      ) : (
+                        <div className="text-sm text-gray-500 px-2 py-6">
+                          Di chuột vào mục có dấu &ldquo;&gt;&rdquo; để xem danh mục con.
+                        </div>
+                      )}
+                    </section>
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Nav Items */}
-            <NavLink href="/giao-hang" icon={<Truck size={18} />}>
-              Giao hàng & bảo hành
-            </NavLink>
-            <NavLink href="/tra-cuu" icon={<Search size={18} />}>
-              Tra cứu đơn đặt trước
-            </NavLink>
-            <NavLink href="/tinh-gia" icon={<Calculator size={18} />}>
-              Tính giá gom hàng
-            </NavLink>
-            <NavLink href="/faq" icon={<HelpCircle size={18} />}>
-              FAQ
-            </NavLink>
-            <NavLink href="/tin-tuc" icon={<Newspaper size={18} />}>
-              Tin tức
-            </NavLink>
+            {/* Centered nav items — evenly spaced from the center */}
+            <div className="flex-1">
+              <div className="overflow-x-auto">
+                <div className="grid grid-flow-col auto-cols-max justify-center items-center gap-10 md:gap-16 lg:gap-20">
+                  <NavLink href="/giao-hang" icon={<Truck size={18} />}>
+                    Giao hàng &amp; bảo hành
+                  </NavLink>
+                  <NavLink href="/tra-cuu" icon={<Search size={18} />}>
+                    Tra cứu đơn đặt trước
+                  </NavLink>
+                  <NavLink href="/tinh-gia" icon={<Calculator size={18} />}>
+                    Tính giá gom hàng
+                  </NavLink>
+                  <NavLink href="/faq" icon={<HelpCircle size={18} />}>
+                    FAQ
+                  </NavLink>
+                  <NavLink href="/tin-tuc" icon={<Newspaper size={18} />}>
+                    Tin tức
+                  </NavLink>
+                </div>
+              </div>
+            </div>
+
+            {/* right spacer to keep balance */}
+            <div className="w-12" />
           </div>
         </div>
       </nav>
@@ -355,7 +390,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className="flex items-center gap-2 px-4 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap text-sm"
+      className="flex items-center gap-2 px-2 md:px-3 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap text-sm rounded"
     >
       {icon}
       <span>{children}</span>
