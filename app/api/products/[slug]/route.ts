@@ -27,7 +27,7 @@ export async function GET(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Product not found'
+                    error: 'Không tìm thấy sản phẩm'
                 },
                 { status: 404 }
             )
@@ -38,7 +38,7 @@ export async function GET(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Product is not available'
+                    error: 'Sản phẩm này không còn bán'
                 },
                 { status: 404 }
             )
@@ -54,7 +54,7 @@ export async function GET(
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to fetch product'
+                error: 'Không thể lấy thông tin sản phẩm'
             },
             { status: 500 }
         )

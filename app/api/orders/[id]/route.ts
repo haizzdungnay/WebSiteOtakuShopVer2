@@ -15,7 +15,7 @@ export async function GET(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Please login to view order'
+                    error: 'Vui lòng đăng nhập để xem đơn hàng'
                 },
                 { status: 401 }
             )
@@ -77,7 +77,7 @@ export async function GET(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Order not found'
+                    error: 'Không tìm thấy đơn hàng'
                 },
                 { status: 404 }
             )
@@ -88,7 +88,7 @@ export async function GET(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Unauthorized to view this order'
+                    error: 'Bạn không có quyền xem đơn hàng này'
                 },
                 { status: 403 }
             )
@@ -227,7 +227,7 @@ export async function GET(
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to fetch order details'
+                error: 'Không thể lấy thông tin đơn hàng'
             },
             { status: 500 }
         )

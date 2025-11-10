@@ -88,7 +88,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(
         {
             success: false,
-            error: 'Failed to fetch products'
+            error: 'Không thể lấy danh sách sản phẩm'
         },
         { status: 500 }
     )

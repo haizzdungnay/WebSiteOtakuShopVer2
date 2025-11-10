@@ -32,7 +32,7 @@ export async function GET() {
         return NextResponse.json(
             {
                 success: false,
-                message: 'Failed to fetch categories'
+                message: 'Không thể lấy danh sách danh mục'
             },
             { status: 500}
         )

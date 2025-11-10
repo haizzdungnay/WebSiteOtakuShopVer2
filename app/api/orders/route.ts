@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Please log in to place an order'
+                    error: 'Vui lòng đăng nhập để đặt hàng'
                 },
                 { status: 401 }
             )
@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Your cart is empty'
+                    error: 'Giỏ hàng của bạn đang trống'
                 },
                 { status: 400 }
             )
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Some items are out of stock',
+                    error: 'Một số sản phẩm đã hết hàng',
                     details: stockValidation.errors
                 },
                 { status: 400 }
@@ -100,7 +100,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Address not found'
+                    error: 'Không tìm thấy địa chỉ giao hàng'
                 },
                 { status: 404 }
             )
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Unauthorized address'
+                    error: 'Địa chỉ không hợp lệ'
                 },
                 { status: 401 }
             )
@@ -292,7 +292,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 success: true,
-                message: 'Order created successfully',
+                message: 'Đặt hàng thành công',
                 data: {
                     order: fullOrder,
                     orderNumber: result.order.orderNumber
@@ -315,7 +315,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to create order'
+                error: 'Không thể tạo đơn hàng. Vui lòng thử lại'
             },
             { status: 500 }
         )
@@ -331,7 +331,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Please log in to view your orders'
+                    error: 'Vui lòng đăng nhập để xem đơn hàng'
                 },
                 { status: 401 }
             )
@@ -380,7 +380,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: 'Orders retrieved successfully',
+            message: 'Lấy danh sách đơn hàng thành công',
             data: orders,
             pagination: {
                 page,
@@ -394,7 +394,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to get orders'
+                error: 'Không thể lấy danh sách đơn hàng'
             },
             { status: 500 }
         )
