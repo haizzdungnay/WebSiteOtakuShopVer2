@@ -4,8 +4,8 @@ import { getUserFromRequest } from '@/lib/auth'
 import { z } from 'zod'
 
 const addToCartSchema = z.object({
-    productId: z.string().min(1, 'Product ID is required'),
-    quantity: z.number().int().positive('Quantity must be a positive number')
+    productId: z.string().min(1, 'Vui lòng chọn sản phẩm'),
+    quantity: z.number().int().positive('Số lượng phải lớn hơn 0')
 })
 
 // POST /api/cart - Thêm sản phẩm vào giỏ hàng
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Unauthorized',
+                    error: 'Vui lòng đăng nhập',
                 },
                 { status: 401 }
             )
@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Product not found'
+                    error: 'Không tìm thấy sản phẩm'
                 },
                 { status: 404 }
             )
@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Product is not available'
+                    error: 'Sản phẩm này hiện không còn bán'
                 },
                 { status: 400 }
             )
@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: `Only ${product.stockQuantity} items left in stock`
+                    error: `Chỉ còn ${product.stockQuantity} sản phẩm trong kho`
                 },
                 { status: 400 }
             )
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
                 return NextResponse.json(
                     {
                         success: false,
-                        error: `Cannot add ${quantity} more. Only ${product.stockQuantity - existingCartItem.quantity} items left in stock`
+                        error: `Không thể thêm ${quantity} sản phẩm. Chỉ còn ${product.stockQuantity - existingCartItem.quantity} sản phẩm trong kho`
                     },
                     { status: 400 }
                 )
@@ -148,7 +148,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 success: true,
-                message: existingCartItem ? 'Cart updated' : 'Added to cart',
+                message: existingCartItem ? 'Đã cập nhật giỏ hàng' : 'Đã thêm vào giỏ hàng',
                 data: cartItem
             },
             { status: existingCartItem ? 200 : 201 }
@@ -170,7 +170,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to add item to cart'
+                error: 'Không thể thêm sản phẩm vào giỏ hàng'
             },
             { status: 500 }
         )
@@ -186,7 +186,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Unauthorized'
+                    error: 'Vui lòng đăng nhập'
                 },
                 { status: 401 }
             )
@@ -245,7 +245,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to get cart'
+                error: 'Không thể lấy giỏ hàng'
             },
             { status: 500 }
         )
@@ -261,7 +261,7 @@ export async function DELETE(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Unauthorized'
+                    error: 'Vui lòng đăng nhập'
                 },
                 { status: 401 }
             )
@@ -276,7 +276,7 @@ export async function DELETE(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: `Cleared ${result.count} items from cart`
+            message: `Đã xóa ${result.count} sản phẩm khỏi giỏ hàng`
         })
     }
     catch (error) {
@@ -284,7 +284,7 @@ export async function DELETE(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to clear cart'
+                error: 'Không thể xóa giỏ hàng'
             },
             { status: 500 }
         )

@@ -7,23 +7,23 @@ import { z } from 'zod'
 const registerSchema = z.object({
     email: z
         .string()
-        .email('Invalid email format')
+        .email('Email không hợp lệ')
         .toLowerCase(), // chuyển về lowercase
 
     password: z
         .string()
-        .min(8, 'Password must be at least 8 characters')
-        .max(100, 'Password is too long'),
+        .min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
+        .max(100, 'Mật khẩu quá dài'),
 
     fullName: z
         .string()
-        .min(2, 'Must be at least 2 characters')
-        .max(100, 'Your name is too long')
+        .min(2, 'Họ tên phải có ít nhất 2 ký tự')
+        .max(100, 'Họ tên quá dài')
         .trim(), // loại bỏ khoảng trắng thừa
         
     phone: z
         .string()
-        .regex(/^(03[2-9]|05[2|6|8|9]|07[0|6|7|8|9]|08[1-9]|09[0-9])\d{7}$/, 'Số điện thoại di động không hợp lệ') // giới hạn các đầu số của nhà mạng Việt Nam
+        .regex(/^(03[2-9]|05[2|6|8|9]|07[0|6|7|8|9]|08[1-9]|09[0-9])\d{7}$/, 'Số điện thoại không hợp lệ') // giới hạn các đầu số của nhà mạng Việt Nam
         .optional()
         .or(z.literal('')), // cho phép để trống
 })
@@ -45,7 +45,7 @@ export async function POST(request: Request) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Email has already been registered'
+                    error: 'Email này đã được đăng ký'
                 },
                 { status: 400 }
             )
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
         return NextResponse.json(
             {
                 success: true,
-                message: 'User registered successfully',
+                message: 'Đăng ký tài khoản thành công',
                 data: user
             },
             { status: 201 } // Created
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Registration failed'
+                error: 'Đăng ký thất bại. Vui lòng thử lại'
             },
             { status: 500 }
         )

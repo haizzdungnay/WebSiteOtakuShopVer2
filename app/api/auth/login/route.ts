@@ -6,8 +6,8 @@ import { z } from 'zod'
 
 // Schema để validate input với zod
 const loginSchema = z.object({
-    email: z.string().email('Invalid email').toLowerCase(),
-    password: z.string().min(8, 'Password must be at least 8 characters')
+    email: z.string().email('Email không hợp lệ').toLowerCase(),
+    password: z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
 })
 
 export async function POST(request: Request) {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Invalid credentials'
+                    error: 'Email hoặc mật khẩu không đúng'
                 },
                 { status: 401 } // Unauthorized
             )
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Invalid credentials'
+                    error: 'Email hoặc mật khẩu không đúng'
                 },
                 { status: 401 }
             )
@@ -64,7 +64,7 @@ export async function POST(request: Request) {
         // trả về token và user info lưu ý không trả về passwordHash
         return NextResponse.json({
             success: true,
-            message: 'Login successful',
+            message: 'Đăng nhập thành công',
             data: {
                 token,
                 user: {
@@ -94,7 +94,7 @@ export async function POST(request: Request) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Login failed'
+                error: 'Đăng nhập thất bại. Vui lòng thử lại'
             },
             { status: 500 }
         )

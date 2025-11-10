@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Unauthorized'
+                    error: 'Vui lòng đăng nhập'
                 },
                 { status: 401 } // Unauthorized
             )
@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
         if (!user) {
             return NextResponse.json({
                 success: false,
-                error: 'User not found'
+                error: 'Không tìm thấy thông tin tài khoản'
             },
                 { status: 404 } // Not found
             )
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to get profile'
+                error: 'Không thể lấy thông tin tài khoản'
             },
             { status: 500 } // Server error
         )
