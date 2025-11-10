@@ -6,7 +6,7 @@ import { z } from 'zod'
 // POST /api/wishlist - Thêm sản phẩm vào wishlist
 
 const addToWishlistSchema = z.object({
-    productId: z.string().min(1, 'Product ID is required')
+    productId: z.string().min(1, 'Vui lòng chọn sản phẩm')
 })
 
 export async function POST(request: NextRequest) {
@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
         if (!user) {
             return NextResponse.json({
                 success: false,
-                error: 'Unauthorized'
+                error: 'Vui lòng đăng nhập'
             },
                 { status: 401 }
             )
@@ -41,7 +41,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Product not found'
+                    error: 'Không tìm thấy sản phẩm'
                 },
                 { status: 404 }
             )
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Product is not available'
+                    error: 'Sản phẩm này không còn bán'
                 },
                 { status: 400 }
             )
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Product already in wishlist'
+                    error: 'Sản phẩm đã có trong danh sách yêu thích'
                 },
                 { status: 400 }
             )
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 success: true,
-                message: 'Added to wishlist'
+                message: 'Đã thêm vào danh sách yêu thích'
             },
             { status: 201 }
         )
@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to add item to wishlist'
+                error: 'Không thể thêm vào danh sách yêu thích'
             },
                 { status: 500 }
         )
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json(
                 {
                 success: false,
-                error: 'Unauthorized'
+                error: 'Vui lòng đăng nhập'
             },
             { status: 401 }
         )
@@ -185,7 +185,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to get wishlist' 
+                error: 'Không thể lấy danh sách yêu thích' 
             },
             { status: 500 }
         )

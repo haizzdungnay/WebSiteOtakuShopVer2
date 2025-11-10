@@ -4,7 +4,7 @@ import { getUserFromRequest } from '@/lib/auth'
 import { z } from 'zod'
 
 const updateQuantitySchema = z.object({
-    quantity: z.number().int().positive('Quantity must be a positive number')
+    quantity: z.number().int().positive('Số lượng phải lớn hơn 0')
 })
 
 // PATCH /api/cart/[id] - Update cart item quantity
@@ -19,7 +19,7 @@ export async function PATCH(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Unauthorized'
+                    error: 'Vui lòng đăng nhập'
                 },
                 { status: 401 }
             )
@@ -50,7 +50,7 @@ export async function PATCH(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Cart item not found'
+                    error: 'Không tìm thấy sản phẩm trong giỏ hàng'
                 },
                 { status: 404 }
             )
@@ -61,7 +61,7 @@ export async function PATCH(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Cart item not found'
+                    error: 'Sản phẩm này không còn bán'
                 },
                 { status: 404 }
             )
@@ -72,7 +72,7 @@ export async function PATCH(
             return NextResponse.json(
                 {
                     success: false,
-                    error: `Only ${cartItem.product.stockQuantity} items left in stock`
+                    error: `Chỉ còn ${cartItem.product.stockQuantity} sản phẩm trong kho`
                 },
                 { status: 400 }
             )
@@ -103,7 +103,7 @@ export async function PATCH(
 
         return NextResponse.json({
                 success: true,
-                message: 'Cart update',
+                message: 'Đã cập nhật giỏ hàng',
                 data: updatedCartItem
             })
     } catch (error) {
@@ -121,7 +121,7 @@ export async function PATCH(
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to update cart item'
+                error: 'Không thể cập nhật giỏ hàng'
             },
             { status: 500 }
         )
@@ -140,7 +140,7 @@ export async function DELETE(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Unauthorized'
+                    error: 'Vui lòng đăng nhập'
                 },
                 { status: 401 }
             )
@@ -157,7 +157,7 @@ export async function DELETE(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Cart item not found'
+                    error: 'Không tìm thấy sản phẩm trong giỏ hàng'
                 },
                 { status: 404 }
             )
@@ -168,7 +168,7 @@ export async function DELETE(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Unauthorized'
+                    error: 'Không có quyền thực hiện'
                 },
                 { status: 403 }
             )
@@ -182,7 +182,7 @@ export async function DELETE(
         return NextResponse.json(
             {
                 success: true,
-                message: 'Item removed from cart'
+                message: 'Đã xóa sản phẩm khỏi giỏ hàng'
             }
         )
     } catch (error) {
@@ -190,7 +190,7 @@ export async function DELETE(
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to remove item'
+                error: 'Không thể xóa sản phẩm'
             },
             { status: 500 }
         )

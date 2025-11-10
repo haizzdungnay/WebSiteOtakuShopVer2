@@ -15,7 +15,7 @@ export async function DELETE(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Unauthorized'
+                    error: 'Vui lòng đăng nhập'
                 },
                 { status: 401 }
             )
@@ -35,7 +35,7 @@ export async function DELETE(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Item not found in wishlist'
+                    error: 'Không tìm thấy sản phẩm trong danh sách yêu thích'
                 },
                 { status: 404 }
             )
@@ -54,7 +54,7 @@ export async function DELETE(
         return NextResponse.json(
             {
                 success: true,
-                message: 'Remove from wishlist'
+                message: 'Đã xóa khỏi danh sách yêu thích'
             }
         )
     } catch (error) {
@@ -62,7 +62,7 @@ export async function DELETE(
         return NextResponse.json(
             {
                 success: false,
-                error: 'Failed to remove from wishlist'
+                error: 'Không thể xóa khỏi danh sách yêu thích'
             },
             { status: 500 }
         )
