@@ -5,19 +5,19 @@ import { z } from 'zod'
 
 // Schema validation
 const updateAddressSchema = z.object({
-    label: z.string().max(50, 'Label too long').optional(),
-    fullName: z.string().min(1, 'Full name is required').max(100, 'Name too long').optional(),
+    label: z.string().max(50, 'Nhãn địa chỉ quá dài').optional(),
+    fullName: z.string().min(1, 'Vui lòng nhập họ và tên').max(100, 'Họ và tên quá dài').optional(),
     phone: z.string()
-        .regex(/^(03[2-9]|05[2|6|8|9]|07[0|6|7|8|9]|08[1-9]|09[0-9])\d{7}$/, 'Invalid Vietnamese mobile phone number')
-        .refine(val => val.length === 10, 'Phone must be exactly 10 digits')
+        .regex(/^(03[2-9]|05[2|6|8|9]|07[0|6|7|8|9]|08[1-9]|09[0-9])\d{7}$/, 'Số điện thoại di động không hợp lệ')
+        .refine(val => val.length === 10, 'Số điện thoại phải có đúng 10 chữ số')
         .optional(),
-    city: z.string().min(1, 'Please select a city').max(100, 'City name too long').optional(),
-    district: z.string().min(1, 'Please select a district').max(100, 'District name too long').optional(),
-    ward: z.string().max(100, 'Ward name too long').optional().nullable(),
+    city: z.string().min(1, 'Vui lòng chọn tỉnh/thành phố').max(100, 'Tên tỉnh/thành phố quá dài').optional(),
+    district: z.string().min(1, 'Vui lòng chọn quận/huyện').max(100, 'Tên quận/huyện quá dài').optional(),
+    ward: z.string().max(100, 'Tên phường/xã quá dài').optional().nullable(),
     address: z.string()
-        .min(5, 'Please enter street address')
-        .max(200, 'Address too long')
-        .refine(val => val.trim().length >= 5, 'Street address cannot be only spaces')
+        .min(5, 'Vui lòng nhập địa chỉ')
+        .max(200, 'Địa chỉ quá dài')
+        .refine(val => val.trim().length >= 5, 'Địa chỉ không được chỉ có khoảng trắng')
         .optional(),
     isDefault: z.boolean().optional()
 })
@@ -32,7 +32,7 @@ export async function PATCH(
         const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
+                { success: false, error: 'Vui lòng đăng nhập' },
                 { status: 401 }
             )
         }
@@ -48,14 +48,14 @@ export async function PATCH(
 
         if (!existingAddress) {
             return NextResponse.json(
-                { success: false, error: 'Address not found' },
+                { success: false, error: 'Không tìm thấy địa chỉ' },
                 { status: 404 }
             )
         }
 
         if (existingAddress.userId !== user.userId) {
             return NextResponse.json(
-                { success: false, error: 'Forbidden' },
+                { success: false, error: 'Bạn không có quyền truy cập địa chỉ này' },
                 { status: 403 }
             )
         }
@@ -79,7 +79,7 @@ export async function PATCH(
 
         return NextResponse.json({
             success: true,
-            message: 'Address updated successfully',
+            message: 'Cập nhật địa chỉ thành công',
             data: updatedAddress
         })
 
@@ -88,7 +88,7 @@ export async function PATCH(
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Validation error',
+                    error: 'Dữ liệu không hợp lệ',
                     details: error.issues
                 },
                 { status: 400 }
@@ -97,7 +97,7 @@ export async function PATCH(
 
         console.error('Update address error:', error)
         return NextResponse.json(
-            { success: false, error: 'Failed to update address' },
+            { success: false, error: 'Không thể cập nhật địa chỉ. Vui lòng thử lại' },
             { status: 500 }
         )
     }
@@ -113,7 +113,7 @@ export async function DELETE(
         const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
+                { success: false, error: 'Vui lòng đăng nhập' },
                 { status: 401 }
             )
         }
@@ -125,14 +125,14 @@ export async function DELETE(
 
         if (!address) {
             return NextResponse.json(
-                { success: false, error: 'Address not found' },
+                { success: false, error: 'Không tìm thấy địa chỉ' },
                 { status: 404 }
             )
         }
 
         if (address.userId !== user.userId) {
             return NextResponse.json(
-                { success: false, error: 'Forbidden' },
+                { success: false, error: 'Bạn không có quyền xóa địa chỉ này' },
                 { status: 403 }
             )
         }
@@ -159,13 +159,13 @@ export async function DELETE(
 
         return NextResponse.json({
             success: true,
-            message: 'Address deleted successfully'
+            message: 'Xóa địa chỉ thành công'
         })
 
     } catch (error) {
         console.error('Delete address error:', error)
         return NextResponse.json(
-            { success: false, error: 'Failed to delete address' },
+            { success: false, error: 'Không thể xóa địa chỉ. Vui lòng thử lại' },
             { status: 500 }
         )
     }

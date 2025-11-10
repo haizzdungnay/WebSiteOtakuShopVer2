@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Invalid type parameter. Must be: cities, districts, or wards',
+                    error: 'Tham số type không hợp lệ. Phải là: cities, districts, hoặc wards',
                     usage: {
                         cities: '/api/locations?type=cities',
                         districts: '/api/locations?type=districts&cityId=79',
@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
                     return NextResponse.json(
                         {
                             success: false,
-                            error: 'cityId parameter is required for districts',
+                            error: 'Tham số cityId là bắt buộc để lấy danh sách quận/huyện',
                             example: '/api/locations?type=districts&cityId=79'
                         },
                         { status: 400 }
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
                     return NextResponse.json(
                         {
                             success: false,
-                            error: 'districtId parameter is required for wards',
+                            error: 'Tham số districtId là bắt buộc để lấy danh sách phường/xã',
                             example: '/api/locations?type=wards&districtId=770'
                         },
                         { status: 400 }
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: `${data.length} ${type} retrieved successfully`,
+            message: `Lấy ${data.length} ${type} thành công`,
             data: data,
             count: data.length
         })
@@ -100,8 +100,8 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: error instanceof Error ? error.message : 'Failed to get locations',
-                details: 'Please try again later or contact support if the issue persists.'
+                error: error instanceof Error ? error.message : 'Không thể lấy dữ liệu địa điểm',
+                details: 'Vui lòng thử lại sau hoặc liên hệ hỗ trợ nếu vấn đề vẫn tiếp diễn.'
             },
             { status: 500 }
         )

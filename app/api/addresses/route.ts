@@ -5,37 +5,37 @@ import { z } from 'zod'
 
 // Validation schema
 const createAddressSchema = z.object({
-    label: z.string().min(1, 'Label is required').max(50, 'Label too long').default('Home'),
-    fullName: z.string().min(1, 'Full name is required').max(100, 'Name too long'),
+    label: z.string().min(1, 'Vui lòng nhập nhãn địa chỉ').max(50, 'Nhãn địa chỉ quá dài').default('Home'),
+    fullName: z.string().min(1, 'Vui lòng nhập họ và tên').max(100, 'Họ và tên quá dài'),
     phone: z.string()
         .regex(/^(03[2-9]|05[2|6|8|9]|07[0|6|7|8|9]|08[1-9]|09[0-9])\d{7}$/, 'Số điện thoại di động không hợp lệ')
-        .refine(val => val.length === 10, 'Phone must be exactly 10 digits'),
+        .refine(val => val.length === 10, 'Số điện thoại phải có đúng 10 chữ số'),
     
     // Street address: User nhập tự do
     address: z.string()
-        .min(5, 'Please enter street address (house number and street name)')
-        .max(200, 'Address too long')
+        .min(5, 'Vui lòng nhập địa chỉ (số nhà và tên đường)')
+        .max(200, 'Địa chỉ quá dài')
         .refine(
             val => val.trim().length >= 5,
-            'Street address cannot be only spaces'
+            'Địa chỉ không được chỉ có khoảng trắng'
         ),
     
     // Ward: Optional, selected from dropdown
     ward: z.string()
-        .max(100, 'Ward name too long')
+        .max(100, 'Tên phường/xã quá dài')
         .optional()
         .nullable()
         .transform(val => val || null), // Convert empty string to null
     
     // District: Required, selected from dropdown
     district: z.string()
-        .min(1, 'Please select a district')
-        .max(100, 'District name too long'),
+        .min(1, 'Vui lòng chọn quận/huyện')
+        .max(100, 'Tên quận/huyện quá dài'),
     
     // City: Required, selected from dropdown
     city: z.string()
-        .min(1, 'Please select a city')
-        .max(100, 'City name too long'),
+        .min(1, 'Vui lòng chọn tỉnh/thành phố')
+        .max(100, 'Tên tỉnh/thành phố quá dài'),
     
     isDefault: z.boolean().optional().default(false)
 })
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
+                { success: false, error: 'Vui lòng đăng nhập' },
                 { status: 401 }
             )
         }
@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: 'Address created successfully',
+            message: 'Tạo địa chỉ thành công',
             data: address
         }, { status: 201 })
 
@@ -90,7 +90,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Validation error',
+                    error: 'Dữ liệu không hợp lệ',
                     details: error.issues
                 },
                 { status: 400 }
@@ -99,7 +99,7 @@ export async function POST(request: NextRequest) {
 
         console.error('Create address error:', error)
         return NextResponse.json(
-            { success: false, error: 'Failed to create address' },
+            { success: false, error: 'Không thể tạo địa chỉ. Vui lòng thử lại' },
             { status: 500 }
         )
     }
@@ -112,7 +112,7 @@ export async function GET(request: NextRequest) {
         const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
-                { success: false, error: 'Unauthorized' },
+                { success: false, error: 'Vui lòng đăng nhập' },
                 { status: 401 }
             )
         }
@@ -137,7 +137,7 @@ export async function GET(request: NextRequest) {
     } catch (error) {
         console.error('Get addresses error:', error)
         return NextResponse.json(
-            { success: false, error: 'Failed to fetch addresses' },
+            { success: false, error: 'Không thể tải danh sách địa chỉ. Vui lòng thử lại' },
             { status: 500 }
         )
     }
