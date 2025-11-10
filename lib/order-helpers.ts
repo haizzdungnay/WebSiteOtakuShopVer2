@@ -133,6 +133,7 @@ export interface CouponValidationResult {
         code: string
         discountType: string
         discountValue: number
+        maxDiscount?: number | null
     }
     error?: string
 }
@@ -152,7 +153,7 @@ export async function validateCoupon(
     if (!coupon) {
         return {
             isValid: false,
-            error: 'Invalid coupon code'
+            error: 'Mã giảm giá không tồn tại'
         }
     }
 
@@ -162,7 +163,7 @@ export async function validateCoupon(
     if (!coupon.isActive) {
         return {
             isValid: false,
-            error: 'Coupon is not active'
+            error: 'Mã giảm giá đã bị vô hiệu hóa'
         }
     }
 
@@ -170,7 +171,7 @@ export async function validateCoupon(
     if (coupon.validTo && coupon.validTo < now) {
         return {
             isValid: false,
-            error: 'Coupon has expired'
+            error: 'Mã giảm giá đã hết hạn'
         }
     }
 
@@ -178,15 +179,15 @@ export async function validateCoupon(
     if (coupon.validFrom && coupon.validFrom > now) {
         return {
             isValid: false,
-            error: 'Coupon is not yet valid'
+            error: 'Mã giảm giá chưa có hiệu lực'
         }
     }
 
-    //  Kiểm tra số tiền tối thiểu để áp dụng coupon
+    // Kiểm tra số tiền tối thiểu để áp dụng coupon
     if (coupon.minOrder && subtotal < Number(coupon.minOrder)) {
         return {
             isValid: false,
-            error: `Minimum order amount for this coupon is ${Number(coupon.minOrder).toLocaleString('vi-VN')}đ`
+            error: `Đơn hàng tối thiểu ${Number(coupon.minOrder).toLocaleString('vi-VN')}đ để sử dụng mã này`
         }
     }
 
@@ -194,7 +195,7 @@ export async function validateCoupon(
     if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) {
         return {
             isValid: false,
-            error: 'Coupon usage limit has been reached'
+            error: 'Mã giảm giá đã hết lượt sử dụng'
         }
     }
 
@@ -205,26 +206,38 @@ export async function validateCoupon(
             id: coupon.id,
             code: coupon.code,
             discountType: coupon.type,
-            discountValue: Number(coupon.value)
+            discountValue: Number(coupon.value),
+            maxDiscount: coupon.maxDiscount ? Number(coupon.maxDiscount) : null
         }
     }
 }
 
-// Tinh toán chiết khấu từ coupon
+// Tính toán chiết khấu từ coupon
 export function calculateDiscount(
     subtotal: number,
     coupon: {
         discountType: string
         discountValue: number
+        maxDiscount?: number | null
     }
 ): number {
+    let discount = 0
+    
     if (coupon.discountType === 'PERCENTAGE') {
         // Giảm giá theo phần trăm
-        return Math.floor(subtotal * (coupon.discountValue / 100))
-    }else {
+        discount = subtotal * (coupon.discountValue / 100)
+        
+        // Apply max discount if set
+        if (coupon.maxDiscount && discount > coupon.maxDiscount) {
+            discount = coupon.maxDiscount
+        }
+    } else {
         // Giảm giá theo số tiền cố định
-        return Math.min(coupon.discountValue, subtotal)
+        discount = Math.min(coupon.discountValue, subtotal)
     }
+    
+    // Round to 2 decimals
+    return Math.round(discount * 100) / 100
 }
 
 /**
