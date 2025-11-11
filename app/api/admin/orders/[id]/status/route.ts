@@ -3,9 +3,7 @@ import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/admin-auth'
 import { z } from 'zod'
 
-// ==========================================
-// Status Transition Rules
-// ==========================================
+// Quy tắc chuyển trạng thái đơn hàng
 
 const STATUS_FLOW = {
   PENDING: ['CONFIRMED', 'CANCELLED'],
@@ -39,9 +37,7 @@ const SHIPPING_STATUS_MAP = {
   CANCELLED: 'FAILED'
 }
 
-// ==========================================
-// Validation Schema
-// ==========================================
+// Schema validation
 
 const updateStatusSchema = z.object({
   status: z.enum([
@@ -54,37 +50,35 @@ const updateStatusSchema = z.object({
     'CANCELLED'
   ]),
   
-  // Shipping info (required for SHIPPING status)
+  // Thông tin vận chuyển (bắt buộc khi chuyển sang SHIPPING)
   trackingCode: z.string().max(100).optional().nullable(),
   carrier: z.string().max(50).optional().nullable(),
   
-  // Admin note
+  // Ghi chú của admin
   adminNote: z.string().max(1000).optional().nullable()
 })
 
-// ==========================================
 // PUT /api/admin/orders/[id]/status
-// ==========================================
 
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
   try {
-    // 1. Check admin authorization
+    // 1. Kiểm tra quyền admin
     const admin = await verifyAdmin(request)
     if (!admin) {
       return NextResponse.json(
-        { success: false, error: 'Không có quyền truy cập' },
+        { success: false, error: 'Không có quyền truy cập. Yêu cầu quyền admin.' },
         { status: 403 }
       )
     }
 
-    // 2. Validate input
+    // 2. Validate dữ liệu đầu vào
     const body = await request.json()
     const validatedData = updateStatusSchema.parse(body)
 
-    // 3. Get current order
+    // 3. Lấy thông tin đơn hàng hiện tại
     const order = await prisma.order.findUnique({
       where: { id: params.id },
       select: {
@@ -126,7 +120,7 @@ export async function PUT(
       )
     }
 
-    // 4. Validate status transition
+    // 4. Kiểm tra quy tắc chuyển trạng thái
     const allowedStatuses = STATUS_FLOW[order.status as keyof typeof STATUS_FLOW] as string[]
     
     if (!allowedStatuses.includes(validatedData.status)) {
@@ -140,7 +134,7 @@ export async function PUT(
       )
     }
 
-    // 5. Validate required fields
+    // 5. Kiểm tra các trường bắt buộc
     if (validatedData.status === 'SHIPPING') {
       if (!validatedData.trackingCode || !validatedData.carrier) {
         return NextResponse.json(
@@ -153,9 +147,9 @@ export async function PUT(
       }
     }
 
-    // 6. Update order in transaction
+    // 6. Cập nhật đơn hàng trong transaction
     const result = await prisma.$transaction(async (tx) => {
-      // Update order status and note
+      // Cập nhật trạng thái đơn hàng và ghi chú
       const updatedOrder = await tx.order.update({
         where: { id: params.id },
         data: {
@@ -166,7 +160,7 @@ export async function PUT(
         }
       })
 
-      // Update payment status if payment exists
+      // Cập nhật trạng thái thanh toán nếu có
       if (order.payment) {
         const newPaymentStatus = PAYMENT_STATUS_MAP[validatedData.status as keyof typeof PAYMENT_STATUS_MAP] as 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'CANCELLED' | 'FAILED' | 'REFUNDED'
         
@@ -174,7 +168,7 @@ export async function PUT(
           where: { id: order.payment.id },
           data: {
             status: newPaymentStatus,
-            // Set paidAt when order is delivered (COD) and not yet paid
+            // Đánh dấu đã thanh toán khi giao hàng thành công (COD) và chưa thanh toán
             paidAt: newPaymentStatus === 'COMPLETED' && !order.payment.paidAt
               ? new Date()
               : undefined
@@ -182,7 +176,7 @@ export async function PUT(
         })
       }
 
-      // Update shipping status if shipping exists
+      // Cập nhật trạng thái vận chuyển nếu có
       if (order.shipping) {
         const newShippingStatus = SHIPPING_STATUS_MAP[validatedData.status as keyof typeof SHIPPING_STATUS_MAP] as 'PREPARING' | 'PICKED_UP' | 'IN_TRANSIT' | 'OUT_FOR_DELIVERY' | 'DELIVERED' | 'FAILED' | 'RETURNED'
         
@@ -192,15 +186,15 @@ export async function PUT(
             status: newShippingStatus,
             trackingCode: validatedData.trackingCode || undefined,
             carrier: validatedData.carrier || undefined,
-            // Set shippedAt when status changes to SHIPPING
+            // Đặt shippedAt khi chuyển sang trạng thái SHIPPING
             shippedAt: validatedData.status === 'SHIPPING' && !order.shipping.shippedAt
               ? new Date()
               : undefined,
-            // Set deliveredAt when status changes to DELIVERED
+            // Đặt deliveredAt khi chuyển sang trạng thái DELIVERED
             deliveredAt: validatedData.status === 'DELIVERED' && !order.shipping.deliveredAt
               ? new Date()
               : undefined,
-            // Append admin note to shipping notes
+            // Thêm ghi chú admin vào ghi chú vận chuyển
             notes: validatedData.adminNote
               ? (order.shipping.notes ? `${order.shipping.notes}\n\n[Admin] ${validatedData.adminNote}` : `[Admin] ${validatedData.adminNote}`)
               : undefined
@@ -234,10 +228,10 @@ export async function PUT(
       return updatedOrder
     })
 
-    // 7. Log admin activity
-    console.log(`[ADMIN] ${admin.email} updated order ${order.orderNumber} status: ${order.status} → ${validatedData.status}`)
+    // 7. Ghi log hoạt động admin
+    console.log(`[ADMIN] ${admin.email} đã cập nhật trạng thái đơn hàng ${order.orderNumber}: ${order.status} → ${validatedData.status}`)
 
-    // 8. Return success response
+    // 8. Trả về kết quả thành công
     return NextResponse.json({
       success: true,
       message: `Đã cập nhật trạng thái đơn hàng thành công`,
