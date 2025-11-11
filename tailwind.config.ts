@@ -45,3 +45,16 @@ const config: Config = {
   plugins: [],
 }
 export default config
+
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        'accent-red': '#FF4458',
+        'primary': '#FF69B4',
+        'primary-dark': '#FF1493',
+        'primary-50': '#FFF0F5',
+      },
+    },
+  },
+}
