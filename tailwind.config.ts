@@ -16,6 +16,7 @@ const config: Config = {
           50: '#FFE5ED',
           100: '#FFD5DC',
         },
+        'accent-red': '#FF4458',
         accent: {
           red: '#FF4444',
           orange: '#FF9966',
@@ -45,16 +46,3 @@ const config: Config = {
   plugins: [],
 }
 export default config
-
-module.exports = {
-  theme: {
-    extend: {
-      colors: {
-        'accent-red': '#FF4458',
-        'primary': '#FF69B4',
-        'primary-dark': '#FF1493',
-        'primary-50': '#FFF0F5',
-      },
-    },
-  },
-}
