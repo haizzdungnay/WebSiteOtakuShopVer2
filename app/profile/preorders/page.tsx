@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRouter } from 'next/navigation';
 import {
   ChevronRight,
   User,
@@ -156,14 +156,13 @@ const filterTabs = [
 
 export default function PreOrdersPage() {
   const { user } = useAuth();
-  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Searching for:', searchQuery);
+    // TODO: Implement search functionality
   };
 
   const filteredOrders = mockPreOrders.filter((order) => {
@@ -479,10 +478,12 @@ export default function PreOrdersPage() {
                     {/* Product Image */}
                     <Link href={`/products/${product.id}`}>
                       <div className="relative aspect-[3/4] overflow-hidden bg-background-light">
-                        <img
+                        <Image
                           src={product.image}
                           alt={product.name}
-                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                          fill
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          className="object-cover transition-transform duration-300 group-hover:scale-110"
                         />
                       </div>
                     </Link>

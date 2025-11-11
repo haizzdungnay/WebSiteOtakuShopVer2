@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
 import { useRouter } from 'next/navigation';
 import { ChevronRight, MapPin, CreditCard, Truck, Receipt } from 'lucide-react';
@@ -381,11 +382,15 @@ export default function CheckoutPage() {
                 <div className="space-y-4 mb-6 max-h-64 overflow-y-auto">
                   {items.map((item) => (
                     <div key={item.id} className="flex gap-3">
-                      <img
-                        src={item.image || '/placeholder-product.jpg'}
-                        alt={item.name}
-                        className="w-16 h-16 object-cover rounded"
-                      />
+                      <div className="relative w-16 h-16 flex-shrink-0">
+                        <Image
+                          src={item.image || '/placeholder-product.jpg'}
+                          alt={item.name}
+                          fill
+                          sizes="64px"
+                          className="object-cover rounded"
+                        />
+                      </div>
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-medium line-clamp-2">{item.name}</h3>
                         <div className="flex items-center justify-between mt-1">
