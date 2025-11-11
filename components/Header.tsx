@@ -107,9 +107,7 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/products?search=${encodeURIComponent(
-        searchQuery
-      )}`;
+      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
     }
   };
 
@@ -301,10 +299,10 @@ export default function Header() {
 
               {/* Mega Menu Dropdown */}
               {showMenuDropdown && (
-                <div className="absolute left-0 top-full mt-0 w-[720px] bg-white rounded-b-lg shadow-2xl border border-gray-200 z-[100]">
+                <div className="absolute left-0 top-full mt-0 w-[280px] md:w-[600px] lg:w-[720px] bg-white rounded-b-lg shadow-2xl border border-gray-200 z-[100]">
                   <div className="flex">
                     {/* Left Column - Main Categories */}
-                    <aside className="w-72 border-r border-gray-200 p-2">
+                    <aside className="w-full md:w-64 lg:w-72 md:border-r border-gray-200 p-2">
                       <nav>
                         {menuItems.map((item, idx) => (
                           <Link
@@ -327,8 +325,8 @@ export default function Header() {
                       </nav>
                     </aside>
 
-                    {/* Right Column - Submenu */}
-                    <section className="flex-1 p-4 min-h-[300px]">
+                    {/* Right Column - Submenu - Hidden on mobile, shown on md+ */}
+                    <section className="hidden md:block flex-1 p-4 min-h-[300px]">
                       {hoveredMenu && submenuData[hoveredMenu] ? (
                         <div>
                           <h3 className="font-bold text-gray-900 mb-3 pb-2 border-b border-gray-200">
