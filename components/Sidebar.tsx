@@ -98,13 +98,8 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
       {/* Sidebar */}
       <aside
         className={`
-          fixed lg:static
-          top-0 left-0 h-full
-          w-72 bg-white
-          shadow-lg lg:shadow-none
-          z-50
-          transform transition-transform duration-300
-          ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
+          ${isOpen ? 'block' : 'hidden'} lg:block
+          w-72 bg-white shadow-lg lg:shadow-none
         `}
       >
         <div className="p-4">
@@ -176,18 +171,6 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
               ))}
             </ul>
           </nav>
-
-          {/* Promotional Banner */}
-          <div className="mt-6 bg-gradient-to-br from-primary to-primary-light rounded-lg p-4 text-white">
-            <h3 className="font-bold text-lg mb-2">JOIN US</h3>
-            <p className="text-sm mb-3">Nhận ưu đãi đặc biệt!</p>
-            <Link
-              href="/register"
-              className="block bg-white text-primary text-center py-2 rounded font-semibold hover:bg-gray-100 transition-colors text-sm"
-            >
-              Đăng ký ngay
-            </Link>
-          </div>
         </div>
       </aside>
     </>
