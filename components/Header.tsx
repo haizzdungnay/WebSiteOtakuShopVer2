@@ -14,72 +14,21 @@ import {
   Grid3x3,
   Truck,
   Calculator,
-  Gift,
-  ShoppingBag,
-  Box,
-  Boxes,
-  Backpack,
-  ChevronRight,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import CartDropdown from './CartDropdown';
-
-// Submenu data for mega menu
-interface SubItem {
-  label: string;
-  href: string;
-  count?: number;
-}
-
-const submenuData: Record<string, SubItem[]> = {
-  '/pvc-figure': [
-    { label: 'Nendoroid', href: '/pvc-figure/nendoroid', count: 150 },
-    { label: 'figma', href: '/pvc-figure/figma', count: 85 },
-    { label: 'Pop Up Parade', href: '/pvc-figure/pop-up-parade', count: 42 },
-    { label: 'Scale Figure 1/7', href: '/pvc-figure/scale-1-7', count: 120 },
-    { label: 'Scale Figure 1/8', href: '/pvc-figure/scale-1-8', count: 95 },
-    { label: 'Prize Figure', href: '/pvc-figure/prize', count: 68 },
-  ],
-  '/resin-figure': [
-    { label: 'GK Model Kit', href: '/resin-figure/gk-model', count: 45 },
-    { label: 'Statue', href: '/resin-figure/statue', count: 32 },
-    { label: 'Diorama', href: '/resin-figure/diorama', count: 28 },
-    { label: 'Bust', href: '/resin-figure/bust', count: 15 },
-    { label: 'Custom Figure', href: '/resin-figure/custom', count: 22 },
-  ],
-};
-
-interface MenuItem {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  badge?: string;
-  hasSubmenu?: boolean;
-}
-
-const menuItems: MenuItem[] = [
-  { href: '/new-releases', icon: <Gift size={20} className="text-accent-red" />, label: 'NEW RELEASES !!!', badge: 'hot' },
-  { href: '/in-stock', icon: <Package size={20} className="text-green-600" />, label: 'NOW In Stock!' },
-  { href: '/products', icon: <ShoppingBag size={20} className="text-blue-600" />, label: 'ALL PRODUCTS' },
-  { href: '/pvc-figure', icon: <Box size={20} />, label: 'PVC Figure', hasSubmenu: true },
-  { href: '/resin-figure', icon: <Box size={20} />, label: 'RESIN Figure', hasSubmenu: true },
-  { href: '/blindbox', icon: <Boxes size={20} />, label: 'Blindbox Arttoy' },
-  { href: '/gundam', icon: <Boxes size={20} />, label: 'Gundam / Plastic Model / Tokusatsu Toys' },
-  { href: '/goods', icon: <Backpack size={20} />, label: 'Balo / Character Goods' },
-];
+import MenuSidebar from './MenuSidebar';
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
-  const [showMenuDropdown, setShowMenuDropdown] = useState(false);
-  const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
+  const [showMenuSidebar, setShowMenuSidebar] = useState(false);
   const { user, logout } = useAuth();
   const { getTotalItems } = useCart();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const cartDropdownRef = useRef<HTMLDivElement>(null);
-  const menuDropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -90,19 +39,16 @@ export default function Header() {
       if (cartDropdownRef.current && !cartDropdownRef.current.contains(event.target as Node)) {
         setShowCartDropdown(false);
       }
-      if (menuDropdownRef.current && !menuDropdownRef.current.contains(event.target as Node)) {
-        setShowMenuDropdown(false);
-      }
     };
 
-    if (showUserDropdown || showCartDropdown || showMenuDropdown) {
+    if (showUserDropdown || showCartDropdown) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showUserDropdown, showCartDropdown, showMenuDropdown]);
+  }, [showUserDropdown, showCartDropdown]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -279,99 +225,14 @@ export default function Header() {
       <nav className="bg-black text-white relative">
         <div className="container-custom overflow-visible">
           <div className="flex items-center gap-1 overflow-x-auto overflow-y-visible">
-            {/* Menu Button with Dropdown */}
-            <div
-              className="relative"
-              ref={menuDropdownRef}
-              onMouseEnter={() => setShowMenuDropdown(true)}
-              onMouseLeave={() => {
-                setShowMenuDropdown(false);
-                setHoveredMenu(null);
-              }}
+            {/* Menu Button - Opens Sidebar */}
+            <button
+              onClick={() => setShowMenuSidebar(true)}
+              className="flex items-center gap-2 px-4 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
             >
-              <button
-                onClick={() => setShowMenuDropdown((v) => !v)}
-                className="flex items-center gap-2 px-4 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
-              >
-                <Grid3x3 size={18} />
-                <span>MENU</span>
-              </button>
-
-              {/* Mega Menu Dropdown */}
-              {showMenuDropdown && (
-                <div className="absolute left-0 top-full mt-0 w-[280px] md:w-[600px] lg:w-[720px] bg-white rounded-b-lg shadow-2xl border border-gray-200 z-[100]">
-                  <div className="flex">
-                    {/* Left Column - Main Categories */}
-                    <aside className="w-full md:w-64 lg:w-72 md:border-r border-gray-200 p-2">
-                      <nav>
-                        {menuItems.map((item, idx) => (
-                          <Link
-                            key={idx}
-                            href={item.href}
-                            className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 group"
-                            onClick={() => setShowMenuDropdown(false)}
-                            onMouseEnter={() => item.hasSubmenu && setHoveredMenu(item.href)}
-                          >
-                            {item.icon}
-                            <span className="flex-1 font-medium text-sm">{item.label}</span>
-                            {item.badge === 'hot' && (
-                              <span className="bg-accent-red text-white text-xs px-2 py-1 rounded-full font-bold">HOT</span>
-                            )}
-                            {item.hasSubmenu && (
-                              <ChevronRight size={16} className="text-gray-400 group-hover:text-primary transition-transform group-hover:translate-x-1" />
-                            )}
-                          </Link>
-                        ))}
-                      </nav>
-                    </aside>
-
-                    {/* Right Column - Submenu - Hidden on mobile, shown on md+ */}
-                    <section className="hidden md:block flex-1 p-4 min-h-[300px]">
-                      {hoveredMenu && submenuData[hoveredMenu] ? (
-                        <div>
-                          <h3 className="font-bold text-gray-900 mb-3 pb-2 border-b border-gray-200">
-                            {menuItems.find(m => m.href === hoveredMenu)?.label}
-                          </h3>
-                          <ul className="grid grid-cols-2 gap-2">
-                            {submenuData[hoveredMenu].map((sub, idx) => (
-                              <li key={idx}>
-                                <Link
-                                  href={sub.href}
-                                  className="flex items-center justify-between px-3 py-2 rounded hover:bg-gray-50 transition-colors group"
-                                  onClick={() => setShowMenuDropdown(false)}
-                                >
-                                  <span className="text-sm text-gray-700 group-hover:text-accent-red transition-colors">
-                                    {sub.label}
-                                  </span>
-                                  {sub.count && (
-                                    <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                                      {sub.count}
-                                    </span>
-                                  )}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                          <div className="mt-4 pt-3 border-t border-gray-200">
-                            <Link
-                              href={hoveredMenu}
-                              className="block text-center text-sm text-accent-red font-semibold hover:underline"
-                              onClick={() => setShowMenuDropdown(false)}
-                            >
-                              Xem tất cả {menuItems.find(m => m.href === hoveredMenu)?.label} →
-                            </Link>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                          Hover vào danh mục để xem sản phẩm
-                        </div>
-                      )}
-                    </section>
-                  </div>
-                </div>
-              )}
-            </div>
+              <Grid3x3 size={18} />
+              <span>MENU</span>
+            </button>
 
             {/* Centered Navigation Items */}
             <div className="flex-1">
@@ -399,6 +260,9 @@ export default function Header() {
           </div>
         </div>
       </nav>
+
+      {/* Menu Sidebar */}
+      <MenuSidebar isOpen={showMenuSidebar} onClose={() => setShowMenuSidebar(false)} />
     </header>
   );
 }
