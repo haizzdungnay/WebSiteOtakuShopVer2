@@ -228,7 +228,7 @@ export default function Header() {
             {/* Menu Button - Opens Sidebar */}
             <button
               onClick={() => setShowMenuSidebar(true)}
-              className="flex items-center gap-2 px-4 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
+              className="flex items-center gap-2 px-91 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
             >
               <Grid3x3 size={18} />
               <span>MENU</span>
