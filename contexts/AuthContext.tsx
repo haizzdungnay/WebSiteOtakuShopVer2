@@ -7,11 +7,16 @@ interface User {
   id: number
   email: string
   username: string
+  role?: 'admin' | 'user'
+}
+
+interface LoginOptions {
+  isAdmin?: boolean
 }
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string) => Promise<boolean>
+  login: (email: string, password: string, options?: LoginOptions) => Promise<boolean>
   register: (email: string, username: string, password: string) => Promise<boolean>
   logout: () => void
   loading: boolean
@@ -51,10 +56,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string, options?: LoginOptions): Promise<boolean> => {
     try {
       const csrfToken = Cookies.get('csrf-token') || ''
-      const response = await fetch('/api/auth/login', {
+      const endpoint = options?.isAdmin ? '/api/admin/login' : '/api/auth/login'
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (response.ok) {
         const data = await response.json()
         setUser(data.user)
-        Cookies.set('token', data.token, { 
+        Cookies.set('token', data.token, {
           expires: 7,
           sameSite: 'strict',
           secure: process.env.NODE_ENV === 'production'

@@ -27,6 +27,7 @@ export async function GET(request: NextRequest) {
         id: payload.userId,
         email: payload.email,
         username: payload.username,
+        role: payload.role || 'user'
       },
     })
   } catch (error) {
