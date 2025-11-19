@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       email: user.email,
       username: user.username,
+      role: 'user'
     })
 
     return NextResponse.json({
@@ -58,6 +59,7 @@ export async function POST(request: NextRequest) {
         id: user.id,
         email: user.email,
         username: user.username,
+        role: 'user'
       },
       token,
     })
