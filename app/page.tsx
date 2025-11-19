@@ -84,184 +84,167 @@ export default function Home() {
 
   return (
     <div className="bg-background-light">
-      {/* Hero Banner */}
-      <section className="bg-gradient-to-br from-primary via-primary-light to-primary py-16 relative overflow-hidden">
-        <div className="container-custom">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            {/* Left: Content */}
-            <div className="text-center lg:text-left space-y-6">
-              <div className="inline-block lg:block">
-                <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-2 drop-shadow-lg">
-                  JOIN US
-                </h1>
-                <div className="h-2 w-32 bg-accent-red rounded-full mx-auto lg:mx-0"></div>
-              </div>
-              <p className="text-xl md:text-2xl text-gray-800 font-medium">
-                Cộng đồng yêu thích Figure & Anime
-              </p>
-              <div className="space-y-3">
-                <p className="text-base text-gray-700">
-                  ✨ Sản phẩm chính hãng 100%
-                </p>
-                <p className="text-base text-gray-700">
-                  🎁 Ưu đãi độc quyền cho thành viên
-                </p>
-                <p className="text-base text-gray-700">
-                  🚀 Cập nhật sản phẩm mới hàng tuần
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
-                <Link
-                  href="/products"
-                  className="inline-block bg-accent-red text-white px-8 py-4 rounded-lg font-bold text-lg hover:bg-red-600 transition-all hover:scale-105 shadow-lg"
-                >
-                  Khám phá ngay
-                </Link>
-                <Link
-                  href="/register"
-                  className="inline-block bg-white text-gray-900 px-8 py-4 rounded-lg font-bold text-lg hover:bg-gray-100 transition-all hover:scale-105 shadow-lg"
-                >
-                  Đăng ký thành viên
-                </Link>
-              </div>
+      <section className="py-8">
+        <div className="container-custom space-y-10">
+          {/* HÀNG TRÊN: Sidebar + JOIN US (cao bằng nhau) */}
+          <div className="flex gap-6 items-stretch">
+            {/* SIDEBAR */}
+            <div className="w-[320px]">
+              <Sidebar
+                isOpen={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+              />
             </div>
 
-            {/* Right: QR Code & Info */}
-            <div className="flex justify-center lg:justify-end">
-              <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full">
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                    Kết nối với chúng tôi
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    Quét mã QR để tham gia nhóm Zalo
+            {/* JOIN US – banner hồng, cao bằng Sidebar + min-height để luôn đẹp */}
+            <div className="flex-1">
+              <div className="relative w-full min-h-[420px] overflow-hidden rounded-[32px] bg-[#ffc1c9] px-16 py-12 flex items-center justify-between gap-10 shadow-[0_18px_40px_rgba(0,0,0,0.08)]">
+                {/* Decor */}
+                <div className="pointer-events-none">
+                  {/* chấm tròn góc trên trái */}
+                  <div className="absolute left-12 top-10 grid grid-cols-4 gap-2 opacity-40">
+                    {Array.from({ length: 16 }).map((_, i) => (
+                      <span
+                        key={i}
+                        className="w-2 h-2 border border-white rounded-full"
+                      />
+                    ))}
+                  </div>
+                  {/* hình tròn đỏ góc dưới trái */}
+                  <div className="absolute -left-32 bottom-[-140px] w-[340px] h-[340px] bg-[#ff4b4b] rounded-full opacity-90" />
+                  {/* dải đỏ cong bên phải */}
+                  <div className="absolute -right-24 -top-10 w-[220px] h-[220px] rounded-full border-[24px] border-[#ff7070] border-t-transparent border-l-transparent" />
+                </div>
+
+                {/* Nội dung bên trái */}
+                <div className="relative z-10 flex-1">
+                  <h2 className="text-[56px] leading-tight font-extrabold tracking-[0.25em] text-[#3b3f4a] mb-6 uppercase">
+                    JOIN US
+                  </h2>
+
+                  <p className="text-lg text-[#3b3f4a] mb-4">
+                    Cộng đồng yêu thích Figure &amp; Anime
                   </p>
+
+                  <ul className="text-base text-[#3b3f4a] space-y-2 mb-8">
+                    <li>✨ Sản phẩm chính hãng 100%</li>
+                    <li>🎁 Ưu đãi độc quyền cho thành viên</li>
+                    <li>🚀 Cập nhật sản phẩm mới hàng tuần</li>
+                  </ul>
+
+                  <div className="flex flex-wrap gap-4">
+                    <Link
+                      href="/products"
+                      className="bg-[#ff4b4b] text-white px-8 py-3 rounded-2xl text-sm font-semibold shadow-md hover:bg-[#ff3333] transition-transform hover:scale-[1.02]"
+                    >
+                      Khám phá ngay
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="bg-white text-[#3b3f4a] px-8 py-3 rounded-2xl text-sm font-semibold shadow-md hover:bg-gray-50 transition-transform hover:scale-[1.02]"
+                    >
+                      Đăng ký thành viên
+                    </Link>
+                  </div>
                 </div>
 
-                {/* QR Code Placeholder */}
-                <div className="bg-gray-100 rounded-xl p-6 mb-6 aspect-square flex items-center justify-center">
-                  <div className="text-center">
-                    <div className="w-48 h-48 bg-white rounded-lg shadow-inner mb-3 flex items-center justify-center border-4 border-gray-300">
-                      <div className="text-gray-400 text-6xl font-bold">QR</div>
+                {/* QR bên phải */}
+                <div className="relative z-10 flex items-center justify-center">
+                  <div className="w-[260px] h-[260px] bg-white rounded-[32px] shadow-[0_18px_40px_rgba(0,0,0,0.15)] flex items-center justify-center">
+                    <div className="w-[210px] h-[210px] bg-[#f4f5f7] rounded-[24px] border border-[#e0e2e7] flex items-center justify-center">
+                      <span className="text-3xl font-semibold text-[#a0a4b0]">
+                        QR
+                      </span>
                     </div>
-                    <p className="text-sm text-gray-600 font-medium">
-                      Quét để tham gia ngay
-                    </p>
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-4 text-white text-center">
-                    <div className="text-2xl font-bold">2.2K+</div>
-                    <div className="text-xs opacity-90">Thành viên</div>
-                  </div>
-                  <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-4 text-white text-center">
-                    <div className="text-2xl font-bold">1.5K+</div>
-                    <div className="text-xs opacity-90">Sản phẩm</div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Decorative Elements */}
-        <div className="absolute top-0 left-0 w-64 h-64 bg-white opacity-10 rounded-full -translate-x-32 -translate-y-32"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white opacity-10 rounded-full translate-x-48 translate-y-48"></div>
-      </section>
-
-      {/* Main Content with Sidebar */}
-      <section className="py-8">
-        <div className="container-custom">
-          <div className="flex gap-6">
-            {/* Sidebar */}
-            <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-            {/* Main Content */}
-            <div className="flex-1">
-              {/* Section: Hot Products */}
-              <div className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    <span className="w-1 h-8 bg-accent-red"></span>
-                    SẢN PHẨM HOT
-                  </h2>
-                  <Link
-                    href="/products?filter=hot"
-                    className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
-                  >
-                    Xem tất cả <ChevronRight size={16} />
-                  </Link>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {sampleProducts
-                    .filter((p) => p.badge === 'hot')
-                    .map((product) => (
-                      <ProductCard key={product.id} {...product} />
-                    ))}
-                </div>
+          {/* HÀNG DƯỚI: các section sản phẩm – full chiều ngang phần content */}
+          <div>
+            {/* SẢN PHẨM HOT */}
+            <div className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <span className="w-1 h-8 bg-accent-red" />
+                  SẢN PHẨM HOT
+                </h2>
+                <Link
+                  href="/products?filter=hot"
+                  className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
+                >
+                  Xem tất cả <ChevronRight size={16} />
+                </Link>
               </div>
-
-              {/* Section: New Arrivals */}
-              <div className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    <span className="w-1 h-8 bg-green-500"></span>
-                    HÀNG MỚI VỀ
-                  </h2>
-                  <Link
-                    href="/products?filter=new"
-                    className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
-                  >
-                    Xem tất cả <ChevronRight size={16} />
-                  </Link>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {sampleProducts
-                    .filter((p) => p.badge === 'new')
-                    .map((product) => (
-                      <ProductCard key={product.id} {...product} />
-                    ))}
-                </div>
-              </div>
-
-              {/* Section: Sale Products */}
-              <div className="mb-12">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    <span className="w-1 h-8 bg-orange-500"></span>
-                    ĐANG GIẢM GIÁ
-                  </h2>
-                  <Link
-                    href="/products?filter=sale"
-                    className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
-                  >
-                    Xem tất cả <ChevronRight size={16} />
-                  </Link>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {sampleProducts
-                    .filter((p) => p.discountPrice)
-                    .map((product) => (
-                      <ProductCard key={product.id} {...product} />
-                    ))}
-                </div>
-              </div>
-
-              {/* Section: All Products */}
-              <div>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    <span className="w-1 h-8 bg-primary"></span>
-                    TẤT CẢ SẢN PHẨM
-                  </h2>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                  {sampleProducts.map((product) => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {sampleProducts
+                  .filter((p) => p.badge === 'hot')
+                  .map((product) => (
                     <ProductCard key={product.id} {...product} />
                   ))}
-                </div>
+              </div>
+            </div>
+
+            {/* HÀNG MỚI VỀ */}
+            <div className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <span className="w-1 h-8 bg-green-500" />
+                  HÀNG MỚI VỀ
+                </h2>
+                <Link
+                  href="/products?filter=new"
+                  className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
+                >
+                  Xem tất cả <ChevronRight size={16} />
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {sampleProducts
+                  .filter((p) => p.badge === 'new')
+                  .map((product) => (
+                    <ProductCard key={product.id} {...product} />
+                  ))}
+              </div>
+            </div>
+
+            {/* ĐANG GIẢM GIÁ */}
+            <div className="mb-12">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <span className="w-1 h-8 bg-orange-500" />
+                  ĐANG GIẢM GIÁ
+                </h2>
+                <Link
+                  href="/products?filter=sale"
+                  className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
+                >
+                  Xem tất cả <ChevronRight size={16} />
+                </Link>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {sampleProducts
+                  .filter((p) => p.discountPrice)
+                  .map((product) => (
+                    <ProductCard key={product.id} {...product} />
+                  ))}
+              </div>
+            </div>
+
+            {/* TẤT CẢ SẢN PHẨM */}
+            <div className="mb-4">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <span className="w-1 h-8 bg-primary" />
+                  TẤT CẢ SẢN PHẨM
+                </h2>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {sampleProducts.map((product) => (
+                  <ProductCard key={product.id} {...product} />
+                ))}
               </div>
             </div>
           </div>

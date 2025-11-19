@@ -99,7 +99,8 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
       <aside
         className={`
           ${isOpen ? 'block' : 'hidden'} lg:block
-          w-72 bg-white shadow-lg lg:shadow-none
+          w-72 bg-white shadow-lg lg:shadow-none rounded-2xl
+          self-start h-auto
         `}
       >
         <div className="p-4">

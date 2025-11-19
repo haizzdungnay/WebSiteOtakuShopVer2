@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import {
@@ -86,6 +87,8 @@ export default function Header() {
                 />
                 <button
                   type="submit"
+                  title="Tìm kiếm"
+                  aria-label="Tìm kiếm"
                   className="bg-primary-light px-6 hover:bg-primary-dark transition-colors"
                 >
                   <Search size={20} className="text-white" />
@@ -192,30 +195,29 @@ export default function Header() {
                 </Link>
               )}
 
-              {/* Giỏ hàng */}
-              <div className="relative" ref={cartDropdownRef}>
-                <button
-                  onClick={() => setShowCartDropdown(!showCartDropdown)}
-                  className="relative flex items-center gap-2 bg-white px-4 py-2 rounded-full hover:bg-gray-50 transition-colors"
-                >
-                  <div className="relative">
-                    <ShoppingCart size={20} className="text-accent-red" />
-                    {getTotalItems() > 0 && (
-                      <span className="absolute -top-2 -right-2 bg-accent-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                        {getTotalItems()}
-                      </span>
-                    )}
-                  </div>
-                  <span className="hidden lg:block text-sm font-semibold text-gray-800">
-                    Giỏ hàng
-                  </span>
-                </button>
+              <button
+                onClick={() => setShowCartDropdown(!showCartDropdown)}
+                title="Giỏ hàng"
+                aria-label="Giỏ hàng"
+                className="relative flex items-center gap-2 bg-white px-4 py-2 rounded-full hover:bg-gray-50 transition-colors"
+              >
+                <div className="relative">
+                  <ShoppingCart size={20} className="text-accent-red" />
+                  {getTotalItems() > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-accent-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                      {getTotalItems()}
+                    </span>
+                  )}
+                </div>
+                <span className="hidden lg:block text-sm font-semibold text-gray-800">
+                  Giỏ hàng
+                </span>
+              </button>
 
-                {/* Cart Dropdown */}
-                {showCartDropdown && (
-                  <CartDropdown onClose={() => setShowCartDropdown(false)} />
-                )}
-              </div>
+              {/* Cart Dropdown */}
+              {showCartDropdown && (
+                <CartDropdown onClose={() => setShowCartDropdown(false)} />
+              )}
             </div>
           </div>
         </div>
@@ -223,18 +225,20 @@ export default function Header() {
 
       {/* Black Navigation Bar */}
       <nav className="bg-black text-white relative">
-        <div className="container-custom overflow-visible">
-          <div className="flex items-center gap-1 overflow-x-auto overflow-y-visible">
-            {/* Menu Button - Opens Sidebar */}
-            <button
-              onClick={() => setShowMenuSidebar(true)}
-              className="flex items-center gap-2 px-91 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
-            >
-              <Grid3x3 size={18} />
-              <span>MENU</span>
-            </button>
+        <div className="container-custom">
+          <div className="flex items-center">
+            {/* CỘT TRÁI: Menu Button (rộng cố định = w-64) */}
+            <div className="w-64 flex-shrink-0">
+              <button
+                onClick={() => setShowMenuSidebar(true)}
+                className="flex w-full items-center justify-center gap-2 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
+              >
+                <Grid3x3 size={18} />
+                <span>MENU</span>
+              </button>
+            </div>
 
-            {/* Centered Navigation Items */}
+            {/* CỘT GIỮA: Navigation Items */}
             <div className="flex-1">
               <div className="grid grid-flow-col auto-cols-max justify-center gap-10 md:gap-16 lg:gap-20">
                 <NavLink href="/giao-hang" icon={<Truck size={18} />}>
@@ -255,8 +259,8 @@ export default function Header() {
               </div>
             </div>
 
-            {/* Right Spacer for Visual Balance */}
-            <div className="w-12"></div>
+            {/* CỘT PHẢI: spacer để cân đối với cột MENU */}
+            <div className="w-64 flex-shrink-0" />
           </div>
         </div>
       </nav>
