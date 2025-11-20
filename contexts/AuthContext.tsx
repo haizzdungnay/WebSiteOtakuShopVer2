@@ -10,13 +10,15 @@ interface User {
   role?: 'admin' | 'user'
 }
 
-interface LoginOptions {
+interface LoginResult {
+  success: boolean
   isAdmin?: boolean
+  error?: string
 }
 
 interface AuthContextType {
   user: User | null
-  login: (email: string, password: string, options?: LoginOptions) => Promise<boolean>
+  login: (email: string, password: string) => Promise<LoginResult>
   register: (email: string, username: string, password: string) => Promise<boolean>
   logout: () => void
   loading: boolean
@@ -69,11 +71,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const login = async (email: string, password: string, options?: LoginOptions): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<LoginResult> => {
     try {
       const csrfToken = Cookies.get('csrf-token') || ''
-      const endpoint = options?.isAdmin ? '/api/admin/login' : '/api/auth/login'
-      const response = await fetch(endpoint, {
+
+      // Try admin login first
+      const adminResponse = await fetch('/api/admin/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,20 +85,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         body: JSON.stringify({ email, password }),
       })
 
-      if (response.ok) {
-        const data = await response.json()
+      if (adminResponse.ok) {
+        const data = await adminResponse.json()
         setUser(data.user)
         Cookies.set('token', data.token, {
           expires: 7,
           sameSite: 'strict',
           secure: process.env.NODE_ENV === 'production'
         })
-        return true
+        return { success: true, isAdmin: true }
       }
-      return false
+
+      // If admin login fails (not admin credentials), try regular user login
+      const userResponse = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+        },
+        body: JSON.stringify({ email, password }),
+      })
+
+      if (userResponse.ok) {
+        const data = await userResponse.json()
+        setUser(data.user)
+        Cookies.set('token', data.token, {
+          expires: 7,
+          sameSite: 'strict',
+          secure: process.env.NODE_ENV === 'production'
+        })
+        return { success: true, isAdmin: false }
+      }
+
+      // Both failed
+      const errorData = await userResponse.json().catch(() => ({}))
+      return {
+        success: false,
+        error: errorData.error || 'Email hoặc mật khẩu không đúng'
+      }
     } catch (error) {
       console.error('Login failed:', error)
-      return false
+      return {
+        success: false,
+        error: 'Không thể kết nối đến máy chủ'
+      }
     }
   }
 
