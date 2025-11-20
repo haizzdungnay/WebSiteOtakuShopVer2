@@ -15,12 +15,16 @@ export const generateToken = (payload: JwtPayload): string => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN })
 }
 
-export const verifyToken = (token: string): JwtPayload | null => {
+export const verifyToken = (token: string): JwtPayload => {
   try {
-    return jwt.verify(token, JWT_SECRET) as JwtPayload
+    const decoded = jwt.verify(token, JWT_SECRET) as JwtPayload
+    if (!decoded) {
+      throw new Error('Invalid token payload')
+    }
+    return decoded
   } catch (error) {
     console.error('JWT verification failed:', error)
-    return null
+    throw error
   }
 }
 
