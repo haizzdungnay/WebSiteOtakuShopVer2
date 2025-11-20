@@ -11,6 +11,7 @@ export function middleware(request: NextRequest) {
 
     // If no token, redirect to login
     if (!token) {
+      console.log('[Middleware] No token found, redirecting to login')
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('redirect', pathname)
@@ -20,15 +21,20 @@ export function middleware(request: NextRequest) {
     try {
       // Verify token and check role
       const payload = verifyToken(token)
+      console.log('[Middleware] Token verified, user role:', payload.role)
 
       // If not admin role, redirect to home with error
       if (payload.role !== 'admin') {
+        console.log('[Middleware] User is not admin, redirecting to home')
         const url = request.nextUrl.clone()
         url.pathname = '/'
         return NextResponse.redirect(url)
       }
+
+      console.log('[Middleware] Admin access granted')
     } catch (error) {
       // Invalid token, redirect to login
+      console.log('[Middleware] Token verification failed:', error)
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('redirect', pathname)

@@ -204,14 +204,13 @@ export default function AdminPage() {
           </div>
           <h1 className="text-2xl font-semibold text-slate-900 mb-3">Không có quyền truy cập</h1>
           <p className="text-slate-600 mb-6">
-            Khu vực này chỉ hiển thị khi bạn đăng nhập bằng tài khoản quản trị viên. Hãy quay lại
-            trang đăng nhập và kích hoạt chế độ quản trị.
+            Khu vực này chỉ dành cho quản trị viên. Vui lòng đăng nhập bằng tài khoản quản trị để truy cập.
           </p>
           <Link
             href="/login"
             className="inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-slate-800"
           >
-            Đăng nhập quản trị
+            Đăng nhập
           </Link>
         </div>
       </section>

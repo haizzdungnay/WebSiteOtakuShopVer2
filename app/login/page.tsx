@@ -11,7 +11,6 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [isAdminMode, setIsAdminMode] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
 
@@ -21,15 +20,12 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const success = await login(email, password, { isAdmin: isAdminMode });
-      if (success) {
-        router.push(isAdminMode ? '/admin' : '/');
+      const result = await login(email, password);
+      if (result.success) {
+        // Redirect based on user role
+        router.push(result.isAdmin ? '/admin' : '/');
       } else {
-        setError(
-          isAdminMode
-            ? 'Thông tin đăng nhập quản trị không hợp lệ'
-            : 'Email hoặc mật khẩu không đúng'
-        );
+        setError(result.error || 'Email hoặc mật khẩu không đúng');
       }
     } catch (err) {
       setError('Đã xảy ra lỗi khi đăng nhập');
@@ -67,9 +63,7 @@ export default function LoginPage() {
                   ĐĂNG NHẬP TÀI KHOẢN
                 </h1>
                 <p className="text-gray-600 text-sm">
-                  {isAdminMode
-                    ? 'Kích hoạt khu vực quản trị viên bằng thông tin bí mật:'
-                    : 'Nhập email và mật khẩu của bạn:'}
+                  Nhập email và mật khẩu của bạn:
                 </p>
               </div>
 
@@ -105,17 +99,6 @@ export default function LoginPage() {
                     className="input-field"
                   />
                 </div>
-
-                {/* Admin Toggle */}
-                <label className="flex items-center gap-3 text-sm font-medium text-gray-700 cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={isAdminMode}
-                    onChange={(e) => setIsAdminMode(e.target.checked)}
-                    className="h-4 w-4 rounded border-gray-300 text-accent-red focus:ring-accent-red"
-                  />
-                  <span>Kích hoạt đăng nhập quản trị</span>
-                </label>
 
                 {/* Submit Button */}
                 <button
