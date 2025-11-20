@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateToken } from '@/lib/jwt'
+import { verifyCSRFToken } from '@/lib/csrf'
 
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin@otakushop.local'
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ChangeMeNow!'
@@ -7,6 +8,17 @@ const ADMIN_DISPLAY_NAME = process.env.ADMIN_DISPLAY_NAME || 'Quản trị viên
 
 export async function POST(request: NextRequest) {
   try {
+    // Verify CSRF token
+    const csrfToken = request.headers.get('X-CSRF-Token')
+    const storedCsrfToken = request.cookies.get('csrf-token')?.value
+
+    if (!verifyCSRFToken(csrfToken || '', storedCsrfToken || '')) {
+      return NextResponse.json(
+        { error: 'Invalid CSRF token' },
+        { status: 403 }
+      )
+    }
+
     const body = await request.json()
     const { email, password } = body
 

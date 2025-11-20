@@ -31,7 +31,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Check if user is logged in on mount
     checkAuth()
+    // Generate CSRF token if not exists
+    initializeCSRF()
   }, [])
+
+  const initializeCSRF = async () => {
+    try {
+      const existingToken = Cookies.get('csrf-token')
+      if (!existingToken) {
+        await fetch('/api/csrf')
+      }
+    } catch (error) {
+      console.error('CSRF initialization failed:', error)
+    }
+  }
 
   const checkAuth = async () => {
     try {
