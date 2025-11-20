@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >nul
 REM Script khởi động PostgreSQL database cho OtakuShop (Windows)
 
 echo =========================================
@@ -17,6 +18,23 @@ if errorlevel 1 (
 )
 
 echo ✅ Docker da duoc cai dat
+
+REM Kiểm tra Docker Desktop có chạy không
+docker ps >nul 2>&1
+if errorlevel 1 (
+    echo.
+    echo ⚠️  QUAN TRONG: Docker Desktop chua chay!
+    echo.
+    echo Vui long:
+    echo 1. Mo Docker Desktop
+    echo 2. Doi Docker Desktop khoi dong xong
+    echo 3. Chay lai script nay
+    echo.
+    pause
+    exit /b 1
+)
+
+echo ✅ Docker Desktop dang chay
 echo.
 
 REM Kiểm tra xem PostgreSQL container đã tồn tại chưa
