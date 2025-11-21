@@ -1,213 +1,203 @@
-# OTAKU Figure Store - Otaku Shop
+# 🎌 OtakuShop - Figure Store
 
-Cửa hàng figure anime chính hãng - E-commerce platform
+Cửa hàng figure anime chính hãng - Next.js E-commerce Platform với Admin Dashboard
 
-## Công nghệ sử dụng
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.6-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://www.postgresql.org/)
 
-- **Next.js 15.5.6** - Framework React với App Router
-- **React 19** - UI Library
-- **TypeScript 5** - Type Safety
-- **Tailwind CSS 3** - Styling
-- **PostgreSQL 15** - Database
-- **Docker** - Containerization
+## ✨ Tính năng
 
-## Yêu cầu hệ thống
+- 🔐 **Authentication System** - Đăng ký, đăng nhập user + Admin login tự động phát hiện
+- 🛒 **Shopping Cart** - Giỏ hàng với quản lý số lượng real-time
+- 📦 **Product Catalog** - Danh sách, chi tiết, tìm kiếm, filter sản phẩm
+- 👤 **User Management** - Profile, lịch sử đơn hàng, preorders
+- 🎯 **Admin Dashboard** - Quản lý sản phẩm, đơn hàng, thông báo, doanh thu
+- 🔒 **Security Features** - JWT authentication, CSRF protection, input validation, XSS prevention
+- 🐳 **Docker Support** - Full containerized stack (PostgreSQL + Next.js)
+- 📱 **Responsive Design** - Mobile-first với Tailwind CSS
+- 🌐 **API Routes** - RESTful API với validation và error handling
+- ⚡ **Health Checks** - Endpoint monitoring cho database và API
 
-- **Node.js** 18.0 trở lên
-- **PostgreSQL** 15.0 trở lên
-- **Docker** và **Docker Compose** (khuyến nghị)
-- **npm** hoặc **yarn**
+## 🛠️ Tech Stack
 
-## Cài đặt chi tiết
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **Next.js** | 15.5.6 | React framework with App Router |
+| **React** | 19.2.0 | UI library |
+| **TypeScript** | 5.9.3 | Type safety |
+| **Tailwind CSS** | 3.4.17 | Utility-first CSS |
+| **PostgreSQL** | 15-alpine | Relational database |
+| **Docker** | Latest | Containerization |
+| **bcryptjs** | 3.0.2 | Password hashing |
+| **jsonwebtoken** | 9.0.2 | JWT authentication |
+| **Lucide React** | Latest | Icon library |
 
-### Phương pháp 1: Sử dụng Docker (Khuyến nghị)
+## 📁 Cấu trúc Project
 
-Docker giúp đảm bảo môi trường phát triển nhất quán trên mọi hệ điều hành.
-
-#### Bước 1: Cài đặt Docker
-
-**Windows:**
-1. Tải Docker Desktop từ https://www.docker.com/products/docker-desktop
-2. Chạy file cài đặt
-3. Khởi động lại máy tính
-4. Mở Docker Desktop và đợi khởi động hoàn tất
-
-**Linux (Ubuntu/Debian):**
-```bash
-sudo apt-get update
-sudo apt-get install docker.io docker-compose
-sudo systemctl start docker
-sudo systemctl enable docker
-sudo usermod -aG docker $USER
+```
+WebSiteOtakuShopVer2/
+├── app/                          # Next.js App Router
+│   ├── admin/                    # 🔐 Admin Dashboard
+│   │   └── page.tsx             # Admin management interface
+│   ├── api/                      # API Routes
+│   │   ├── admin/               # Admin endpoints
+│   │   │   └── login/           # Admin authentication
+│   │   ├── auth/                # User authentication
+│   │   │   ├── login/           # User login
+│   │   │   ├── register/        # User registration
+│   │   │   ├── logout/          # Logout endpoint
+│   │   │   └── me/              # Get current user
+│   │   ├── csrf/                # CSRF token generation
+│   │   ├── health/              # 🆕 Health check endpoint
+│   │   └── products/            # Products API
+│   ├── login/                    # Login page (auto-detects admin)
+│   ├── register/                 # Registration page
+│   ├── products/                 # Product catalog
+│   │   ├── page.tsx             # Products list
+│   │   └── [slug]/              # Product detail
+│   ├── characters/               # Character pages
+│   ├── profile/                  # User profile
+│   ├── checkout/                 # Checkout process
+│   ├── search/                   # Search results
+│   ├── tin-tuc/                  # News/Blog
+│   ├── tinh-gia/                 # Price calculator
+│   ├── tra-cuu/                  # Order tracking
+│   ├── giao-hang/                # Shipping info
+│   ├── faq/                      # FAQ
+│   ├── new-releases/             # New products
+│   ├── layout.tsx                # Root layout with AuthProvider
+│   └── page.tsx                  # Homepage
+├── components/                   # Reusable Components
+│   ├── Header.tsx                # Main navigation
+│   ├── Footer.tsx                # Footer
+│   ├── Sidebar.tsx               # Category sidebar
+│   ├── MenuSidebar.tsx           # Mobile menu
+│   ├── ProductCard.tsx           # Product card
+│   ├── CartDropdown.tsx          # Shopping cart
+│   └── FloatingButtons.tsx       # Floating action buttons
+├── contexts/                     # React Contexts
+│   ├── AuthContext.tsx           # Auth state management
+│   └── CartContext.tsx           # Cart state management
+├── lib/                          # Utilities & Helpers
+│   ├── db.ts                     # PostgreSQL connection
+│   ├── jwt.ts                    # JWT generation/verification
+│   ├── csrf.ts                   # CSRF token utilities
+│   ├── sanitize.ts               # XSS prevention
+│   └── validators.ts             # 🆕 Input validation
+├── types/                        # TypeScript Types
+│   └── product.ts                # Product types
+├── public/                       # Static Assets
+│   └── images/                   # Images directory
+├── scripts/                      # Utility Scripts
+│   └── init-db.js                # Database initialization
+├── docker-compose.yml            # Docker services config
+├── Dockerfile                    # Next.js Docker image
+├── middleware.ts                 # Route protection middleware
+├── init.sql                      # Database schema
+├── start-db.bat                  # 🪟 Database startup (Windows)
+├── start-db.sh                   # 🐧 Database startup (Linux/Mac)
+├── package.json                  # Dependencies
+├── .env.example                  # Environment template
+├── .env.local                    # Local config (gitignored)
+├── DATABASE_SETUP.md             # Database setup guide
+├── QUICKSTART_WINDOWS.md         # Windows quick start
+└── README.md                     # This file
 ```
 
-**macOS:**
-1. Tải Docker Desktop từ https://www.docker.com/products/docker-desktop
-2. Mở file .dmg và kéo Docker vào Applications
-3. Khởi động Docker từ Applications
+## 🚀 Quick Start
 
-#### Bước 2: Clone repository
+### Yêu cầu
 
-**Windows (PowerShell/CMD):**
-```cmd
-git clone https://github.com/haizzdungnay/WebSiteOtakuShopVer2.git
-cd WebSiteOtakuShopVer2
-```
+- **Node.js** 18.0+
+- **Docker** & **Docker Desktop** (khuyến nghị)
+- **PostgreSQL** 15+ (nếu không dùng Docker)
 
-**Linux/macOS:**
-```bash
-git clone https://github.com/haizzdungnay/WebSiteOtakuShopVer2.git
-cd WebSiteOtakuShopVer2
-```
-
-#### Bước 3: Cấu hình môi trường
-
-Tạo file `.env.local` trong thư mục gốc:
-
-**Windows (PowerShell):**
-```powershell
-New-Item -Path .env.local -ItemType File
-notepad .env.local
-```
-
-**Windows (CMD):**
-```cmd
-type nul > .env.local
-notepad .env.local
-```
-
-**Linux/macOS:**
-```bash
-touch .env.local
-nano .env.local
-```
-
-Thêm nội dung sau vào file `.env.local`:
-
-```env
-# Database Configuration
-POSTGRES_HOST=postgres
-POSTGRES_PORT=5432
-POSTGRES_DB=otakushop
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=yourStrongPassword123
-
-# JWT Secret (thay đổi thành chuỗi ngẫu nhiên)
-JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
-
-# Next.js
-NEXT_PUBLIC_API_URL=http://localhost:3000
-```
-
-#### Bước 4: Khởi động với Docker
-
-**Windows:**
-```cmd
-docker-compose up --build
-```
-
-**Linux/macOS:**
-```bash
-docker-compose up --build
-```
-
-Đợi 2-3 phút để Docker build và khởi động. Khi thấy:
-```
-web-1       | ▲ Next.js 15.5.6
-web-1       | - Local: http://localhost:3000
-```
-
-Truy cập: **http://localhost:3000**
-
-#### Bước 5: Khởi tạo database
-
-Mở terminal/cmd mới và chạy:
-
-**Windows:**
-```cmd
-docker-compose exec web node scripts/init-db.js
-```
-
-**Linux/macOS:**
-```bash
-docker-compose exec web node scripts/init-db.js
-```
-
----
-
-### Phương pháp 2: Chạy trực tiếp (Development)
-
-Phù hợp khi bạn muốn phát triển và debug code.
-
-#### Bước 1: Cài đặt PostgreSQL
-
-**Windows:**
-1. Tải PostgreSQL từ https://www.postgresql.org/download/windows/
-2. Chạy installer, chọn port 5432
-3. Đặt password cho user postgres
-4. Cài đặt pgAdmin (đi kèm trong installer)
-
-**Linux (Ubuntu/Debian):**
-```bash
-sudo apt-get update
-sudo apt-get install postgresql postgresql-contrib
-sudo systemctl start postgresql
-sudo systemctl enable postgresql
-```
-
-**macOS:**
-```bash
-brew install postgresql@15
-brew services start postgresql@15
-```
-
-#### Bước 2: Tạo database
-
-**Windows (PowerShell):**
-```powershell
-# Mở psql
-& "C:\Program Files\PostgreSQL\15\bin\psql.exe" -U postgres
-
-# Trong psql, chạy:
-CREATE DATABASE otakushop;
-\q
-```
-
-**Linux/macOS:**
-```bash
-sudo -u postgres psql
-CREATE DATABASE otakushop;
-\q
-```
-
-#### Bước 3: Clone và cài đặt
+### Bước 1: Clone Repository
 
 ```bash
 git clone https://github.com/haizzdungnay/WebSiteOtakuShopVer2.git
 cd WebSiteOtakuShopVer2
+```
+
+### Bước 2: Cài đặt Dependencies
+
+```bash
 npm install
 ```
 
-#### Bước 4: Cấu hình môi trường
+### Bước 3: Cấu hình Environment
 
-Tạo file `.env.local`:
+```bash
+# Copy template
+cp .env.example .env.local
 
-```env
-POSTGRES_HOST=localhost
-POSTGRES_PORT=5432
-POSTGRES_DB=otakushop
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=your_postgres_password
-JWT_SECRET=your-secret-key-here
+# Generate strong JWT secret
+openssl rand -base64 32
 ```
 
-#### Bước 5: Khởi tạo database
+**Chỉnh sửa `.env.local`:**
+
+```env
+# Database
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=otakushop
+DB_USER=postgres
+DB_PASSWORD=your_strong_password
+
+# JWT (⚠️ REQUIRED - generate với openssl rand -base64 32)
+JWT_SECRET=your_generated_secret_here
+JWT_EXPIRES_IN=7d
+
+# Admin Credentials (⚠️ CHANGE IN PRODUCTION)
+ADMIN_USERNAME=admin@yourdomain.com
+ADMIN_PASSWORD=YourStrongPassword123!
+ADMIN_DISPLAY_NAME=Admin Name
+
+# App
+NODE_ENV=development
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
+### Bước 4: Khởi động Database
+
+**Windows:**
+```cmd
+start-db.bat
+```
+
+**Linux/Mac:**
+```bash
+./start-db.sh
+```
+
+Hoặc thủ công:
+```bash
+docker-compose up -d postgres
+```
+
+### Bước 5: Khởi tạo Database (lần đầu)
 
 ```bash
 node scripts/init-db.js
 ```
 
-#### Bước 6: Chạy development server
+Output:
+```
+🚀 Starting database initialization...
+✅ Database connection successful!
+✅ Users table created
+✅ Products table created
+✅ Sample products inserted
+✅ Test user created
+   Email: test@otakushop.local
+   Password: password123
+🎉 Database initialization completed!
+```
+
+### Bước 6: Khởi động Development Server
 
 ```bash
 npm run dev
@@ -215,329 +205,297 @@ npm run dev
 
 Truy cập: **http://localhost:3000**
 
----
+## 🔑 Tài khoản mặc định
 
-## Các lệnh thường dùng
+### Admin Account
+- **URL**: http://localhost:3000/login
+- **Email**: `admin@otakushop.local` (hoặc theo `.env.local`)
+- **Password**: `ChangeMeNow!` (⚠️ **Thay đổi trong production!**)
+- **Redirect**: Sau login → `/admin` (Admin Dashboard)
 
-### Docker Commands
+### Test User Account
+- **URL**: http://localhost:3000/login
+- **Email**: `test@otakushop.local`
+- **Password**: `password123`
+- **Redirect**: Sau login → `/` (Homepage)
 
-**Khởi động services:**
+### Đăng ký mới
+- **URL**: http://localhost:3000/register
+- Nhập email, username, password
+- Tự động login sau đăng ký
+
+## 📝 Available Scripts
+
 ```bash
-docker-compose up
+# Development
+npm run dev              # Start dev server (localhost:3000)
+npm run build            # Build for production
+npm start                # Start production server
+npm run lint             # Run ESLint
+
+# Docker
+npm run docker:build     # Build Docker images
+npm run docker:up        # Start all services
+npm run docker:down      # Stop all services
+
+# Database
+start-db.bat             # Start PostgreSQL (Windows)
+./start-db.sh            # Start PostgreSQL (Linux/Mac)
+node scripts/init-db.js  # Initialize database
 ```
 
-**Khởi động ở chế độ background:**
+## 🐳 Docker Deployment
+
+### Start Full Stack
+
 ```bash
 docker-compose up -d
 ```
 
-**Dừng services:**
+Services:
+- **PostgreSQL**: `localhost:5432`
+- **Next.js**: `localhost:3000`
+
+### Stop Services
+
 ```bash
 docker-compose down
 ```
 
-**Xóa tất cả (bao gồm database):**
+### Reset Database (⚠️ Xóa dữ liệu)
+
 ```bash
 docker-compose down -v
+docker-compose up -d postgres
+node scripts/init-db.js
 ```
 
-**Xem logs:**
-```bash
-docker-compose logs -f web
-docker-compose logs -f postgres
-```
-
-**Truy cập container:**
-```bash
-docker-compose exec web sh
-docker-compose exec postgres psql -U postgres
-```
-
-**Rebuild container:**
-```bash
-docker-compose up --build
-```
-
-### NPM Commands
+### View Logs
 
 ```bash
-npm run dev          # Chạy development (http://localhost:3000)
-npm run build        # Build production
-npm start            # Chạy production server
-npm run lint         # Kiểm tra linting errors
+docker logs -f otakushop-db     # PostgreSQL logs
+docker logs -f otakushop-app    # Next.js logs
 ```
 
-### Database Commands
+## 🔒 Security Features
 
-**Khởi tạo lại database:**
+### Implemented
 
-**Windows:**
-```cmd
-docker-compose exec web node scripts/init-db.js
+✅ **JWT Authentication** - Token-based auth với secure secret
+✅ **CSRF Protection** - Token validation cho state-changing requests
+✅ **Password Hashing** - bcrypt với salt rounds
+✅ **Input Validation** - Email, password, username validation
+✅ **XSS Prevention** - Input sanitization
+✅ **SQL Injection Prevention** - Parameterized queries
+✅ **Route Protection** - Middleware cho admin routes
+✅ **Secure Cookies** - httpOnly, sameSite, secure flags
+✅ **Environment Secrets** - No hardcoded credentials
+
+### Security Checklist for Production
+
+- [ ] Change `ADMIN_PASSWORD` to strong password
+- [ ] Generate strong `JWT_SECRET` (32+ characters)
+- [ ] Change `DB_PASSWORD` from default
+- [ ] Set `NODE_ENV=production`
+- [ ] Enable HTTPS (secure cookies)
+- [ ] Set up rate limiting
+- [ ] Configure CORS properly
+- [ ] Enable database SSL
+- [ ] Set up error logging (Sentry, etc.)
+- [ ] Regular security audits
+
+## 🧪 API Endpoints
+
+### Health Check
+
+```
+GET /api/health
 ```
 
-**Linux/macOS:**
-```bash
-docker-compose exec web node scripts/init-db.js
+Response:
+```json
+{
+  "status": "ok",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "services": {
+    "database": "healthy",
+    "api": "healthy"
+  }
+}
 ```
-
----
-
-## Cấu trúc thư mục
-
-```
-WebSiteOtakuShopVer2/
-├── app/                       # Next.js App Router
-│   ├── page.tsx              # Trang chủ
-│   ├── layout.tsx            # Root layout
-│   ├── globals.css           # Global styles
-│   ├── login/                # Trang đăng nhập
-│   ├── register/             # Trang đăng ký
-│   ├── products/             # Danh sách & chi tiết sản phẩm
-│   │   ├── page.tsx
-│   │   └── [slug]/          # Dynamic route
-│   ├── faq/                  # Câu hỏi thường gặp
-│   ├── tin-tuc/              # Tin tức/Blog
-│   ├── tinh-gia/             # Tính giá gom hàng
-│   ├── tra-cuu/              # Tra cứu đơn hàng
-│   ├── giao-hang/            # Chính sách giao hàng
-│   └── api/                  # API Routes
-│       ├── auth/             # Authentication
-│       └── products/         # Products
-├── components/                # React Components
-│   ├── Header.tsx            # Header với menu dropdown
-│   ├── Footer.tsx            # Footer
-│   ├── Sidebar.tsx           # Sidebar menu
-│   ├── ProductCard.tsx       # Product card component
-│   ├── CartDropdown.tsx      # Shopping cart dropdown
-│   └── FloatingButtons.tsx   # Floating action buttons
-├── contexts/                  # React Contexts
-│   ├── AuthContext.tsx       # Authentication state
-│   └── CartContext.tsx       # Shopping cart state
-├── lib/                       # Utilities
-│   ├── db.ts                 # Database connection
-│   └── auth.ts               # Auth utilities
-├── public/                    # Static files
-│   └── images/               # Images
-├── scripts/                   # Utility scripts
-│   └── init-db.js            # Database initialization
-├── docker-compose.yml         # Docker configuration
-├── Dockerfile                 # Docker build
-├── next.config.js            # Next.js config
-├── tailwind.config.ts        # Tailwind config
-├── tsconfig.json             # TypeScript config
-└── package.json              # Dependencies
-```
-
----
-
-## Tính năng
-
-### Đã hoàn thành ✅
-- Xác thực người dùng (Register/Login/Logout)
-- Quản lý giỏ hàng (Add/Remove/Update quantity)
-- Danh sách sản phẩm với filter
-- Trang chi tiết sản phẩm (gallery, countdown, tabs)
-- Tin tức/Blog với sidebar và pagination
-- FAQ với accordion
-- Tính giá gom hàng (JPY to VND calculator)
-- Tra cứu đơn hàng với search và filter
-- Chính sách giao hàng & bảo hành
-- User account dropdown
-- Menu dropdown với categories
-- Responsive design
-
-### Đang phát triển 🚧
-- Payment integration
-- Order management
-- Admin dashboard
-- Social login (Google, Facebook)
-
----
-
-## API Endpoints
 
 ### Authentication
 
-**POST** `/api/auth/register`
-```json
+#### User Login
+```
+POST /api/auth/login
+Content-Type: application/json
+X-CSRF-Token: <token>
+
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+```
+
+#### Admin Login
+```
+POST /api/admin/login
+Content-Type: application/json
+X-CSRF-Token: <token>
+
+{
+  "email": "admin@example.com",
+  "password": "admin_password"
+}
+```
+
+#### Register
+```
+POST /api/auth/register
+Content-Type: application/json
+X-CSRF-Token: <token>
+
 {
   "email": "user@example.com",
   "username": "username",
-  "password": "password123"
+  "password": "Password123"
 }
 ```
 
-**POST** `/api/auth/login`
+#### Get Current User
+```
+GET /api/auth/me
+Cookie: token=<jwt_token>
+```
+
+#### Logout
+```
+POST /api/auth/logout
+Cookie: token=<jwt_token>
+```
+
+### CSRF Token
+```
+GET /api/csrf
+```
+
+Response:
 ```json
 {
-  "username": "username",
-  "password": "password123"
+  "token": "csrf_token_here"
 }
 ```
 
-**POST** `/api/auth/logout`
-- No body required
-- Returns: `{ success: true }`
+## 🐛 Troubleshooting
 
-**GET** `/api/auth/me`
-- Headers: `Cookie: token=<jwt_token>`
-- Returns: User info
+### Database Connection Errors
 
-### Products
+**Error**: `ECONNREFUSED` hoặc `Connection refused`
 
-**GET** `/api/products`
-- Returns: List of all products
+**Solution**:
+1. Kiểm tra Docker Desktop đang chạy
+2. Kiểm tra PostgreSQL container:
+   ```bash
+   docker ps | grep otakushop-db
+   ```
+3. Restart database:
+   ```bash
+   docker-compose restart postgres
+   ```
+4. Xem logs:
+   ```bash
+   docker logs otakushop-db
+   ```
 
----
+### JWT Secret Error
 
-## Troubleshooting
+**Error**: `JWT_SECRET environment variable is required`
 
-### 1. Docker build fails
+**Solution**:
+1. Generate secret:
+   ```bash
+   openssl rand -base64 32
+   ```
+2. Add to `.env.local`:
+   ```env
+   JWT_SECRET=your_generated_secret
+   ```
 
-**Lỗi**: `Cannot connect to Docker daemon`
+### Admin Cannot Access Dashboard
 
-**Windows:**
-- Mở Docker Desktop
-- Đảm bảo Docker đang chạy (icon ở taskbar màu xanh)
-- Chạy lại `docker-compose up`
+**Solution**:
+1. Clear browser cookies
+2. Login lại với admin credentials
+3. Check middleware logs in terminal
+4. Verify `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env.local`
 
-**Linux:**
-```bash
-sudo systemctl start docker
-sudo usermod -aG docker $USER
-# Đăng xuất và đăng nhập lại
-```
+### Port Already in Use
 
-### 2. Port đã được sử dụng
+**Error**: `Port 3000 already in use`
 
-**Lỗi**: `Port 3000 is already in use`
-
-**Windows:**
+**Windows**:
 ```cmd
 netstat -ano | findstr :3000
 taskkill /PID <PID> /F
 ```
 
-**Linux/macOS:**
+**Linux/Mac**:
 ```bash
 lsof -ti:3000 | xargs kill -9
 ```
 
-Hoặc đổi port trong `docker-compose.yml`:
-```yaml
-ports:
-  - "3001:3000"  # Thay 3000 bằng port khác
-```
+### Docker Build Fails
 
-### 3. Database connection error
+**Solution**:
+1. Ensure Docker Desktop is running
+2. Clear Docker cache:
+   ```bash
+   docker system prune -a
+   ```
+3. Rebuild:
+   ```bash
+   docker-compose build --no-cache
+   ```
 
-**Lỗi**: `ECONNREFUSED` hoặc `Connection refused`
+## 📚 Documentation
 
-**Kiểm tra PostgreSQL đang chạy:**
-```bash
-docker-compose ps
-```
+- **[DATABASE_SETUP.md](DATABASE_SETUP.md)** - Chi tiết setup database
+- **[QUICKSTART_WINDOWS.md](QUICKSTART_WINDOWS.md)** - Hướng dẫn Windows
+- **[.env.example](.env.example)** - Environment variables
 
-**Restart PostgreSQL:**
-```bash
-docker-compose restart postgres
-```
+## 🤝 Contributing
 
-**Xem logs:**
-```bash
-docker-compose logs postgres
-```
+1. Fork repository
+2. Create feature branch: `git checkout -b feature/amazing-feature`
+3. Commit changes: `git commit -m 'Add amazing feature'`
+4. Push to branch: `git push origin feature/amazing-feature`
+5. Open Pull Request
 
-### 4. Hydration error
+### Code Style
 
-**Lỗi**: `Hydration failed` hoặc `Text content did not match`
+- Use TypeScript
+- Follow ESLint rules
+- Use Prettier for formatting
+- Write meaningful commit messages
 
-**Giải pháp:**
-```bash
-# Xóa cache và rebuild
-rm -rf .next
-npm run build
-```
+## 📄 License
 
-### 5. npm install fails
+MIT License - see [LICENSE](LICENSE) file
 
-**Windows:**
-```cmd
-rmdir /s /q node_modules
-del package-lock.json
-npm cache clean --force
-npm install
-```
-
-**Linux/macOS:**
-```bash
-rm -rf node_modules package-lock.json
-npm cache clean --force
-npm install
-```
-
-### 6. Build errors after git pull
-
-**Xóa build cache:**
-
-**Windows:**
-```cmd
-rmdir /s /q .next
-rmdir /s /q node_modules
-npm install
-npm run build
-```
-
-**Linux/macOS:**
-```bash
-rm -rf .next node_modules
-npm install
-npm run build
-```
-
----
-
-## Development Tips
-
-### Hot Reload không hoạt động
-
-Restart dev server:
-```bash
-# Dừng (Ctrl+C)
-npm run dev
-```
-
-### Thay đổi database schema
-
-```bash
-# Xóa database và tạo lại
-docker-compose down -v
-docker-compose up -d postgres
-docker-compose exec web node scripts/init-db.js
-```
-
-### Debug trong Docker
-
-```bash
-# Truy cập container
-docker-compose exec web sh
-
-# Xem biến môi trường
-docker-compose exec web env
-
-# Xem logs real-time
-docker-compose logs -f web
-```
-
----
-
-## Team
+## 👥 Team
 
 - Dương
 - Nguyên
 - Lâm
 
-## License
+## 🙏 Acknowledgments
 
-MIT License
+- Next.js team
+- React team
+- PostgreSQL community
+- All contributors
+
+---
+
+**Made with ❤️ in Vietnam**
