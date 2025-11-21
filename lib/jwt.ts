@@ -2,9 +2,19 @@ import jwt from 'jsonwebtoken'
 
 // Require JWT_SECRET from environment - fail fast if not set
 const JWT_SECRET: string = process.env.JWT_SECRET as string
-if (!JWT_SECRET || JWT_SECRET === 'your-secret-key-change-in-production') {
+const isTestEnv = process.env.NODE_ENV === 'test' || process.env.CI === 'true'
+
+if (!JWT_SECRET) {
   throw new Error(
-    'JWT_SECRET environment variable is required and must be a strong secret. ' +
+    'JWT_SECRET environment variable is required. ' +
+    'Generate one with: openssl rand -base64 32'
+  )
+}
+
+// Only enforce strong secrets in production/development
+if (!isTestEnv && JWT_SECRET === 'your-secret-key-change-in-production') {
+  throw new Error(
+    'JWT_SECRET must be a strong secret. Default value not allowed. ' +
     'Generate one with: openssl rand -base64 32'
   )
 }
