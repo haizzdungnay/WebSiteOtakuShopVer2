@@ -1,6 +1,14 @@
 import jwt from 'jsonwebtoken'
 
-const JWT_SECRET: string = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
+// Require JWT_SECRET from environment - fail fast if not set
+const JWT_SECRET: string = process.env.JWT_SECRET as string
+if (!JWT_SECRET || JWT_SECRET === 'your-secret-key-change-in-production') {
+  throw new Error(
+    'JWT_SECRET environment variable is required and must be a strong secret. ' +
+    'Generate one with: openssl rand -base64 32'
+  )
+}
+
 const JWT_EXPIRES_IN: string = process.env.JWT_EXPIRES_IN || '7d'
 
 export interface JwtPayload {
