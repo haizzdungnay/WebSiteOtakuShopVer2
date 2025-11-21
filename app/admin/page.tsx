@@ -29,6 +29,15 @@ interface AnnouncementForm {
   content: string;
 }
 
+interface Order {
+  id: number;
+  customer: string;
+  items: number;
+  total: number;
+  status: 'pending' | 'approved' | 'rejected';
+  channel: string;
+}
+
 const initialProducts = [
   {
     id: 1,
@@ -59,13 +68,13 @@ const initialProducts = [
   },
 ];
 
-const initialOrders = [
+const initialOrders: Order[] = [
   {
     id: 101,
     customer: 'Trần Duy',
     items: 3,
     total: 6890000,
-    status: 'pending' as const,
+    status: 'pending',
     channel: 'Website',
   },
   {
@@ -73,7 +82,7 @@ const initialOrders = [
     customer: 'Nguyễn Hà',
     items: 2,
     total: 3120000,
-    status: 'approved' as const,
+    status: 'approved',
     channel: 'Facebook',
   },
   {
@@ -81,7 +90,7 @@ const initialOrders = [
     customer: 'Hoàng Nam',
     items: 5,
     total: 9450000,
-    status: 'pending' as const,
+    status: 'pending',
     channel: 'Shopee',
   },
 ];
