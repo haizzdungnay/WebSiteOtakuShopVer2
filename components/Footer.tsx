@@ -3,12 +3,12 @@ import { Facebook, Instagram, Youtube, Mail, MapPin, Phone } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300 pt-12 pb-6">
-      <div className="container-custom">
+    <footer className="bg-gray-900 text-gray-300 pt-12 pb-6" suppressHydrationWarning>
+      <div className="container-custom" suppressHydrationWarning>
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8" suppressHydrationWarning>
           {/* About */}
-          <div>
+          <div suppressHydrationWarning>
             <h3 className="text-white font-bold text-lg mb-4">JH FIGURE</h3>
             <p className="text-sm mb-4 text-gray-400">
               Chuyên cung cấp các loại figure chính hãng, mô hình anime, manga và
@@ -134,25 +134,25 @@ export default function Footer() {
         </div>
 
         {/* Payment Methods */}
-        <div className="border-t border-gray-800 pt-6 mb-6">
-          <div className="text-center">
+        <div className="border-t border-gray-800 pt-6 mb-6" suppressHydrationWarning>
+          <div className="text-center" suppressHydrationWarning>
             <h4 className="text-white font-semibold mb-3 text-sm">
               Phương thức thanh toán
             </h4>
-            <div className="flex justify-center gap-4 flex-wrap">
-              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800">
+            <div className="flex justify-center gap-4 flex-wrap" suppressHydrationWarning>
+              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800" suppressHydrationWarning>
                 VISA
               </div>
-              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800">
+              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800" suppressHydrationWarning>
                 MASTERCARD
               </div>
-              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800">
+              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800" suppressHydrationWarning>
                 MOMO
               </div>
-              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800">
+              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800" suppressHydrationWarning>
                 ZALOPAY
               </div>
-              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800">
+              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800" suppressHydrationWarning>
                 COD
               </div>
             </div>

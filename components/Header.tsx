@@ -60,11 +60,11 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 shadow-md">
+    <header className="sticky top-0 z-50 shadow-md" suppressHydrationWarning>
       {/* Top Pink Header */}
-      <div className="bg-primary py-3 px-4">
-        <div className="container-custom">
-          <div className="flex items-center justify-between gap-4 flex-wrap lg:flex-nowrap">
+      <div className="bg-primary py-3 px-4" suppressHydrationWarning>
+        <div className="container-custom" suppressHydrationWarning>
+          <div className="flex items-center justify-between gap-4 flex-wrap lg:flex-nowrap" suppressHydrationWarning>
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               <div className="flex items-center gap-1">
