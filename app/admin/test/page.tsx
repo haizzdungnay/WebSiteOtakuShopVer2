@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 
 export default function AdminTestPage() {
   const { user } = useAuth();
@@ -29,18 +30,18 @@ export default function AdminTestPage() {
             </div>
 
             <div className="flex gap-4">
-              <a
+              <Link
                 href="/admin"
                 className="px-6 py-3 bg-slate-900 text-white rounded-full font-semibold hover:bg-slate-800"
               >
                 Go to Admin Dashboard
-              </a>
-              <a
+              </Link>
+              <Link
                 href="/"
                 className="px-6 py-3 bg-slate-200 text-slate-900 rounded-full font-semibold hover:bg-slate-300"
               >
                 Go to Home
-              </a>
+              </Link>
             </div>
           </div>
         </div>
