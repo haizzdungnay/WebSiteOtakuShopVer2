@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { verifyToken } from '@/lib/jwt'
+import { verifyTokenEdge } from '@/lib/jwt-edge'
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   // Check if the request is for admin routes
@@ -26,7 +26,7 @@ export function middleware(request: NextRequest) {
 
     try {
       // Verify token and check role
-      const payload = verifyToken(token)
+      const payload = await verifyTokenEdge(token)
       console.log('[Middleware] ✅ Token verified successfully')
       console.log('[Middleware] User payload:', {
         userId: payload.userId,
