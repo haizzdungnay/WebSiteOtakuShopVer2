@@ -1,0 +1,208 @@
+### Auth Profile & Password Tests
+### Base URL: http://localhost:3000
+
+@token = YOUR_JWT_TOKEN_HERE
+
+### ============================================
+### 1. GET Profile - Xem thông tin cá nhân
+### ============================================
+GET http://localhost:3000/api/auth/profile
+Authorization: Bearer {{token}}
+
+### ============================================
+### 2. PUT Profile - Cập nhật thông tin (Full)
+### ============================================
+PUT http://localhost:3000/api/auth/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fullName": "Nguyễn Văn A Updated",
+  "phone": "0901234567",
+  "gender": "MALE",
+  "dateOfBirth": "1995-05-15T00:00:00.000Z",
+  "avatar": "https://uploadthing.com/f/abc123.jpg"
+}
+
+### ============================================
+### 3. PUT Profile - Chỉ cập nhật fullName
+### ============================================
+PUT http://localhost:3000/api/auth/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fullName": "Tên Mới"
+}
+
+### ============================================
+### 4. PUT Profile - Chỉ cập nhật phone
+### ============================================
+PUT http://localhost:3000/api/auth/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "phone": "0912345678"
+}
+
+### ============================================
+### 5. PUT Profile - Phone không hợp lệ (Should fail)
+### ============================================
+PUT http://localhost:3000/api/auth/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "phone": "123456"
+}
+
+### ============================================
+### 6. PUT Profile - Phone trùng (Should fail)
+### ============================================
+PUT http://localhost:3000/api/auth/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "phone": "PHONE_ALREADY_EXISTS"
+}
+
+### ============================================
+### 7. Change Password - Đổi mật khẩu thành công
+### ============================================
+POST http://localhost:3000/api/auth/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "newpassword123",
+  "confirmPassword": "newpassword123"
+}
+
+### ============================================
+### 8. Change Password - Mật khẩu hiện tại sai (Should fail)
+### ============================================
+POST http://localhost:3000/api/auth/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "wrongpassword",
+  "newPassword": "newpassword123",
+  "confirmPassword": "newpassword123"
+}
+
+### ============================================
+### 9. Change Password - Confirm không khớp (Should fail)
+### ============================================
+POST http://localhost:3000/api/auth/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "newpassword123",
+  "confirmPassword": "differentpassword"
+}
+
+### ============================================
+### 10. Change Password - Mật khẩu mới trùng cũ (Should fail)
+### ============================================
+POST http://localhost:3000/api/auth/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "password123",
+  "confirmPassword": "password123"
+}
+
+### ============================================
+### 11. Change Password - Mật khẩu quá ngắn (Should fail)
+### ============================================
+POST http://localhost:3000/api/auth/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "short",
+  "confirmPassword": "short"
+}
+
+### ============================================
+### UPLOAD AVATAR FLOW
+### ============================================
+### Step 1: Upload avatar qua UploadThing (use frontend or Postman multipart)
+### Endpoint: POST http://localhost:3000/api/uploadthing
+### Route: avatar
+### Response: { url: "https://uploadthing.com/f/..." }
+
+### Step 2a: Cập nhật avatar URL qua dedicated endpoint (Recommended)
+PUT http://localhost:3000/api/auth/upload-avatar
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "avatarUrl": "https://uploadthing.com/f/NEW_AVATAR_URL"
+}
+
+### Step 2b: Hoặc cập nhật qua profile endpoint (Alternative)
+PUT http://localhost:3000/api/auth/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "avatar": "https://uploadthing.com/f/NEW_AVATAR_URL"
+}
+
+### ============================================
+### FULL WORKFLOW TEST
+### ============================================
+### 1. Login để lấy token
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password123"
+}
+
+### 2. Get profile để xem thông tin hiện tại
+GET http://localhost:3000/api/auth/profile
+Authorization: Bearer {{token}}
+
+### 3. Update profile
+PUT http://localhost:3000/api/auth/profile
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "fullName": "Nguyễn Văn B",
+  "phone": "0987654321",
+  "gender": "FEMALE",
+  "dateOfBirth": "1998-08-20T00:00:00.000Z"
+}
+
+### 4. Change password
+POST http://localhost:3000/api/auth/change-password
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "currentPassword": "password123",
+  "newPassword": "newSecurePassword123",
+  "confirmPassword": "newSecurePassword123"
+}
+
+### 5. Login lại với mật khẩu mới
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "newSecurePassword123"
+}
