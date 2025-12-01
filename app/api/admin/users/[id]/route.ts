@@ -233,7 +233,7 @@ export async function PUT(
     }
 
     // 5. Prevent changing own role
-    if (validatedData.role && admin.id === id) {
+    if (validatedData.role && admin.userId === id) {
       return NextResponse.json(
         { success: false, error: 'Không thể thay đổi quyền của chính mình' },
         { status: 400 }
