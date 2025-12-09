@@ -1,33 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { verifyToken } from '@/lib/jwt'
+import { prisma } from '@/lib/prisma'
+import { getUserFromRequest } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    const authHeader = request.headers.get('authorization')
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    const payload = getUserFromRequest(request)
+
+    if (!payload) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
     }
 
-    const token = authHeader.substring(7)
-    const payload = verifyToken(token)
+    // Fetch user from database to get latest info
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: {
+        id: true,
+        email: true,
+        fullName: true,
+        phone: true,
+        role: true,
+        avatar: true,
+        gender: true,
+        dateOfBirth: true,
+        createdAt: true
+      }
+    })
 
-    if (!payload) {
+    if (!user) {
       return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
+        { error: 'User not found' },
+        { status: 404 }
       )
     }
 
     return NextResponse.json({
+      success: true,
       user: {
-        id: payload.userId,
-        email: payload.email,
-        username: payload.username,
-        role: payload.role || 'user'
+        id: user.id,
+        email: user.email,
+        username: user.fullName, // for backward compatibility
+        fullName: user.fullName,
+        phone: user.phone,
+        role: user.role === 'ADMIN' ? 'admin' : 'user',
+        avatar: user.avatar,
+        gender: user.gender,
+        dateOfBirth: user.dateOfBirth,
+        createdAt: user.createdAt
       },
     })
   } catch (error) {
