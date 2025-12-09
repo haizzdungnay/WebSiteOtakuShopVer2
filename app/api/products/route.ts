@@ -1,74 +1,96 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { query } from '@/lib/db'
-import { verifyToken } from '@/lib/jwt'
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
 export async function GET(request: NextRequest) {
-  try {
-    const result = await query(
-      'SELECT id, name, description, price, image_url, category, created_at FROM products ORDER BY created_at DESC'
-    )
+    try {
+        // lấy query param từ url
+        const searchParams = request.nextUrl.searchParams
 
-    return NextResponse.json({
-      products: result.rows,
-    })
-  } catch (error) {
-    console.error('Products fetch error:', error)
+        // Parse params với default values
+        const page = parseInt(searchParams.get('page') || '1')
+        const limit = parseInt(searchParams.get('limit') || '20')
+        const category = searchParams.get('category') // slug của category (chỉ lấy 1)
+        const search = searchParams.get('search')
+        const sort = searchParams.get('sort') || 'createdAt' // field để sort
+        const order = searchParams.get('order') || 'desc' // asc hoặc desc
+        const featured = searchParams.get('featured') // 'true' hoặc null
+
+        // Build where condition
+        const where: any = {
+            isActive: true // Chỉ lấy products active
+        }
+
+        // Filter by category
+        if (category) {
+            where.category = {
+                slug: category
+            }
+        }
+
+        //Filter feature products
+        if (featured == 'true') {
+            where.featured = true
+        }
+
+        //search by name hoặc description
+        if (search) {
+            where.OR = [
+                {
+                    name: {
+                        contains: search,
+                        mode: 'insensitive' // không phân biệt hoa thường
+                    }
+                },
+                {
+                    description: {
+                        contains: search,
+                        mode: 'insensitive'
+                    }
+                }
+            ]
+        }
+        // Query products + count total
+        const [products, total] = await Promise.all([
+            prisma.product.findMany({
+                where,
+                include: {
+                    category: {
+                        select: {
+                            id: true,
+                            name: true,
+                            slug: true
+                        }
+                    }
+                },
+                orderBy: {
+                    [sort]: order
+                },
+                skip: (page - 1) * limit,
+                take: limit
+            }),
+            prisma.product.count({ where })
+        ])
+
+        // Return với pagination info
+        return NextResponse.json({
+            success: true,
+            data: products,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+                hasMore: page * limit < total
+            }
+        })
+} catch (error) {
+    console.error('Error fetching products:', error)
     return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+        {
+            success: false,
+            error: 'Không thể lấy danh sách sản phẩm'
+        },
+        { status: 500 }
     )
-  }
 }
-
-export async function POST(request: NextRequest) {
-  try {
-    // Verify authentication
-    const authHeader = request.headers.get('authorization')
-    
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      )
-    }
-
-    const token = authHeader.substring(7)
-    const payload = verifyToken(token)
-
-    if (!payload) {
-      return NextResponse.json(
-        { error: 'Invalid token' },
-        { status: 401 }
-      )
-    }
-
-    const body = await request.json()
-    const { name, description, price, image_url, category } = body
-
-    if (!name || !price) {
-      return NextResponse.json(
-        { error: 'Name and price are required' },
-        { status: 400 }
-      )
-    }
-
-    const result = await query(
-      'INSERT INTO products (name, description, price, image_url, category) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-      [name, description || '', parseFloat(price), image_url || '', category || 'general']
-    )
-
-    return NextResponse.json(
-      {
-        message: 'Product created successfully',
-        product: result.rows[0],
-      },
-      { status: 201 }
-    )
-  } catch (error) {
-    console.error('Product creation error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
 }

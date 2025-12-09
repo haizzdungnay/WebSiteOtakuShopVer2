@@ -4,10 +4,13 @@ import React, { createContext, useContext, useState, useEffect } from 'react'
 import Cookies from 'js-cookie'
 
 interface User {
-  id: number
+  id: string | number
   email: string
   username: string
+  fullName?: string
+  phone?: string | null
   role?: 'admin' | 'user'
+  avatar?: string | null
 }
 
 interface LoginResult {
@@ -16,12 +19,18 @@ interface LoginResult {
   error?: string
 }
 
+interface RegisterResult {
+  success: boolean
+  error?: string
+}
+
 interface AuthContextType {
   user: User | null
   login: (email: string, password: string) => Promise<LoginResult>
-  register: (email: string, username: string, password: string) => Promise<boolean>
+  register: (email: string, fullName: string, password: string, phone?: string) => Promise<RegisterResult>
   logout: () => void
   loading: boolean
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -59,7 +68,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
         if (response.ok) {
           const data = await response.json()
-          setUser(data.user)
+          const userData = data.user
+          setUser({
+            id: userData.id,
+            email: userData.email,
+            username: userData.username || userData.fullName,
+            fullName: userData.fullName,
+            phone: userData.phone,
+            role: userData.role,
+            avatar: userData.avatar
+          })
         } else {
           Cookies.remove('token')
         }
@@ -69,6 +87,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  const refreshUser = async () => {
+    await checkAuth()
   }
 
   const login = async (email: string, password: string): Promise<LoginResult> => {
@@ -87,7 +109,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (adminResponse.ok) {
         const data = await adminResponse.json()
-        setUser(data.user)
+        const userData = data.user
+        setUser({
+          id: userData.id,
+          email: userData.email,
+          username: userData.username || userData.fullName,
+          fullName: userData.fullName,
+          role: 'admin'
+        })
         Cookies.set('token', data.token, {
           expires: 7,
           sameSite: 'strict',
@@ -108,8 +137,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (userResponse.ok) {
         const data = await userResponse.json()
-        setUser(data.user)
-        Cookies.set('token', data.token, {
+        // API mới trả về data.data.user và data.data.token
+        const userData = data.data?.user || data.user
+        const token = data.data?.token || data.token
+
+        setUser({
+          id: userData.id,
+          email: userData.email,
+          username: userData.fullName,
+          fullName: userData.fullName,
+          phone: userData.phone,
+          role: 'user'
+        })
+        Cookies.set('token', token, {
           expires: 7,
           sameSite: 'strict',
           secure: process.env.NODE_ENV === 'production'
@@ -132,7 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  const register = async (email: string, username: string, password: string): Promise<boolean> => {
+  const register = async (email: string, fullName: string, password: string, phone?: string): Promise<RegisterResult> => {
     try {
       const csrfToken = Cookies.get('csrf-token') || ''
       const response = await fetch('/api/auth/register', {
@@ -141,23 +181,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           'Content-Type': 'application/json',
           'X-CSRF-Token': csrfToken,
         },
-        body: JSON.stringify({ email, username, password }),
+        body: JSON.stringify({ email, fullName, password, phone: phone || '' }),
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        setUser(data.user)
-        Cookies.set('token', data.token, { 
-          expires: 7,
-          sameSite: 'strict',
-          secure: process.env.NODE_ENV === 'production'
-        })
-        return true
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        // API mới không trả về token sau khi register
+        // User cần login sau khi register
+        return { success: true }
       }
-      return false
+
+      return {
+        success: false,
+        error: data.error || 'Đăng ký thất bại'
+      }
     } catch (error) {
       console.error('Registration failed:', error)
-      return false
+      return {
+        success: false,
+        error: 'Không thể kết nối đến máy chủ'
+      }
     }
   }
 
@@ -168,7 +212,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, register, logout, loading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

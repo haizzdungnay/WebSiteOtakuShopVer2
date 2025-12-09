@@ -8,7 +8,8 @@ import Sidebar from '@/components/Sidebar';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -26,19 +27,25 @@ export default function RegisterPage() {
       return;
     }
 
-    if (password.length < 6) {
-      setError('Mật khẩu phải có ít nhất 6 ký tự');
+    if (password.length < 8) {
+      setError('Mật khẩu phải có ít nhất 8 ký tự');
+      return;
+    }
+
+    if (fullName.length < 2) {
+      setError('Họ tên phải có ít nhất 2 ký tự');
       return;
     }
 
     setLoading(true);
 
     try {
-      const success = await register(email, username, password);
-      if (success) {
-        router.push('/');
+      const result = await register(email, fullName, password, phone);
+      if (result.success) {
+        // Redirect to login page after successful registration
+        router.push('/login?registered=true');
       } else {
-        setError('Đăng ký không thành công. Email hoặc username đã tồn tại.');
+        setError(result.error || 'Đăng ký không thành công. Email đã tồn tại.');
       }
     } catch (err) {
       setError('Đã xảy ra lỗi khi đăng ký');
@@ -99,15 +106,26 @@ export default function RegisterPage() {
                   />
                 </div>
 
-                {/* Username */}
+                {/* Full Name */}
                 <div>
                   <input
                     type="text"
-                    placeholder="Tên đăng nhập"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Họ và tên"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
                     required
-                    minLength={3}
+                    minLength={2}
+                    className="input-field"
+                  />
+                </div>
+
+                {/* Phone (optional) */}
+                <div>
+                  <input
+                    type="tel"
+                    placeholder="Số điện thoại (không bắt buộc)"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     className="input-field"
                   />
                 </div>
@@ -116,11 +134,11 @@ export default function RegisterPage() {
                 <div>
                   <input
                     type="password"
-                    placeholder="Mật khẩu"
+                    placeholder="Mật khẩu (ít nhất 8 ký tự)"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    minLength={6}
+                    minLength={8}
                     className="input-field"
                   />
                 </div>
@@ -133,7 +151,7 @@ export default function RegisterPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     required
-                    minLength={6}
+                    minLength={8}
                     className="input-field"
                   />
                 </div>

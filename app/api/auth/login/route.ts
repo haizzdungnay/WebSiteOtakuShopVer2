@@ -1,73 +1,102 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-import { query } from '@/lib/db'
-import { generateToken } from '@/lib/jwt'
-import { sanitizeInput } from '@/lib/sanitize'
+import jwt from 'jsonwebtoken'
+import { z } from 'zod'
 
-export async function POST(request: NextRequest) {
-  try {
-    const body = await request.json()
-    const { email, password } = body
+// Schema để validate input với zod
+const loginSchema = z.object({
+    email: z.string().email('Email không hợp lệ').toLowerCase(),
+    password: z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
+})
 
-    // Validate input
-    if (!email || !password) {
-      return NextResponse.json(
-        { error: 'Email and password are required' },
-        { status: 400 }
-      )
+export async function POST(request: Request) {
+    try {
+        // Parse body từ request
+        const body = await request.json()
+
+        // Validate input với zod
+        const { email, password } = loginSchema.parse(body)
+
+        // Tìm user theo email
+        const user = await prisma.user.findUnique({
+            where: { email }
+        })
+
+        // Case 1: User không tồn tại
+        if (!user) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: 'Email hoặc mật khẩu không đúng'
+                },
+                { status: 401 } // Unauthorized
+            )
+        }
+
+        // Case 2: Verify password
+        const isPasswordValid = await bcrypt.compare(password, user.passwordHash)
+
+        if (!isPasswordValid) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: 'Email hoặc mật khẩu không đúng'
+                },
+                { status: 401 }
+            )
+        }
+
+        // Case 3: Password đúng -> tạo JWT
+        const token = jwt.sign(
+            {
+                // Payload
+                userId: user.id,
+                email: user.email,
+                role: user.role
+            },
+            process.env.JWT_SECRET!, // secret key
+            {
+                expiresIn: '7d' // tạo token có hạn trong 7 ngày
+            }
+        )
+
+        // trả về token và user info lưu ý không trả về passwordHash
+        return NextResponse.json({
+            success: true,
+            message: 'Đăng nhập thành công',
+            data: {
+                token,
+                user: {
+                    id: user.id,
+                    email: user.email,
+                    fullName: user.fullName,
+                    phone: user.phone,
+                    role: user.role
+                }
+            }
+        })
     }
+    catch (error) {
+        // validatation error
+        if (error instanceof z.ZodError) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: error.issues[0].message // trả về lỗi đầu tiên
+                },
+                { status: 400 }
+            )
+        }
 
-    // Sanitize email to prevent XSS
-    const sanitizedEmail = sanitizeInput(email)
-
-    // Find user
-    const result = await query(
-      'SELECT id, email, username, password FROM users WHERE email = $1',
-      [sanitizedEmail]
-    )
-
-    if (result.rows.length === 0) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      )
+        // Lỗi server khác
+        console.error('Login error:', error)
+        return NextResponse.json(
+            {
+                success: false,
+                error: 'Đăng nhập thất bại. Vui lòng thử lại'
+            },
+            { status: 500 }
+        )
     }
-
-    const user = result.rows[0]
-
-    // Verify password
-    const isValidPassword = await bcrypt.compare(password, user.password)
-
-    if (!isValidPassword) {
-      return NextResponse.json(
-        { error: 'Invalid credentials' },
-        { status: 401 }
-      )
-    }
-
-    // Generate JWT token
-    const token = generateToken({
-      userId: user.id,
-      email: user.email,
-      username: user.username,
-      role: 'user'
-    })
-
-    return NextResponse.json({
-      message: 'Login successful',
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        role: 'user'
-      },
-      token,
-    })
-  } catch (error) {
-    console.error('Login error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
-  }
 }
