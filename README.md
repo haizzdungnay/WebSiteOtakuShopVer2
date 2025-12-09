@@ -1,118 +1,103 @@
-# 🎌 OtakuShop - Figure Store
+# OtakuShop - Figure Store
 
-Cửa hàng figure anime chính hãng - Next.js E-commerce Platform với Admin Dashboard
+Cửa hàng figure anime chính hãng - Next.js E-commerce Platform với Prisma ORM
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.5.6-black)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
+[![Prisma](https://img.shields.io/badge/Prisma-6.17-blue)](https://www.prisma.io/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)](https://www.postgresql.org/)
 
-## ✨ Tính năng
+## Tính năng
 
-- 🔐 **Authentication System** - Đăng ký, đăng nhập user + Admin login tự động phát hiện
-- 🛒 **Shopping Cart** - Giỏ hàng với quản lý số lượng real-time
-- 📦 **Product Catalog** - Danh sách, chi tiết, tìm kiếm, filter sản phẩm
-- 👤 **User Management** - Profile, lịch sử đơn hàng, preorders
-- 🎯 **Admin Dashboard** - Quản lý sản phẩm, đơn hàng, thông báo, doanh thu
-- 🔒 **Security Features** - JWT authentication, CSRF protection, input validation, XSS prevention
-- 🐳 **Docker Support** - Full containerized stack (PostgreSQL + Next.js)
-- 📱 **Responsive Design** - Mobile-first với Tailwind CSS
-- 🌐 **API Routes** - RESTful API với validation và error handling
-- ⚡ **Health Checks** - Endpoint monitoring cho database và API
+### Frontend
+- **Authentication** - Đăng ký, đăng nhập user + Admin login
+- **Shopping Cart** - Giỏ hàng với quản lý số lượng real-time
+- **Product Catalog** - Danh sách, chi tiết, tìm kiếm, filter sản phẩm
+- **User Profile** - Profile, lịch sử đơn hàng, wishlist
+- **Responsive Design** - Mobile-first với Tailwind CSS
 
-## 🛠️ Tech Stack
+### Backend (Prisma ORM)
+- **Full API** - RESTful API với Prisma ORM
+- **Order Management** - Quản lý đơn hàng đầy đủ
+- **Cart & Wishlist** - Giỏ hàng và danh sách yêu thích
+- **Reviews System** - Đánh giá sản phẩm với vote helpful
+- **Admin Dashboard** - Quản lý products, orders, users, coupons
+- **Location Services** - API địa chỉ Việt Nam
+- **File Upload** - Upload ảnh với UploadThing
+
+## Tech Stack
 
 | Technology | Version | Purpose |
 |------------|---------|---------|
 | **Next.js** | 15.5.6 | React framework with App Router |
 | **React** | 19.2.0 | UI library |
 | **TypeScript** | 5.9.3 | Type safety |
+| **Prisma** | 6.17.1 | ORM for PostgreSQL |
 | **Tailwind CSS** | 3.4.17 | Utility-first CSS |
-| **PostgreSQL** | 15-alpine | Relational database |
-| **Docker** | Latest | Containerization |
+| **PostgreSQL** | 15 | Relational database |
+| **Zod** | 4.1.12 | Schema validation |
 | **bcryptjs** | 3.0.2 | Password hashing |
 | **jsonwebtoken** | 9.0.2 | JWT authentication |
-| **Lucide React** | Latest | Icon library |
 
-## 📁 Cấu trúc Project
+## Cấu trúc Project
 
 ```
 WebSiteOtakuShopVer2/
-├── app/                          # Next.js App Router
-│   ├── admin/                    # 🔐 Admin Dashboard
-│   │   └── page.tsx             # Admin management interface
+├── app/
 │   ├── api/                      # API Routes
-│   │   ├── admin/               # Admin endpoints
-│   │   │   └── login/           # Admin authentication
-│   │   ├── auth/                # User authentication
-│   │   │   ├── login/           # User login
-│   │   │   ├── register/        # User registration
-│   │   │   ├── logout/          # Logout endpoint
-│   │   │   └── me/              # Get current user
-│   │   ├── csrf/                # CSRF token generation
-│   │   ├── health/              # 🆕 Health check endpoint
-│   │   └── products/            # Products API
-│   ├── login/                    # Login page (auto-detects admin)
+│   │   ├── auth/                 # Authentication
+│   │   │   ├── login/            # User login
+│   │   │   ├── register/         # User registration
+│   │   │   ├── me/               # Get current user
+│   │   │   ├── profile/          # Update profile
+│   │   │   └── change-password/  # Change password
+│   │   ├── admin/                # Admin APIs
+│   │   │   ├── login/            # Admin login
+│   │   │   ├── dashboard/        # Dashboard stats
+│   │   │   ├── products/         # Product management
+│   │   │   ├── orders/           # Order management
+│   │   │   ├── users/            # User management
+│   │   │   ├── categories/       # Category management
+│   │   │   ├── coupons/          # Coupon management
+│   │   │   └── reviews/          # Review moderation
+│   │   ├── products/             # Products API
+│   │   ├── categories/           # Categories API
+│   │   ├── cart/                 # Shopping cart
+│   │   ├── wishlist/             # Wishlist
+│   │   ├── orders/               # Orders
+│   │   ├── reviews/              # Reviews
+│   │   ├── addresses/            # User addresses
+│   │   ├── coupons/              # Coupon validation
+│   │   └── location/             # Location services
+│   ├── admin/                    # Admin Dashboard pages
+│   ├── login/                    # Login page
 │   ├── register/                 # Registration page
-│   ├── products/                 # Product catalog
-│   │   ├── page.tsx             # Products list
-│   │   └── [slug]/              # Product detail
-│   ├── characters/               # Character pages
-│   ├── profile/                  # User profile
-│   ├── checkout/                 # Checkout process
-│   ├── search/                   # Search results
-│   ├── tin-tuc/                  # News/Blog
-│   ├── tinh-gia/                 # Price calculator
-│   ├── tra-cuu/                  # Order tracking
-│   ├── giao-hang/                # Shipping info
-│   ├── faq/                      # FAQ
-│   ├── new-releases/             # New products
-│   ├── layout.tsx                # Root layout with AuthProvider
-│   └── page.tsx                  # Homepage
-├── components/                   # Reusable Components
-│   ├── Header.tsx                # Main navigation
-│   ├── Footer.tsx                # Footer
-│   ├── Sidebar.tsx               # Category sidebar
-│   ├── MenuSidebar.tsx           # Mobile menu
-│   ├── ProductCard.tsx           # Product card
-│   ├── CartDropdown.tsx          # Shopping cart
-│   └── FloatingButtons.tsx       # Floating action buttons
+│   ├── products/                 # Product pages
+│   ├── checkout/                 # Checkout
+│   └── ...                       # Other pages
+├── components/                   # React Components
 ├── contexts/                     # React Contexts
-│   ├── AuthContext.tsx           # Auth state management
-│   └── CartContext.tsx           # Cart state management
-├── lib/                          # Utilities & Helpers
-│   ├── db.ts                     # PostgreSQL connection
-│   ├── jwt.ts                    # JWT generation/verification
-│   ├── csrf.ts                   # CSRF token utilities
-│   ├── sanitize.ts               # XSS prevention
-│   └── validators.ts             # 🆕 Input validation
-├── types/                        # TypeScript Types
-│   └── product.ts                # Product types
-├── public/                       # Static Assets
-│   └── images/                   # Images directory
-├── scripts/                      # Utility Scripts
-│   └── init-db.js                # Database initialization
-├── docker-compose.yml            # Docker services config
-├── Dockerfile                    # Next.js Docker image
-├── middleware.ts                 # Route protection middleware
-├── init.sql                      # Database schema
-├── start-db.bat                  # 🪟 Database startup (Windows)
-├── start-db.sh                   # 🐧 Database startup (Linux/Mac)
-├── package.json                  # Dependencies
-├── .env.example                  # Environment template
-├── .env.local                    # Local config (gitignored)
-├── DATABASE_SETUP.md             # Database setup guide
-├── QUICKSTART_WINDOWS.md         # Windows quick start
-└── README.md                     # This file
+│   ├── AuthContext.tsx           # Auth state
+│   └── CartContext.tsx           # Cart state
+├── lib/                          # Utilities
+│   ├── prisma.ts                 # Prisma client
+│   ├── auth.ts                   # Auth helpers
+│   ├── admin-auth.ts             # Admin auth
+│   └── ...                       # Other utilities
+├── prisma/
+│   ├── schema.prisma             # Database schema
+│   ├── migrations/               # Database migrations
+│   └── seed.ts                   # Seed data
+└── ...
 ```
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Yêu cầu
 
 - **Node.js** 18.0+
-- **Docker** & **Docker Desktop** (khuyến nghị)
-- **PostgreSQL** 15+ (nếu không dùng Docker)
+- **PostgreSQL** 15+ (local hoặc Docker)
 
 ### Bước 1: Clone Repository
 
@@ -129,75 +114,48 @@ npm install
 
 ### Bước 3: Cấu hình Environment
 
-```bash
-# Copy template
-cp .env.example .env.local
-
-# Generate strong JWT secret
-openssl rand -base64 32
-```
-
-**Chỉnh sửa `.env.local`:**
+Tạo file `.env` trong thư mục gốc:
 
 ```env
-# Database
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=otakushop
-DB_USER=postgres
-DB_PASSWORD=your_strong_password
+# Database - Prisma
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/otakushop?schema=public
 
-# JWT (⚠️ REQUIRED - generate với openssl rand -base64 32)
-JWT_SECRET=your_generated_secret_here
-JWT_EXPIRES_IN=7d
+# JWT Secret (generate với: openssl rand -base64 32)
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
 
-# Admin Credentials (⚠️ CHANGE IN PRODUCTION)
-ADMIN_USERNAME=admin@yourdomain.com
-ADMIN_PASSWORD=YourStrongPassword123!
-ADMIN_DISPLAY_NAME=Admin Name
+# Admin Credentials (cho development)
+ADMIN_USERNAME=admin@otakushop.local
+ADMIN_PASSWORD=ChangeMeNow!
+ADMIN_DISPLAY_NAME=Quản trị viên
 
 # App
 NODE_ENV=development
 NEXT_PUBLIC_API_URL=http://localhost:3000
 ```
 
-### Bước 4: Khởi động Database
+### Bước 4: Khởi động PostgreSQL
 
-**Windows:**
-```cmd
-start-db.bat
-```
-
-**Linux/Mac:**
-```bash
-./start-db.sh
-```
-
-Hoặc thủ công:
+**Dùng Docker:**
 ```bash
 docker-compose up -d postgres
 ```
 
-### Bước 5: Khởi tạo Database (lần đầu)
+**Hoặc đảm bảo PostgreSQL local đang chạy.**
+
+### Bước 5: Khởi tạo Database với Prisma
 
 ```bash
-node scripts/init-db.js
+# Generate Prisma Client
+npx prisma generate
+
+# Push schema to database
+npx prisma db push
+
+# (Optional) Seed sample data
+npm run db:seed
 ```
 
-Output:
-```
-🚀 Starting database initialization...
-✅ Database connection successful!
-✅ Users table created
-✅ Products table created
-✅ Sample products inserted
-✅ Test user created
-   Email: test@otakushop.local
-   Password: password123
-🎉 Database initialization completed!
-```
-
-### Bước 6: Khởi động Development Server
+### Bước 6: Chạy Development Server
 
 ```bash
 npm run dev
@@ -205,266 +163,136 @@ npm run dev
 
 Truy cập: **http://localhost:3000**
 
-## 🔑 Tài khoản mặc định
+## Tài khoản mặc định
 
 ### Admin Account
-- **URL**: http://localhost:3000/login
-- **Email**: `admin@otakushop.local` (hoặc theo `.env.local`)
-- **Password**: `ChangeMeNow!` (⚠️ **Thay đổi trong production!**)
-- **Redirect**: Sau login → `/admin` (Admin Dashboard)
+- **Email**: `admin@otakushop.local`
+- **Password**: `ChangeMeNow!`
+- **Note**: Thay đổi trong file `.env` cho production!
 
-### Test User Account
-- **URL**: http://localhost:3000/login
-- **Email**: `test@otakushop.local`
-- **Password**: `password123`
-- **Redirect**: Sau login → `/` (Homepage)
+### Test User
+Đăng ký tài khoản mới tại `/register`
 
-### Đăng ký mới
-- **URL**: http://localhost:3000/register
-- Nhập email, username, password
-- Tự động login sau đăng ký
-
-## 📝 Available Scripts
+## Scripts
 
 ```bash
 # Development
-npm run dev              # Start dev server (localhost:3000)
+npm run dev              # Start dev server
 npm run build            # Build for production
 npm start                # Start production server
 npm run lint             # Run ESLint
 
+# Database (Prisma)
+npm run db:push          # Push schema to database
+npm run db:migrate       # Run migrations
+npm run db:seed          # Seed sample data
+npm run db:studio        # Open Prisma Studio
+
 # Docker
-npm run docker:build     # Build Docker images
-npm run docker:up        # Start all services
-npm run docker:down      # Stop all services
-
-# Database
-start-db.bat             # Start PostgreSQL (Windows)
-./start-db.sh            # Start PostgreSQL (Linux/Mac)
-node scripts/init-db.js  # Initialize database
+npm run docker:up        # Start PostgreSQL
+npm run docker:down      # Stop PostgreSQL
 ```
 
-## 🐳 Docker Deployment
-
-### Start Full Stack
-
-```bash
-docker-compose up -d
-```
-
-Services:
-- **PostgreSQL**: `localhost:5432`
-- **Next.js**: `localhost:3000`
-
-### Stop Services
-
-```bash
-docker-compose down
-```
-
-### Reset Database (⚠️ Xóa dữ liệu)
-
-```bash
-docker-compose down -v
-docker-compose up -d postgres
-node scripts/init-db.js
-```
-
-### View Logs
-
-```bash
-docker logs -f otakushop-db     # PostgreSQL logs
-docker logs -f otakushop-app    # Next.js logs
-```
-
-## 🔒 Security Features
-
-### Implemented
-
-✅ **JWT Authentication** - Token-based auth với secure secret
-✅ **CSRF Protection** - Token validation cho state-changing requests
-✅ **Password Hashing** - bcrypt với salt rounds
-✅ **Input Validation** - Email, password, username validation
-✅ **XSS Prevention** - Input sanitization
-✅ **SQL Injection Prevention** - Parameterized queries
-✅ **Route Protection** - Middleware cho admin routes
-✅ **Secure Cookies** - httpOnly, sameSite, secure flags
-✅ **Environment Secrets** - No hardcoded credentials
-
-### Security Checklist for Production
-
-- [ ] Change `ADMIN_PASSWORD` to strong password
-- [ ] Generate strong `JWT_SECRET` (32+ characters)
-- [ ] Change `DB_PASSWORD` from default
-- [ ] Set `NODE_ENV=production`
-- [ ] Enable HTTPS (secure cookies)
-- [ ] Set up rate limiting
-- [ ] Configure CORS properly
-- [ ] Enable database SSL
-- [ ] Set up error logging (Sentry, etc.)
-- [ ] Regular security audits
-
-## 🧪 API Endpoints
-
-### Health Check
-
-```
-GET /api/health
-```
-
-Response:
-```json
-{
-  "status": "ok",
-  "timestamp": "2024-01-01T00:00:00.000Z",
-  "services": {
-    "database": "healthy",
-    "api": "healthy"
-  }
-}
-```
+## API Endpoints
 
 ### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/login` | User login |
+| POST | `/api/auth/register` | User registration |
+| GET | `/api/auth/me` | Get current user |
+| POST | `/api/auth/profile` | Update profile |
+| POST | `/api/auth/change-password` | Change password |
 
-#### User Login
+### Admin
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/admin/login` | Admin login |
+| GET | `/api/admin/dashboard/stats` | Dashboard statistics |
+| GET/POST | `/api/admin/products` | Product management |
+| GET/POST | `/api/admin/orders` | Order management |
+| GET/POST | `/api/admin/users` | User management |
+
+### Products & Categories
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/products` | List products |
+| GET | `/api/products/[slug]` | Product detail |
+| GET | `/api/categories` | List categories |
+
+### Cart & Wishlist
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET/POST | `/api/cart` | Cart operations |
+| DELETE | `/api/cart/[id]` | Remove from cart |
+| GET/POST | `/api/wishlist` | Wishlist operations |
+
+### Orders
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET/POST | `/api/orders` | Order operations |
+| GET | `/api/orders/[id]` | Order detail |
+| POST | `/api/orders/[id]/cancel` | Cancel order |
+
+### Reviews
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET/POST | `/api/reviews` | Review operations |
+| GET | `/api/products/[slug]/reviews` | Product reviews |
+
+## Database Schema (Prisma)
+
+Các models chính:
+- **User** - Người dùng
+- **Product** - Sản phẩm
+- **Category** - Danh mục
+- **Order** / **OrderItem** - Đơn hàng
+- **CartItem** - Giỏ hàng
+- **Wishlist** - Danh sách yêu thích
+- **Review** / **ReviewVote** - Đánh giá
+- **Address** - Địa chỉ
+- **Coupon** - Mã giảm giá
+- **Payment** / **Shipping** - Thanh toán & Vận chuyển
+- **Admin** - Quản trị viên
+
+Xem chi tiết: `prisma/schema.prisma`
+
+## Troubleshooting
+
+### Lỗi DATABASE_URL not found
+
 ```
-POST /api/auth/login
-Content-Type: application/json
-X-CSRF-Token: <token>
-
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-```
-
-#### Admin Login
-```
-POST /api/admin/login
-Content-Type: application/json
-X-CSRF-Token: <token>
-
-{
-  "email": "admin@example.com",
-  "password": "admin_password"
-}
-```
-
-#### Register
-```
-POST /api/auth/register
-Content-Type: application/json
-X-CSRF-Token: <token>
-
-{
-  "email": "user@example.com",
-  "username": "username",
-  "password": "Password123"
-}
-```
-
-#### Get Current User
-```
-GET /api/auth/me
-Cookie: token=<jwt_token>
-```
-
-#### Logout
-```
-POST /api/auth/logout
-Cookie: token=<jwt_token>
-```
-
-### CSRF Token
-```
-GET /api/csrf
-```
-
-Response:
-```json
-{
-  "token": "csrf_token_here"
-}
-```
-
-## 🐛 Troubleshooting
-
-### Database Connection Errors
-
-**Error**: `ECONNREFUSED` hoặc `Connection refused`
-
-**Solution**:
-1. Kiểm tra Docker Desktop đang chạy
-2. Kiểm tra PostgreSQL container:
-   ```bash
-   docker ps | grep otakushop-db
-   ```
-3. Restart database:
-   ```bash
-   docker-compose restart postgres
-   ```
-4. Xem logs:
-   ```bash
-   docker logs otakushop-db
-   ```
-
-### JWT Secret Error
-
-**Error**: `JWT_SECRET environment variable is required`
-
-**Solution**:
-1. Generate secret:
-   ```bash
-   openssl rand -base64 32
-   ```
-2. Add to `.env.local`:
-   ```env
-   JWT_SECRET=your_generated_secret
-   ```
-
-### Admin Cannot Access Dashboard
-
-**Solution**:
-1. Clear browser cookies
-2. Login lại với admin credentials
-3. Check middleware logs in terminal
-4. Verify `ADMIN_USERNAME` and `ADMIN_PASSWORD` in `.env.local`
-
-### Port Already in Use
-
-**Error**: `Port 3000 already in use`
-
-**Windows**:
-```cmd
-netstat -ano | findstr :3000
-taskkill /PID <PID> /F
+error: Environment variable not found: DATABASE_URL
 ```
 
-**Linux/Mac**:
+**Giải pháp**: Tạo file `.env` với DATABASE_URL:
+```env
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/otakushop?schema=public
+```
+
+### Lỗi kết nối database
+
+```
+Can't reach database server
+```
+
+**Giải pháp**:
+1. Đảm bảo PostgreSQL đang chạy
+2. Kiểm tra connection string trong `.env`
+3. Thử: `docker-compose up -d postgres`
+
+### Lỗi Prisma Client
+
+```
+Prisma Client could not be initialized
+```
+
+**Giải pháp**:
 ```bash
-lsof -ti:3000 | xargs kill -9
+npx prisma generate
 ```
 
-### Docker Build Fails
-
-**Solution**:
-1. Ensure Docker Desktop is running
-2. Clear Docker cache:
-   ```bash
-   docker system prune -a
-   ```
-3. Rebuild:
-   ```bash
-   docker-compose build --no-cache
-   ```
-
-## 📚 Documentation
-
-- **[DATABASE_SETUP.md](DATABASE_SETUP.md)** - Chi tiết setup database
-- **[QUICKSTART_WINDOWS.md](QUICKSTART_WINDOWS.md)** - Hướng dẫn Windows
-- **[.env.example](.env.example)** - Environment variables
-
-## 🤝 Contributing
+## Contributing
 
 1. Fork repository
 2. Create feature branch: `git checkout -b feature/amazing-feature`
@@ -472,30 +300,16 @@ lsof -ti:3000 | xargs kill -9
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Open Pull Request
 
-### Code Style
+## License
 
-- Use TypeScript
-- Follow ESLint rules
-- Use Prettier for formatting
-- Write meaningful commit messages
+MIT License
 
-## 📄 License
-
-MIT License - see [LICENSE](LICENSE) file
-
-## 👥 Team
+## Team
 
 - Dương
 - Nguyên
 - Lâm
 
-## 🙏 Acknowledgments
-
-- Next.js team
-- React team
-- PostgreSQL community
-- All contributors
-
 ---
 
-**Made with ❤️ in Vietnam**
+**Made with love in Vietnam**
