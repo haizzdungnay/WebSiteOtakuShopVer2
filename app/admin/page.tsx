@@ -24,7 +24,7 @@ import {
   FolderPlus,
   Image,
   ListChecks,
-  LockKeyhole,
+  Loader2,
   MessageSquare,
   PackageCheck,
   RefreshCw,
@@ -558,7 +558,48 @@ export default function AdminPage() {
                 </div>
                 <p className="mt-4 text-3xl font-bold text-slate-900">{stats?.pendingOrders || 0}</p>
               </div>
-            )}
+            </div>
+          </>
+        )}
+
+        {/* Products Tab */}
+        {activeTab === 'products' && (
+          <>
+            {/* Actions */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Quản lý sản phẩm</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={fetchProducts}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+                >
+                  <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                  Làm mới
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingProduct(null);
+                    setProductForm({
+                      name: '',
+                      slug: '',
+                      description: '',
+                      price: '',
+                      comparePrice: '',
+                      stockQuantity: '',
+                      categoryId: '',
+                      images: [],
+                      isActive: true,
+                      featured: false,
+                    });
+                    setShowProductModal(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                >
+                  <FilePlus size={16} />
+                  Thêm sản phẩm
+                </button>
+              </div>
+            </div>
 
             {/* Products List */}
             <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
@@ -877,7 +918,7 @@ export default function AdminPage() {
                         </button>
                       )}
                     </div>
-                  </form>
+                  </div>
                 </div>
               ))}
               {orders.length === 0 && (
