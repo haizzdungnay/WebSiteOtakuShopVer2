@@ -240,6 +240,174 @@ npm run docker:down      # Stop PostgreSQL
 | GET/POST | `/api/reviews` | Review operations |
 | GET | `/api/products/[slug]/reviews` | Product reviews |
 
+## Hướng dẫn Quản lý Sản phẩm
+
+### Thêm sản phẩm qua Admin Dashboard
+
+1. **Đăng nhập Admin**:
+   - Truy cập `/admin` và đăng nhập với tài khoản admin
+   - Mặc định: `admin@otakushop.local` / `ChangeMeNow!`
+
+2. **Thêm sản phẩm mới**:
+   - Chọn tab **"Sản phẩm"**
+   - Click nút **"Thêm sản phẩm"**
+   - Điền thông tin:
+     - **Tên sản phẩm** (bắt buộc): Ví dụ "Figure Gojo Satoru 1/7"
+     - **Mô tả** (bắt buộc): Mô tả chi tiết sản phẩm (≥20 ký tự)
+     - **Giá bán** (bắt buộc): Giá VND (ví dụ: 1500000)
+     - **Giá gốc**: Nếu có giảm giá, nhập giá gốc cao hơn
+     - **Tồn kho** (bắt buộc): Số lượng còn hàng
+     - **Danh mục** (bắt buộc): Chọn từ danh sách
+     - **Hình ảnh**: Thêm URL hình ảnh
+
+3. **Thêm hình ảnh sản phẩm**:
+   - Nhập URL hình ảnh (HTTPS)
+   - Click nút **"+"** để thêm vào danh sách
+   - Có thể thêm nhiều hình, hình đầu tiên làm thumbnail
+   - **Nguồn hình ảnh gợi ý**:
+     - Upload lên [ImgBB](https://imgbb.com/)
+     - Upload lên [Cloudinary](https://cloudinary.com/)
+     - Sử dụng [UploadThing](https://uploadthing.com/) (tích hợp sẵn)
+
+4. **Tùy chọn**:
+   - ☑ **Hiển thị sản phẩm**: Bật/tắt hiển thị trên shop
+   - ☑ **Sản phẩm nổi bật**: Hiển thị ở trang chủ
+
+### Thêm sản phẩm qua Database (Prisma)
+
+**Bước 1: Mở Prisma Studio**
+```bash
+npm run db:studio
+# hoặc
+npx prisma studio
+```
+
+**Bước 2: Thêm sản phẩm**
+- Mở bảng **Product**
+- Click **"Add record"**
+- Điền các field:
+  - `name`: Tên sản phẩm
+  - `slug`: URL-friendly name (vd: `figure-gojo-satoru`)
+  - `description`: Mô tả
+  - `price`: Giá (Decimal)
+  - `categoryId`: ID của category
+  - `stockQuantity`: Số lượng
+  - `images`: Array JSON `["url1", "url2"]`
+  - `isActive`: true/false
+- Click **"Save"**
+
+**Hoặc sử dụng Prisma Client trong code:**
+```typescript
+import { prisma } from '@/lib/prisma';
+
+await prisma.product.create({
+  data: {
+    name: 'Figure Gojo Satoru 1/7',
+    slug: 'figure-gojo-satoru-1-7',
+    description: 'Figure chính hãng Gojo Satoru từ Jujutsu Kaisen...',
+    price: 1500000,
+    categoryId: 'category-id-here',
+    stockQuantity: 10,
+    images: ['https://example.com/image1.jpg'],
+    isActive: true,
+    featured: false,
+  },
+});
+```
+
+### Thêm Category mới
+
+**Qua Prisma Studio:**
+- Mở bảng **Category**
+- Thêm record với `name`, `slug`, `description`, `imageUrl`
+
+**Qua code:**
+```typescript
+await prisma.category.create({
+  data: {
+    name: 'Figure Scale',
+    slug: 'figure-scale',
+    description: 'Figure tỉ lệ cao cấp',
+    imageUrl: 'https://example.com/category.jpg',
+  },
+});
+```
+
+## Hướng dẫn Database Operations
+
+### Prisma Commands
+
+```bash
+# Xem database trong trình duyệt
+npx prisma studio
+
+# Tạo Prisma Client từ schema
+npx prisma generate
+
+# Push schema changes (không tạo migration)
+npx prisma db push
+
+# Tạo migration mới
+npx prisma migrate dev --name <migration-name>
+
+# Reset database (XÓA TẤT CẢ DATA!)
+npx prisma migrate reset
+
+# Seed data mẫu
+npm run db:seed
+```
+
+### Thêm field mới vào Database
+
+**Bước 1: Sửa schema**
+
+Edit file `prisma/schema.prisma`:
+```prisma
+model Product {
+  // ... existing fields
+  newField String? // Thêm field mới
+}
+```
+
+**Bước 2: Tạo migration**
+```bash
+npx prisma migrate dev --name add_new_field
+```
+
+**Bước 3: Generate lại Client**
+```bash
+npx prisma generate
+```
+
+### Backup & Restore Database
+
+**Backup:**
+```bash
+# Export toàn bộ database
+pg_dump -U postgres -d otakushop > backup.sql
+
+# Hoặc chỉ data
+pg_dump -U postgres -d otakushop --data-only > data.sql
+```
+
+**Restore:**
+```bash
+psql -U postgres -d otakushop < backup.sql
+```
+
+### Seed Sample Data
+
+File `prisma/seed.ts` chứa data mẫu. Chạy:
+```bash
+npm run db:seed
+```
+
+Data mẫu bao gồm:
+- 3 Categories (Figure Scale, Nendoroid, Plush)
+- 10 Products mẫu
+- 1 Admin account
+- 1 Test user
+
 ## Database Schema (Prisma)
 
 Các models chính:
