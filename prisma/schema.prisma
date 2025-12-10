@@ -410,7 +410,7 @@ model ReviewVote {
   userId    String
   isHelpful Boolean // true = helpful, false = not helpful
   createdAt DateTime @default(now())
-  
+
   review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -418,4 +418,21 @@ model ReviewVote {
   @@index([reviewId])
   @@index([userId])
   @@map("review_votes")
+}
+
+// ==========================================
+// ANNOUNCEMENT (Thông báo nội bộ/công khai)
+// ==========================================
+model Announcement {
+  id        String   @id @default(cuid())
+  title     String
+  summary   String   @db.Text
+  content   String?  @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isActive])
+  @@index([createdAt])
+  @@map("announcements")
 }

@@ -1,7 +1,20 @@
 'use client';
 
-import { useState, useMemo, FormEvent } from 'react';
+import { useState, useEffect, FormEvent } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  useAdminProducts,
+  useAdminOrders,
+  useAdminReviews,
+  useAdminCategories,
+  useAdminAnnouncements,
+  Product,
+  Order,
+  Review,
+  Category,
+  Announcement,
+  CreateProductData,
+} from '@/hooks/useAdminApi';
 import {
   BarChart3,
   Coins,
@@ -12,198 +25,375 @@ import {
   PackageCheck,
   ShieldAlert,
   Users,
+  Star,
+  MessageSquare,
+  Edit,
+  Trash2,
+  Eye,
+  EyeOff,
+  Pin,
+  Check,
+  X,
+  Loader2,
+  Plus,
+  Image as ImageIcon,
+  RefreshCw,
 } from 'lucide-react';
 import Link from 'next/link';
 
+type TabType = 'dashboard' | 'products' | 'orders' | 'reviews' | 'announcements';
+
 interface ProductFormState {
   name: string;
-  sku: string;
+  description: string;
   price: string;
+  comparePrice: string;
   stock: string;
-  category: string;
+  categoryId: string;
+  images: string[];
+  isActive: boolean;
+  featured: boolean;
 }
 
-interface AnnouncementForm {
+interface AnnouncementFormState {
   title: string;
   summary: string;
   content: string;
+  isActive: boolean;
 }
 
-interface Order {
-  id: number;
-  customer: string;
-  items: number;
-  total: number;
-  status: 'pending' | 'approved' | 'rejected';
-  channel: string;
-}
-
-const initialProducts = [
-  {
-    id: 1,
-    name: 'Figure Itadori Yuji 1/7',
-    sku: 'FIG-ITD-01',
-    price: 2890000,
-    stock: 12,
-    category: 'Jujutsu Kaisen',
-    status: 'active' as const,
-  },
-  {
-    id: 2,
-    name: 'Nendoroid Gojo Satoru',
-    sku: 'NEN-GOJ-88',
-    price: 1590000,
-    stock: 8,
-    category: 'Nendoroid',
-    status: 'active' as const,
-  },
-  {
-    id: 3,
-    name: 'Mô hình Luffy Gear 5',
-    sku: 'FIG-LUF-05',
-    price: 3250000,
-    stock: 5,
-    category: 'One Piece',
-    status: 'inactive' as const,
-  },
-];
-
-const initialOrders: Order[] = [
-  {
-    id: 101,
-    customer: 'Trần Duy',
-    items: 3,
-    total: 6890000,
-    status: 'pending',
-    channel: 'Website',
-  },
-  {
-    id: 102,
-    customer: 'Nguyễn Hà',
-    items: 2,
-    total: 3120000,
-    status: 'approved',
-    channel: 'Facebook',
-  },
-  {
-    id: 103,
-    customer: 'Hoàng Nam',
-    items: 5,
-    total: 9450000,
-    status: 'pending',
-    channel: 'Shopee',
-  },
-];
-
-const initialAnnouncements = [
-  {
-    id: 1,
-    title: 'Lịch nhập hàng tháng 5',
-    summary: 'Cập nhật tiến độ container mới về với hơn 200 mẫu figure.',
-    createdAt: '02/05/2024',
-  },
-];
+const ORDER_STATUS_MAP: Record<string, { label: string; color: string; nextStatus?: string[] }> = {
+  PENDING: { label: 'Chờ xác nhận', color: 'bg-amber-50 text-amber-600', nextStatus: ['CONFIRMED', 'CANCELLED'] },
+  CONFIRMED: { label: 'Đã xác nhận', color: 'bg-blue-50 text-blue-600', nextStatus: ['PREPARING', 'CANCELLED'] },
+  PREPARING: { label: 'Đang chuẩn bị', color: 'bg-indigo-50 text-indigo-600', nextStatus: ['SHIPPING'] },
+  SHIPPING: { label: 'Đang giao', color: 'bg-purple-50 text-purple-600', nextStatus: ['DELIVERED'] },
+  DELIVERED: { label: 'Đã giao', color: 'bg-teal-50 text-teal-600', nextStatus: ['COMPLETED'] },
+  COMPLETED: { label: 'Hoàn thành', color: 'bg-emerald-50 text-emerald-600' },
+  CANCELLED: { label: 'Đã hủy', color: 'bg-rose-50 text-rose-600' },
+};
 
 export default function AdminPage() {
   const { user } = useAuth();
-  const [products, setProducts] = useState(initialProducts);
-  const [orders, setOrders] = useState(initialOrders);
-  const [announcements, setAnnouncements] = useState(initialAnnouncements);
+  const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+
+  // Products state
+  const { getProducts, createProduct, updateProduct, deleteProduct, loading: productsLoading } = useAdminProducts();
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productsSummary, setProductsSummary] = useState({ total: 0, active: 0, inactive: 0, outOfStock: 0, lowStock: 0 });
+  const [showProductForm, setShowProductForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productForm, setProductForm] = useState<ProductFormState>({
     name: '',
-    sku: '',
+    description: '',
     price: '',
+    comparePrice: '',
     stock: '',
-    category: '',
+    categoryId: '',
+    images: [],
+    isActive: true,
+    featured: false,
   });
-  const [announcementForm, setAnnouncementForm] = useState<AnnouncementForm>({
+  const [newImageUrl, setNewImageUrl] = useState('');
+
+  // Orders state
+  const { getOrders, updateOrderStatus, loading: ordersLoading } = useAdminOrders();
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [ordersSummary, setOrdersSummary] = useState({ total: 0, totalRevenue: 0, byStatus: {} as Record<string, number> });
+
+  // Reviews state
+  const { getReviews, updateReview, deleteReview, loading: reviewsLoading } = useAdminReviews();
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [reviewsSummary, setReviewsSummary] = useState({ total: 0, pending: 0, approved: 0, pinned: 0 });
+
+  // Categories state
+  const { getCategories } = useAdminCategories();
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  // Announcements state
+  const { getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, loading: announcementsLoading } = useAdminAnnouncements();
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
+  const [announcementForm, setAnnouncementForm] = useState<AnnouncementFormState>({
     title: '',
     summary: '',
     content: '',
+    isActive: true,
   });
-  const [manualIncome, setManualIncome] = useState<{ source: string; amount: string }>({
-    source: '',
-    amount: '',
-  });
-  const [incomeRecords, setIncomeRecords] = useState<{ source: string; amount: number }[]>([]);
 
-  const approvedOrdersIncome = useMemo(
-    () =>
-      orders
-        .filter((order) => order.status === 'approved')
-        .reduce((sum, order) => sum + order.total, 0),
-    [orders],
-  );
+  // Shipping modal for order status
+  const [shippingModal, setShippingModal] = useState<{ orderId: string; status: string } | null>(null);
+  const [shippingInfo, setShippingInfo] = useState({ trackingCode: '', carrier: '' });
 
-  const totalIncome = useMemo(() => {
-    const manual = incomeRecords.reduce((sum, record) => sum + record.amount, 0);
-    return manual + approvedOrdersIncome;
-  }, [incomeRecords, approvedOrdersIncome]);
+  // Load initial data
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      loadCategories();
+    }
+  }, [user]);
 
-  const pendingOrders = orders.filter((order) => order.status === 'pending');
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      switch (activeTab) {
+        case 'dashboard':
+        case 'products':
+          loadProducts();
+          break;
+        case 'orders':
+          loadOrders();
+          break;
+        case 'reviews':
+          loadReviews();
+          break;
+        case 'announcements':
+          loadAnnouncements();
+          break;
+      }
+    }
+  }, [activeTab, user]);
 
-  const handleAddProduct = (event: FormEvent) => {
-    event.preventDefault();
-    setProducts((prev) => [
-      {
-        id: Date.now(),
-        name: productForm.name,
-        sku: productForm.sku,
-        price: Number(productForm.price),
-        stock: Number(productForm.stock),
-        category: productForm.category,
-        status: 'active',
-      },
+  const loadCategories = async () => {
+    const result = await getCategories({ limit: 100 });
+    if (result.success && result.data) {
+      setCategories(result.data.categories);
+    }
+  };
+
+  const loadProducts = async () => {
+    const result = await getProducts({ limit: 50 });
+    if (result.success && result.data) {
+      setProducts(result.data.products);
+      setProductsSummary(result.data.summary);
+    }
+  };
+
+  const loadOrders = async () => {
+    const result = await getOrders({ limit: 50 });
+    if (result.success && result.data) {
+      setOrders(result.data.orders);
+      setOrdersSummary(result.data.summary);
+    }
+  };
+
+  const loadReviews = async () => {
+    const result = await getReviews({ limit: 50 });
+    if (result.success && result.data) {
+      setReviews(result.data.reviews);
+      setReviewsSummary(result.data.summary);
+    }
+  };
+
+  const loadAnnouncements = async () => {
+    const result = await getAnnouncements({ limit: 50 });
+    if (result.success && result.data) {
+      setAnnouncements(result.data.announcements);
+    }
+  };
+
+  // Product handlers
+  const resetProductForm = () => {
+    setProductForm({
+      name: '',
+      description: '',
+      price: '',
+      comparePrice: '',
+      stock: '',
+      categoryId: '',
+      images: [],
+      isActive: true,
+      featured: false,
+    });
+    setNewImageUrl('');
+    setEditingProduct(null);
+  };
+
+  const handleEditProduct = (product: Product) => {
+    setEditingProduct(product);
+    setProductForm({
+      name: product.name,
+      description: product.description,
+      price: String(product.price),
+      comparePrice: product.comparePrice ? String(product.comparePrice) : '',
+      stock: String(product.stockQuantity),
+      categoryId: product.categoryId,
+      images: product.images,
+      isActive: product.isActive,
+      featured: product.featured,
+    });
+    setShowProductForm(true);
+  };
+
+  const handleAddImage = () => {
+    if (newImageUrl && newImageUrl.startsWith('http')) {
+      setProductForm((prev) => ({
+        ...prev,
+        images: [...prev.images, newImageUrl],
+      }));
+      setNewImageUrl('');
+    }
+  };
+
+  const handleRemoveImage = (index: number) => {
+    setProductForm((prev) => ({
       ...prev,
-    ]);
-    setProductForm({ name: '', sku: '', price: '', stock: '', category: '' });
+      images: prev.images.filter((_, i) => i !== index),
+    }));
   };
 
-  const handleUpdateProductStatus = (id: number, status: 'active' | 'inactive') => {
-    setProducts((prev) => prev.map((product) => (product.id === id ? { ...product, status } : product)));
+  const handleProductSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+
+    const productData: CreateProductData = {
+      name: productForm.name,
+      description: productForm.description,
+      price: Number(productForm.price),
+      comparePrice: productForm.comparePrice ? Number(productForm.comparePrice) : null,
+      categoryId: productForm.categoryId,
+      stockQuantity: Number(productForm.stock),
+      images: productForm.images,
+      isActive: productForm.isActive,
+      featured: productForm.featured,
+    };
+
+    let result;
+    if (editingProduct) {
+      result = await updateProduct(editingProduct.id, productData);
+    } else {
+      result = await createProduct(productData);
+    }
+
+    if (result.success) {
+      setShowProductForm(false);
+      resetProductForm();
+      loadProducts();
+    } else {
+      alert(result.error || 'Có lỗi xảy ra');
+    }
   };
 
-  const handleAdjustStock = (id: number, amount: number) => {
-    setProducts((prev) =>
-      prev.map((product) =>
-        product.id === id
-          ? { ...product, stock: Math.max(0, product.stock + amount) }
-          : product,
-      ),
-    );
+  const handleDeleteProduct = async (id: string) => {
+    if (!confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
+    const result = await deleteProduct(id);
+    if (result.success) {
+      loadProducts();
+    } else {
+      alert(result.error || 'Không thể xóa sản phẩm');
+    }
   };
 
-  const handleOrderDecision = (id: number, status: 'approved' | 'rejected') => {
-    setOrders((prev) =>
-      prev.map((order) => (order.id === id ? { ...order, status } : order)),
-    );
+  const handleToggleProductStatus = async (product: Product) => {
+    const result = await updateProduct(product.id, { isActive: !product.isActive });
+    if (result.success) {
+      loadProducts();
+    }
   };
 
-  const handleIncomeRecord = (event: FormEvent) => {
-    event.preventDefault();
-    if (!manualIncome.source || !manualIncome.amount) return;
-    setIncomeRecords((prev) => [
-      ...prev,
-      { source: manualIncome.source, amount: Number(manualIncome.amount) },
-    ]);
-    setManualIncome({ source: '', amount: '' });
+  // Order handlers
+  const handleOrderStatusChange = async (orderId: string, newStatus: string) => {
+    if (newStatus === 'SHIPPING') {
+      setShippingModal({ orderId, status: newStatus });
+      return;
+    }
+
+    const result = await updateOrderStatus(orderId, newStatus);
+    if (result.success) {
+      loadOrders();
+    } else {
+      alert(result.error || 'Không thể cập nhật trạng thái');
+    }
   };
 
-  const handleAnnouncementSubmit = (event: FormEvent) => {
-    event.preventDefault();
-    if (!announcementForm.title || !announcementForm.summary) return;
-    setAnnouncements((prev) => [
-      {
-        id: Date.now(),
-        title: announcementForm.title,
-        summary: announcementForm.summary,
-        createdAt: new Date().toLocaleDateString('vi-VN'),
-      },
-      ...prev,
-    ]);
-    setAnnouncementForm({ title: '', summary: '', content: '' });
+  const handleShippingSubmit = async () => {
+    if (!shippingModal) return;
+    if (!shippingInfo.trackingCode || !shippingInfo.carrier) {
+      alert('Vui lòng nhập đầy đủ mã vận đơn và đơn vị vận chuyển');
+      return;
+    }
+
+    const result = await updateOrderStatus(shippingModal.orderId, shippingModal.status, {
+      trackingCode: shippingInfo.trackingCode,
+      carrier: shippingInfo.carrier,
+    });
+
+    if (result.success) {
+      setShippingModal(null);
+      setShippingInfo({ trackingCode: '', carrier: '' });
+      loadOrders();
+    } else {
+      alert(result.error || 'Không thể cập nhật trạng thái');
+    }
   };
 
+  // Review handlers
+  const handleToggleReviewApproval = async (review: Review) => {
+    const result = await updateReview(review.id, { isApproved: !review.isApproved });
+    if (result.success) {
+      loadReviews();
+    }
+  };
+
+  const handleToggleReviewPin = async (review: Review) => {
+    const result = await updateReview(review.id, { isPinned: !review.isPinned });
+    if (result.success) {
+      loadReviews();
+    }
+  };
+
+  const handleDeleteReview = async (id: string) => {
+    if (!confirm('Bạn có chắc muốn xóa đánh giá này?')) return;
+    const result = await deleteReview(id);
+    if (result.success) {
+      loadReviews();
+    } else {
+      alert(result.error || 'Không thể xóa đánh giá');
+    }
+  };
+
+  // Announcement handlers
+  const resetAnnouncementForm = () => {
+    setAnnouncementForm({
+      title: '',
+      summary: '',
+      content: '',
+      isActive: true,
+    });
+  };
+
+  const handleAnnouncementSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    const result = await createAnnouncement({
+      title: announcementForm.title,
+      summary: announcementForm.summary,
+      content: announcementForm.content || undefined,
+      isActive: announcementForm.isActive,
+    });
+
+    if (result.success) {
+      setShowAnnouncementForm(false);
+      resetAnnouncementForm();
+      loadAnnouncements();
+    } else {
+      alert(result.error || 'Có lỗi xảy ra');
+    }
+  };
+
+  const handleDeleteAnnouncement = async (id: string) => {
+    if (!confirm('Bạn có chắc muốn xóa thông báo này?')) return;
+    const result = await deleteAnnouncement(id);
+    if (result.success) {
+      loadAnnouncements();
+    } else {
+      alert(result.error || 'Không thể xóa thông báo');
+    }
+  };
+
+  const handleToggleAnnouncementStatus = async (announcement: Announcement) => {
+    const result = await updateAnnouncement(announcement.id, { isActive: !announcement.isActive });
+    if (result.success) {
+      loadAnnouncements();
+    }
+  };
+
+  // Access denied screen
   if (!user || user.role !== 'admin') {
     return (
       <section className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-16">
@@ -211,359 +401,858 @@ export default function AdminPage() {
           <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
             <ShieldAlert size={32} />
           </div>
-          <h1 className="text-2xl font-semibold text-slate-900 mb-3">Không có quyền truy cập</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 mb-3">Khong co quyen truy cap</h1>
           <p className="text-slate-600 mb-6">
-            Khu vực này chỉ dành cho quản trị viên. Vui lòng đăng nhập bằng tài khoản quản trị để truy cập.
+            Khu vuc nay chi danh cho quan tri vien. Vui long dang nhap bang tai khoan quan tri de truy cap.
           </p>
           <Link
             href="/login"
             className="inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-slate-800"
           >
-            Đăng nhập
+            Dang nhap
           </Link>
         </div>
       </section>
     );
   }
 
+  const pendingOrdersCount = ordersSummary.byStatus?.PENDING || 0;
+
   return (
     <div className="min-h-screen bg-slate-50 py-12">
-      <div className="container-custom space-y-10">
+      <div className="container-custom space-y-8">
+        {/* Header */}
         <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 text-white shadow-2xl">
           <p className="text-sm uppercase tracking-[0.3em] text-slate-300">Admin workspace</p>
           <div className="mt-4 flex flex-wrap items-center justify-between gap-6">
             <div>
-              <h1 className="text-3xl font-bold">Xin chào, {user.username}</h1>
+              <h1 className="text-3xl font-bold">Xin chao, {user.username}</h1>
               <p className="text-slate-300 mt-2">
-                Quản trị đơn hàng, doanh thu và nội dung chỉ trong một bảng điều khiển.
+                Quan tri don hang, doanh thu va noi dung chi trong mot bang dieu khien.
               </p>
             </div>
             <div className="flex items-center gap-4">
               <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
-                <div className="text-2xl font-bold">{products.length}</div>
-                <p className="text-sm text-slate-300">Mặt hàng đang quản lý</p>
+                <div className="text-2xl font-bold">{productsSummary.total}</div>
+                <p className="text-sm text-slate-300">San pham</p>
               </div>
               <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
-                <div className="text-2xl font-bold">{pendingOrders.length}</div>
-                <p className="text-sm text-slate-300">Đơn chờ duyệt</p>
+                <div className="text-2xl font-bold">{pendingOrdersCount}</div>
+                <p className="text-sm text-slate-300">Don cho duyet</p>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-500">Tổng thu nhập dự kiến</p>
-              <Coins className="text-amber-500" size={20} />
-            </div>
-            <p className="mt-4 text-3xl font-bold text-slate-900">
-              {totalIncome.toLocaleString('vi-VN')}đ
-            </p>
-            <p className="text-xs text-emerald-500 mt-1">Bao gồm đơn đã duyệt & thu nhập thủ công</p>
-          </div>
-          <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-500">Đơn chờ duyệt</p>
-              <ListChecks className="text-blue-500" size={20} />
-            </div>
-            <p className="mt-4 text-3xl font-bold text-slate-900">{pendingOrders.length}</p>
-            <p className="text-xs text-slate-500 mt-1">Theo dõi trạng thái từng đơn hàng</p>
-          </div>
-          <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-500">Nhân viên trực tuyến</p>
-              <Users className="text-purple-500" size={20} />
-            </div>
-            <p className="mt-4 text-3xl font-bold text-slate-900">3</p>
-            <p className="text-xs text-slate-500 mt-1">Giao ca đầy đủ</p>
-          </div>
-          <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-slate-500">Bài đăng thông báo</p>
-              <FilePlus className="text-rose-500" size={20} />
-            </div>
-            <p className="mt-4 text-3xl font-bold text-slate-900">{announcements.length}</p>
-            <p className="text-xs text-slate-500 mt-1">Tin tức đã lên lịch</p>
-          </div>
+        {/* Tabs */}
+        <div className="flex gap-2 flex-wrap">
+          {[
+            { id: 'dashboard', label: 'Tong quan', icon: BarChart3 },
+            { id: 'products', label: 'San pham', icon: FolderPlus },
+            { id: 'orders', label: 'Don hang', icon: PackageCheck },
+            { id: 'reviews', label: 'Danh gia', icon: MessageSquare },
+            { id: 'announcements', label: 'Thong bao', icon: FilePlus },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as TabType)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-2xl font-medium transition-all ${
+                activeTab === tab.id
+                  ? 'bg-slate-900 text-white shadow-lg'
+                  : 'bg-white text-slate-600 hover:bg-slate-100'
+              }`}
+            >
+              <tab.icon size={18} />
+              {tab.label}
+            </button>
+          ))}
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
-          <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-            <div className="flex items-center gap-3 mb-6">
-              <FolderPlus className="text-slate-900" />
-              <div>
-                <h2 className="text-xl font-semibold">Thêm mặt hàng nhanh</h2>
-                <p className="text-sm text-slate-500">Ghi nhận sản phẩm mới để đội nội dung cập nhật.</p>
+        {/* Dashboard Tab */}
+        {activeTab === 'dashboard' && (
+          <div className="space-y-8">
+            {/* Stats Cards */}
+            <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+              <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-slate-500">Tong doanh thu</p>
+                  <Coins className="text-amber-500" size={20} />
+                </div>
+                <p className="mt-4 text-3xl font-bold text-slate-900">
+                  {ordersSummary.totalRevenue?.toLocaleString('vi-VN') || 0}d
+                </p>
+                <p className="text-xs text-emerald-500 mt-1">Tu don da giao & hoan thanh</p>
+              </div>
+              <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-slate-500">Don cho duyet</p>
+                  <ListChecks className="text-blue-500" size={20} />
+                </div>
+                <p className="mt-4 text-3xl font-bold text-slate-900">{pendingOrdersCount}</p>
+                <p className="text-xs text-slate-500 mt-1">Can xu ly</p>
+              </div>
+              <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-slate-500">San pham het hang</p>
+                  <PackageCheck className="text-rose-500" size={20} />
+                </div>
+                <p className="mt-4 text-3xl font-bold text-slate-900">{productsSummary.outOfStock}</p>
+                <p className="text-xs text-slate-500 mt-1">Can nhap them</p>
+              </div>
+              <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-slate-500">Danh gia cho duyet</p>
+                  <MessageSquare className="text-purple-500" size={20} />
+                </div>
+                <p className="mt-4 text-3xl font-bold text-slate-900">{reviewsSummary.pending}</p>
+                <p className="text-xs text-slate-500 mt-1">Can kiem duyet</p>
               </div>
             </div>
-            <form className="grid gap-4 md:grid-cols-2" onSubmit={handleAddProduct}>
-              <input
-                required
-                value={productForm.name}
-                onChange={(event) => setProductForm({ ...productForm, name: event.target.value })}
-                placeholder="Tên sản phẩm"
-                className="input-field"
-              />
-              <input
-                required
-                value={productForm.sku}
-                onChange={(event) => setProductForm({ ...productForm, sku: event.target.value })}
-                placeholder="Mã SKU"
-                className="input-field"
-              />
-              <input
-                required
-                type="number"
-                min={0}
-                value={productForm.price}
-                onChange={(event) => setProductForm({ ...productForm, price: event.target.value })}
-                placeholder="Giá bán"
-                className="input-field"
-              />
-              <input
-                required
-                type="number"
-                min={0}
-                value={productForm.stock}
-                onChange={(event) => setProductForm({ ...productForm, stock: event.target.value })}
-                placeholder="Tồn kho"
-                className="input-field"
-              />
-              <input
-                required
-                value={productForm.category}
-                onChange={(event) => setProductForm({ ...productForm, category: event.target.value })}
-                placeholder="Dòng sản phẩm"
-                className="input-field md:col-span-2"
-              />
-              <button
-                type="submit"
-                className="md:col-span-2 rounded-2xl bg-slate-900 py-3 text-sm font-semibold text-white shadow-lg hover:bg-slate-800"
-              >
-                Lưu mặt hàng mới
-              </button>
-            </form>
-          </div>
 
-          <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-            <div className="flex items-center gap-3 mb-6">
-              <BarChart3 className="text-slate-900" />
-              <div>
-                <h2 className="text-xl font-semibold">Tính thu nhập</h2>
-                <p className="text-sm text-slate-500">Thêm các nguồn thu bổ sung ngoài đơn đã duyệt.</p>
+            {/* Quick Actions */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
+                <h3 className="text-lg font-semibold mb-4">San pham sap het hang</h3>
+                <div className="space-y-3">
+                  {products
+                    .filter((p) => p.stockQuantity <= 10)
+                    .slice(0, 5)
+                    .map((product) => (
+                      <div key={product.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50">
+                        <div>
+                          <p className="font-medium text-slate-900">{product.name}</p>
+                          <p className="text-sm text-slate-500">{product.category?.name}</p>
+                        </div>
+                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                          product.stockQuantity === 0 ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600'
+                        }`}>
+                          Con {product.stockQuantity}
+                        </span>
+                      </div>
+                    ))}
+                  {products.filter((p) => p.stockQuantity <= 10).length === 0 && (
+                    <p className="text-slate-500 text-center py-4">Khong co san pham nao sap het hang</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
+                <h3 className="text-lg font-semibold mb-4">Don hang gan day</h3>
+                <div className="space-y-3">
+                  {orders.slice(0, 5).map((order) => (
+                    <div key={order.id} className="flex items-center justify-between p-3 rounded-xl bg-slate-50">
+                      <div>
+                        <p className="font-medium text-slate-900">#{order.orderNumber}</p>
+                        <p className="text-sm text-slate-500">{order.customerName}</p>
+                      </div>
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${ORDER_STATUS_MAP[order.status]?.color}`}>
+                        {ORDER_STATUS_MAP[order.status]?.label}
+                      </span>
+                    </div>
+                  ))}
+                  {orders.length === 0 && (
+                    <p className="text-slate-500 text-center py-4">Chua co don hang nao</p>
+                  )}
+                </div>
               </div>
             </div>
-            <div className="rounded-2xl bg-slate-50 p-4 mb-4">
-              <p className="text-xs uppercase tracking-wide text-slate-500">Tổng cộng</p>
-              <p className="text-3xl font-bold text-slate-900">{totalIncome.toLocaleString('vi-VN')}đ</p>
-              <p className="text-xs text-slate-500">Trong đó đơn đã duyệt đóng góp {approvedOrdersIncome.toLocaleString('vi-VN')}đ</p>
-            </div>
-            <form className="space-y-3" onSubmit={handleIncomeRecord}>
-              <input
-                required
-                value={manualIncome.source}
-                onChange={(event) => setManualIncome({ ...manualIncome, source: event.target.value })}
-                placeholder="Nguồn thu (ví dụ: hội chợ, kênh cộng tác viên)"
-                className="input-field"
-              />
-              <input
-                required
-                type="number"
-                min={0}
-                value={manualIncome.amount}
-                onChange={(event) => setManualIncome({ ...manualIncome, amount: event.target.value })}
-                placeholder="Số tiền"
-                className="input-field"
-              />
-              <button
-                type="submit"
-                className="w-full rounded-2xl bg-slate-900 py-3 text-sm font-semibold text-white hover:bg-slate-800"
-              >
-                Ghi nhận thu nhập
-              </button>
-            </form>
-            <ul className="mt-6 space-y-3 text-sm">
-              {incomeRecords.length === 0 && (
-                <li className="rounded-2xl border border-dashed border-slate-200 px-4 py-3 text-slate-400 text-center">
-                  Chưa có nguồn thu bổ sung nào được ghi nhận
-                </li>
-              )}
-              {incomeRecords.map((record) => (
-                <li
-                  key={`${record.source}-${record.amount}`}
-                  className="flex items-center justify-between rounded-2xl border border-slate-100 px-4 py-3 text-slate-700"
+          </div>
+        )}
+
+        {/* Products Tab */}
+        {activeTab === 'products' && (
+          <div className="space-y-6">
+            {/* Actions */}
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Quan ly san pham ({productsSummary.total})</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={loadProducts}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
                 >
-                  <span>{record.source}</span>
-                  <span className="font-semibold">+{record.amount.toLocaleString('vi-VN')}đ</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div className="grid gap-8 lg:grid-cols-2">
-          <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-            <div className="flex items-center gap-3 mb-6">
-              <PackageCheck className="text-slate-900" />
-              <div>
-                <h2 className="text-xl font-semibold">Duyệt đơn</h2>
-                <p className="text-sm text-slate-500">Kiểm tra nguồn kênh và xác nhận thanh toán.</p>
+                  <RefreshCw size={16} className={productsLoading ? 'animate-spin' : ''} />
+                  Lam moi
+                </button>
+                <button
+                  onClick={() => {
+                    resetProductForm();
+                    setShowProductForm(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                >
+                  <Plus size={16} />
+                  Them san pham
+                </button>
               </div>
             </div>
-            <div className="space-y-4">
-              {orders.map((order) => (
-                <div key={order.id} className="rounded-2xl border border-slate-100 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm text-slate-500">#{order.id} • {order.channel}</p>
-                      <p className="text-lg font-semibold text-slate-900">{order.customer}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-slate-500">Giá trị</p>
-                      <p className="text-lg font-semibold text-slate-900">
-                        {order.total.toLocaleString('vi-VN')}đ
-                      </p>
-                    </div>
+
+            {/* Product Form Modal */}
+            {showProductForm && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <div className="p-6 border-b border-slate-100">
+                    <h3 className="text-xl font-semibold">
+                      {editingProduct ? 'Chinh sua san pham' : 'Them san pham moi'}
+                    </h3>
                   </div>
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                    <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        order.status === 'approved'
-                          ? 'bg-emerald-50 text-emerald-600'
-                          : order.status === 'rejected'
-                          ? 'bg-rose-50 text-rose-600'
-                          : 'bg-amber-50 text-amber-600'
-                      }`}
-                    >
-                      {order.status === 'approved'
-                        ? 'Đã duyệt'
-                        : order.status === 'rejected'
-                        ? 'Từ chối'
-                        : 'Đang chờ'}
-                    </span>
-                    <div className="flex gap-2">
+                  <form onSubmit={handleProductSubmit} className="p-6 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Ten san pham *</label>
+                      <input
+                        required
+                        value={productForm.name}
+                        onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
+                        className="input-field"
+                        placeholder="VD: Figure Gojo Satoru 1/7"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Mo ta *</label>
+                      <textarea
+                        required
+                        rows={4}
+                        value={productForm.description}
+                        onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                        className="input-field"
+                        placeholder="Mo ta chi tiet san pham (it nhat 20 ky tu)"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Gia ban *</label>
+                        <input
+                          required
+                          type="number"
+                          min={0}
+                          value={productForm.price}
+                          onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
+                          className="input-field"
+                          placeholder="VND"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Gia goc (neu giam gia)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={productForm.comparePrice}
+                          onChange={(e) => setProductForm({ ...productForm, comparePrice: e.target.value })}
+                          className="input-field"
+                          placeholder="VND"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Ton kho *</label>
+                        <input
+                          required
+                          type="number"
+                          min={0}
+                          value={productForm.stock}
+                          onChange={(e) => setProductForm({ ...productForm, stock: e.target.value })}
+                          className="input-field"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-slate-700 mb-1">Danh muc *</label>
+                        <select
+                          required
+                          value={productForm.categoryId}
+                          onChange={(e) => setProductForm({ ...productForm, categoryId: e.target.value })}
+                          className="input-field"
+                        >
+                          <option value="">Chon danh muc</option>
+                          {categories.map((cat) => (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Images */}
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Hinh anh *</label>
+                      <div className="flex gap-2 mb-2">
+                        <input
+                          type="url"
+                          value={newImageUrl}
+                          onChange={(e) => setNewImageUrl(e.target.value)}
+                          className="input-field flex-1"
+                          placeholder="Nhap URL hinh anh"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleAddImage}
+                          className="px-4 py-2 bg-slate-900 text-white rounded-xl hover:bg-slate-800"
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {productForm.images.map((img, idx) => (
+                          <div key={idx} className="relative group">
+                            <img src={img} alt="" className="w-20 h-20 object-cover rounded-lg" />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(idx)}
+                              className="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <X size={14} className="mx-auto" />
+                            </button>
+                          </div>
+                        ))}
+                        {productForm.images.length === 0 && (
+                          <div className="w-20 h-20 border-2 border-dashed border-slate-200 rounded-lg flex items-center justify-center text-slate-400">
+                            <ImageIcon size={24} />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Checkboxes */}
+                    <div className="flex gap-6">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={productForm.isActive}
+                          onChange={(e) => setProductForm({ ...productForm, isActive: e.target.checked })}
+                          className="w-4 h-4 rounded"
+                        />
+                        <span className="text-sm">Hien thi san pham</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={productForm.featured}
+                          onChange={(e) => setProductForm({ ...productForm, featured: e.target.checked })}
+                          className="w-4 h-4 rounded"
+                        />
+                        <span className="text-sm">San pham noi bat</span>
+                      </label>
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
                       <button
-                        onClick={() => handleOrderDecision(order.id, 'approved')}
-                        className="rounded-full bg-emerald-500/10 px-4 py-2 text-xs font-semibold text-emerald-600 hover:bg-emerald-500/20"
+                        type="button"
+                        onClick={() => {
+                          setShowProductForm(false);
+                          resetProductForm();
+                        }}
+                        className="flex-1 py-3 rounded-2xl border border-slate-200 text-slate-600 hover:bg-slate-50"
                       >
-                        Chấp nhận
+                        Huy
                       </button>
                       <button
-                        onClick={() => handleOrderDecision(order.id, 'rejected')}
-                        className="rounded-full bg-rose-500/10 px-4 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-500/20"
+                        type="submit"
+                        disabled={productsLoading}
+                        className="flex-1 py-3 rounded-2xl bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 flex items-center justify-center gap-2"
                       >
-                        Từ chối
+                        {productsLoading && <Loader2 size={16} className="animate-spin" />}
+                        {editingProduct ? 'Cap nhat' : 'Them san pham'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Products List */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="text-left p-4 font-medium text-slate-600">San pham</th>
+                      <th className="text-left p-4 font-medium text-slate-600">Danh muc</th>
+                      <th className="text-right p-4 font-medium text-slate-600">Gia</th>
+                      <th className="text-center p-4 font-medium text-slate-600">Ton kho</th>
+                      <th className="text-center p-4 font-medium text-slate-600">Trang thai</th>
+                      <th className="text-center p-4 font-medium text-slate-600">Thao tac</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {products.map((product) => (
+                      <tr key={product.id} className="hover:bg-slate-50">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            {product.images[0] && (
+                              <img src={product.images[0]} alt="" className="w-12 h-12 object-cover rounded-lg" />
+                            )}
+                            <div>
+                              <p className="font-medium text-slate-900">{product.name}</p>
+                              <p className="text-sm text-slate-500">{product.slug}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4 text-slate-600">{product.category?.name}</td>
+                        <td className="p-4 text-right">
+                          <p className="font-medium text-slate-900">{Number(product.price).toLocaleString('vi-VN')}d</p>
+                          {product.comparePrice && (
+                            <p className="text-sm text-slate-400 line-through">
+                              {Number(product.comparePrice).toLocaleString('vi-VN')}d
+                            </p>
+                          )}
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            product.stockQuantity === 0
+                              ? 'bg-rose-100 text-rose-600'
+                              : product.stockQuantity <= 10
+                              ? 'bg-amber-100 text-amber-600'
+                              : 'bg-emerald-100 text-emerald-600'
+                          }`}>
+                            {product.stockQuantity}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <button
+                            onClick={() => handleToggleProductStatus(product)}
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              product.isActive
+                                ? 'bg-emerald-100 text-emerald-600'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            {product.isActive ? 'Dang ban' : 'An'}
+                          </button>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleEditProduct(product)}
+                              className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"
+                              title="Chinh sua"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="p-2 rounded-lg hover:bg-rose-100 text-rose-600"
+                              title="Xoa"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {products.length === 0 && (
+                <div className="p-8 text-center text-slate-500">
+                  {productsLoading ? (
+                    <Loader2 size={24} className="animate-spin mx-auto" />
+                  ) : (
+                    'Chua co san pham nao'
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Orders Tab */}
+        {activeTab === 'orders' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Quan ly don hang ({ordersSummary.total})</h2>
+              <button
+                onClick={loadOrders}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+              >
+                <RefreshCw size={16} className={ordersLoading ? 'animate-spin' : ''} />
+                Lam moi
+              </button>
+            </div>
+
+            {/* Shipping Modal */}
+            {shippingModal && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-2xl w-full max-w-md p-6">
+                  <h3 className="text-lg font-semibold mb-4">Thong tin van chuyen</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Ma van don *</label>
+                      <input
+                        value={shippingInfo.trackingCode}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, trackingCode: e.target.value })}
+                        className="input-field"
+                        placeholder="VD: SPXVN123456789"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Don vi van chuyen *</label>
+                      <select
+                        value={shippingInfo.carrier}
+                        onChange={(e) => setShippingInfo({ ...shippingInfo, carrier: e.target.value })}
+                        className="input-field"
+                      >
+                        <option value="">Chon don vi</option>
+                        <option value="GHN">Giao Hang Nhanh</option>
+                        <option value="GHTK">Giao Hang Tiet Kiem</option>
+                        <option value="SPX">Shopee Express</option>
+                        <option value="JT">J&T Express</option>
+                        <option value="VNPost">VNPost</option>
+                        <option value="Viettel">Viettel Post</option>
+                        <option value="Ninja">Ninja Van</option>
+                        <option value="Other">Khac</option>
+                      </select>
+                    </div>
+                    <div className="flex gap-3 pt-2">
+                      <button
+                        onClick={() => {
+                          setShippingModal(null);
+                          setShippingInfo({ trackingCode: '', carrier: '' });
+                        }}
+                        className="flex-1 py-2 rounded-xl border border-slate-200 text-slate-600"
+                      >
+                        Huy
+                      </button>
+                      <button
+                        onClick={handleShippingSubmit}
+                        className="flex-1 py-2 rounded-xl bg-slate-900 text-white"
+                      >
+                        Xac nhan
                       </button>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-            <div className="flex items-center gap-3 mb-6">
-              <ListChecks className="text-slate-900" />
-              <div>
-                <h2 className="text-xl font-semibold">Quản lý mặt hàng</h2>
-                <p className="text-sm text-slate-500">Điều chỉnh tồn kho và trạng thái bán.</p>
               </div>
-            </div>
-            <div className="space-y-4">
-              {products.map((product) => (
-                <div key={product.id} className="rounded-2xl border border-slate-100 p-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{product.name}</p>
-                      <p className="text-xs text-slate-500">{product.sku} • {product.category}</p>
+            )}
+
+            {/* Orders List */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-100">
+              <div className="divide-y divide-slate-100">
+                {orders.map((order) => (
+                  <div key={order.id} className="p-4">
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div>
+                        <p className="text-sm text-slate-500">#{order.orderNumber}</p>
+                        <p className="font-semibold text-slate-900">{order.customerName}</p>
+                        <p className="text-sm text-slate-500">{order.customerPhone}</p>
+                        <p className="text-sm text-slate-500">{order._count.orderItems} san pham</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-slate-900">
+                          {Number(order.totalAmount).toLocaleString('vi-VN')}d
+                        </p>
+                        <p className="text-sm text-slate-500">
+                          {new Date(order.createdAt).toLocaleDateString('vi-VN')}
+                        </p>
+                      </div>
                     </div>
-                    <div className="text-right text-sm">
-                      <p className="text-slate-500">Giá</p>
-                      <p className="font-semibold text-slate-900">{product.price.toLocaleString('vi-VN')}đ</p>
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${ORDER_STATUS_MAP[order.status]?.color}`}>
+                        {ORDER_STATUS_MAP[order.status]?.label}
+                      </span>
+                      <div className="flex gap-2">
+                        {ORDER_STATUS_MAP[order.status]?.nextStatus?.map((nextStatus) => (
+                          <button
+                            key={nextStatus}
+                            onClick={() => handleOrderStatusChange(order.id, nextStatus)}
+                            className={`px-4 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                              nextStatus === 'CANCELLED'
+                                ? 'bg-rose-100 text-rose-600 hover:bg-rose-200'
+                                : 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
+                            }`}
+                          >
+                            {ORDER_STATUS_MAP[nextStatus]?.label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-slate-500">Tồn kho:</span>
-                      <span className="font-semibold text-slate-900">{product.stock}</span>
-                      <div className="flex gap-1">
+                ))}
+              </div>
+              {orders.length === 0 && (
+                <div className="p-8 text-center text-slate-500">
+                  {ordersLoading ? (
+                    <Loader2 size={24} className="animate-spin mx-auto" />
+                  ) : (
+                    'Chua co don hang nao'
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Reviews Tab */}
+        {activeTab === 'reviews' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">
+                Quan ly danh gia ({reviewsSummary.total}) - Cho duyet: {reviewsSummary.pending}
+              </h2>
+              <button
+                onClick={loadReviews}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+              >
+                <RefreshCw size={16} className={reviewsLoading ? 'animate-spin' : ''} />
+                Lam moi
+              </button>
+            </div>
+
+            {/* Reviews List */}
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <div key={review.id} className="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
+                  <div className="flex flex-wrap items-start justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-semibold">
+                        {review.user.fullName?.charAt(0) || 'U'}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900">{review.user.fullName}</p>
+                        <p className="text-sm text-slate-500">{review.user.email}</p>
+                        <div className="flex items-center gap-1 mt-1">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              size={14}
+                              className={star <= review.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-slate-500">
+                        {new Date(review.createdAt).toLocaleDateString('vi-VN')}
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                        {review.isVerified && (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-600">Da mua</span>
+                        )}
+                        {review.isPinned && (
+                          <span className="px-2 py-0.5 rounded-full text-xs bg-amber-100 text-amber-600">Ghim</span>
+                        )}
+                        <span className={`px-2 py-0.5 rounded-full text-xs ${
+                          review.isApproved ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'
+                        }`}>
+                          {review.isApproved ? 'Da duyet' : 'Cho duyet'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 p-4 rounded-xl bg-slate-50">
+                    <p className="text-sm text-slate-500 mb-1">San pham: <span className="font-medium text-slate-700">{review.product.name}</span></p>
+                    {review.title && <p className="font-medium text-slate-900">{review.title}</p>}
+                    <p className="text-slate-600 mt-1">{review.comment}</p>
+                    {review.images.length > 0 && (
+                      <div className="flex gap-2 mt-3">
+                        {review.images.map((img, idx) => (
+                          <img key={idx} src={img} alt="" className="w-16 h-16 object-cover rounded-lg" />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-end gap-2">
+                    <button
+                      onClick={() => handleToggleReviewApproval(review)}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                        review.isApproved
+                          ? 'bg-rose-100 text-rose-600 hover:bg-rose-200'
+                          : 'bg-emerald-100 text-emerald-600 hover:bg-emerald-200'
+                      }`}
+                    >
+                      {review.isApproved ? <EyeOff size={14} /> : <Eye size={14} />}
+                      {review.isApproved ? 'Bo duyet' : 'Duyet'}
+                    </button>
+                    <button
+                      onClick={() => handleToggleReviewPin(review)}
+                      className={`flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+                        review.isPinned
+                          ? 'bg-amber-100 text-amber-600 hover:bg-amber-200'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      <Pin size={14} />
+                      {review.isPinned ? 'Bo ghim' : 'Ghim'}
+                    </button>
+                    <button
+                      onClick={() => handleDeleteReview(review.id)}
+                      className="flex items-center gap-1 px-4 py-2 rounded-xl text-sm font-medium bg-rose-100 text-rose-600 hover:bg-rose-200 transition-colors"
+                    >
+                      <Trash2 size={14} />
+                      Xoa
+                    </button>
+                  </div>
+                </div>
+              ))}
+              {reviews.length === 0 && (
+                <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-8 text-center text-slate-500">
+                  {reviewsLoading ? (
+                    <Loader2 size={24} className="animate-spin mx-auto" />
+                  ) : (
+                    'Chua co danh gia nao'
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Announcements Tab */}
+        {activeTab === 'announcements' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">Quan ly thong bao ({announcements.length})</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={loadAnnouncements}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+                >
+                  <RefreshCw size={16} className={announcementsLoading ? 'animate-spin' : ''} />
+                  Lam moi
+                </button>
+                <button
+                  onClick={() => setShowAnnouncementForm(true)}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                >
+                  <Plus size={16} />
+                  Them thong bao
+                </button>
+              </div>
+            </div>
+
+            {/* Announcement Form Modal */}
+            {showAnnouncementForm && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-3xl w-full max-w-lg">
+                  <div className="p-6 border-b border-slate-100">
+                    <h3 className="text-xl font-semibold">Them thong bao moi</h3>
+                  </div>
+                  <form onSubmit={handleAnnouncementSubmit} className="p-6 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Tieu de *</label>
+                      <input
+                        required
+                        value={announcementForm.title}
+                        onChange={(e) => setAnnouncementForm({ ...announcementForm, title: e.target.value })}
+                        className="input-field"
+                        placeholder="Tieu de thong bao"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Tom tat *</label>
+                      <textarea
+                        required
+                        rows={2}
+                        value={announcementForm.summary}
+                        onChange={(e) => setAnnouncementForm({ ...announcementForm, summary: e.target.value })}
+                        className="input-field"
+                        placeholder="Tom tat ngan gon (it nhat 10 ky tu)"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-1">Noi dung chi tiet</label>
+                      <textarea
+                        rows={4}
+                        value={announcementForm.content}
+                        onChange={(e) => setAnnouncementForm({ ...announcementForm, content: e.target.value })}
+                        className="input-field"
+                        placeholder="Noi dung chi tiet (tuy chon)"
+                      />
+                    </div>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={announcementForm.isActive}
+                        onChange={(e) => setAnnouncementForm({ ...announcementForm, isActive: e.target.checked })}
+                        className="w-4 h-4 rounded"
+                      />
+                      <span className="text-sm">Hien thi thong bao</span>
+                    </label>
+                    <div className="flex gap-3 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowAnnouncementForm(false);
+                          resetAnnouncementForm();
+                        }}
+                        className="flex-1 py-3 rounded-2xl border border-slate-200 text-slate-600 hover:bg-slate-50"
+                      >
+                        Huy
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={announcementsLoading}
+                        className="flex-1 py-3 rounded-2xl bg-slate-900 text-white hover:bg-slate-800 disabled:opacity-50 flex items-center justify-center gap-2"
+                      >
+                        {announcementsLoading && <Loader2 size={16} className="animate-spin" />}
+                        Dang thong bao
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Announcements List */}
+            <div className="space-y-4">
+              {announcements.map((announcement) => (
+                <div key={announcement.id} className="bg-white rounded-2xl shadow-lg border border-slate-100 p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-slate-500">
+                        {new Date(announcement.createdAt).toLocaleDateString('vi-VN')}
+                      </p>
+                      <h3 className="text-lg font-semibold text-slate-900 mt-1">{announcement.title}</h3>
+                      <p className="text-slate-600 mt-2">{announcement.summary}</p>
+                      {announcement.content && (
+                        <p className="text-sm text-slate-500 mt-2 line-clamp-2">{announcement.content}</p>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        announcement.isActive
+                          ? 'bg-emerald-100 text-emerald-600'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}>
+                        {announcement.isActive ? 'Hien thi' : 'An'}
+                      </span>
+                      <div className="flex gap-2">
                         <button
-                          onClick={() => handleAdjustStock(product.id, 1)}
-                          className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold"
+                          onClick={() => handleToggleAnnouncementStatus(announcement)}
+                          className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"
+                          title={announcement.isActive ? 'An' : 'Hien thi'}
                         >
-                          +1
+                          {announcement.isActive ? <EyeOff size={16} /> : <Eye size={16} />}
                         </button>
                         <button
-                          onClick={() => handleAdjustStock(product.id, -1)}
-                          className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold"
+                          onClick={() => handleDeleteAnnouncement(announcement.id)}
+                          className="p-2 rounded-lg hover:bg-rose-100 text-rose-600"
+                          title="Xoa"
                         >
-                          -1
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </div>
-                    <select
-                      value={product.status}
-                      onChange={(event) => handleUpdateProductStatus(product.id, event.target.value as 'active' | 'inactive')}
-                      className="rounded-full border border-slate-200 px-4 py-2 text-xs font-semibold"
-                    >
-                      <option value="active">Đang bán</option>
-                      <option value="inactive">Tạm ẩn</option>
-                    </select>
                   </div>
                 </div>
               ))}
+              {announcements.length === 0 && (
+                <div className="bg-white rounded-2xl shadow-lg border border-slate-100 p-8 text-center text-slate-500">
+                  {announcementsLoading ? (
+                    <Loader2 size={24} className="animate-spin mx-auto" />
+                  ) : (
+                    'Chua co thong bao nao'
+                  )}
+                </div>
+              )}
             </div>
           </div>
-        </div>
-
-        <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-          <div className="flex items-center gap-3 mb-6">
-            <LockKeyhole className="text-slate-900" />
-            <div>
-              <h2 className="text-xl font-semibold">Đăng thông tin nội bộ</h2>
-              <p className="text-sm text-slate-500">Biên tập thông báo cho cộng đồng hoặc nội bộ cửa hàng.</p>
-            </div>
-          </div>
-          <form className="grid gap-4 md:grid-cols-2" onSubmit={handleAnnouncementSubmit}>
-            <input
-              required
-              value={announcementForm.title}
-              onChange={(event) => setAnnouncementForm({ ...announcementForm, title: event.target.value })}
-              placeholder="Tiêu đề thông báo"
-              className="input-field md:col-span-2"
-            />
-            <input
-              required
-              value={announcementForm.summary}
-              onChange={(event) => setAnnouncementForm({ ...announcementForm, summary: event.target.value })}
-              placeholder="Tóm tắt ngắn"
-              className="input-field md:col-span-2"
-            />
-            <textarea
-              rows={4}
-              value={announcementForm.content}
-              onChange={(event) => setAnnouncementForm({ ...announcementForm, content: event.target.value })}
-              placeholder="Nội dung chi tiết (tùy chọn)"
-              className="input-field md:col-span-2"
-            />
-            <button
-              type="submit"
-              className="md:col-span-2 rounded-2xl bg-slate-900 py-3 text-sm font-semibold text-white hover:bg-slate-800"
-            >
-              Đăng thông báo
-            </button>
-          </form>
-          <div className="mt-8 grid gap-4 lg:grid-cols-2">
-            {announcements.map((announcement) => (
-              <div key={announcement.id} className="rounded-2xl border border-slate-100 p-4">
-                <p className="text-xs uppercase tracking-wide text-slate-500">{announcement.createdAt}</p>
-                <h3 className="mt-2 text-lg font-semibold text-slate-900">{announcement.title}</h3>
-                <p className="mt-2 text-sm text-slate-600">{announcement.summary}</p>
-              </div>
-            ))}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
