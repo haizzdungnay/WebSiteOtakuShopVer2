@@ -4,6 +4,19 @@ import { useState, useEffect, useMemo, FormEvent } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Cookies from 'js-cookie';
 import {
+  useAdminProducts,
+  useAdminOrders,
+  useAdminReviews,
+  useAdminCategories,
+  useAdminAnnouncements,
+  Product,
+  Order,
+  Review,
+  Category,
+  Announcement,
+  CreateProductData,
+} from '@/hooks/useAdminApi';
+import {
   BarChart3,
   Coins,
   Edit,
@@ -435,15 +448,15 @@ export default function AdminPage() {
           <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center text-slate-500">
             <ShieldAlert size={32} />
           </div>
-          <h1 className="text-2xl font-semibold text-slate-900 mb-3">Không có quyền truy cập</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 mb-3">Khong co quyen truy cap</h1>
           <p className="text-slate-600 mb-6">
-            Khu vực này chỉ dành cho quản trị viên. Vui lòng đăng nhập bằng tài khoản quản trị để truy cập.
+            Khu vuc nay chi danh cho quan tri vien. Vui long dang nhap bang tai khoan quan tri de truy cap.
           </p>
           <Link
             href="/login"
             className="inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-lg hover:bg-slate-800"
           >
-            Đăng nhập
+            Dang nhap
           </Link>
         </div>
       </section>
@@ -480,8 +493,8 @@ export default function AdminPage() {
                 <p className="text-sm text-slate-300">Sản phẩm</p>
               </div>
               <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
-                <div className="text-2xl font-bold">{pendingOrders.length}</div>
-                <p className="text-sm text-slate-300">Đơn chờ duyệt</p>
+                <div className="text-2xl font-bold">{pendingOrdersCount}</div>
+                <p className="text-sm text-slate-300">Don cho duyet</p>
               </div>
             </div>
           </div>
@@ -545,6 +558,100 @@ export default function AdminPage() {
                 </div>
                 <p className="mt-4 text-3xl font-bold text-slate-900">{stats?.pendingOrders || 0}</p>
               </div>
+            )}
+
+            {/* Products List */}
+            <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="text-left p-4 font-medium text-slate-600">San pham</th>
+                      <th className="text-left p-4 font-medium text-slate-600">Danh muc</th>
+                      <th className="text-right p-4 font-medium text-slate-600">Gia</th>
+                      <th className="text-center p-4 font-medium text-slate-600">Ton kho</th>
+                      <th className="text-center p-4 font-medium text-slate-600">Trang thai</th>
+                      <th className="text-center p-4 font-medium text-slate-600">Thao tac</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {products.map((product) => (
+                      <tr key={product.id} className="hover:bg-slate-50">
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            {product.images[0] && (
+                              <img src={product.images[0]} alt="" className="w-12 h-12 object-cover rounded-lg" />
+                            )}
+                            <div>
+                              <p className="font-medium text-slate-900">{product.name}</p>
+                              <p className="text-sm text-slate-500">{product.slug}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4 text-slate-600">{product.category?.name}</td>
+                        <td className="p-4 text-right">
+                          <p className="font-medium text-slate-900">{Number(product.price).toLocaleString('vi-VN')}d</p>
+                          {product.comparePrice && (
+                            <p className="text-sm text-slate-400 line-through">
+                              {Number(product.comparePrice).toLocaleString('vi-VN')}d
+                            </p>
+                          )}
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                            product.stockQuantity === 0
+                              ? 'bg-rose-100 text-rose-600'
+                              : product.stockQuantity <= 10
+                              ? 'bg-amber-100 text-amber-600'
+                              : 'bg-emerald-100 text-emerald-600'
+                          }`}>
+                            {product.stockQuantity}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <button
+                            onClick={() => handleToggleProductStatus(product)}
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              product.isActive
+                                ? 'bg-emerald-100 text-emerald-600'
+                                : 'bg-slate-100 text-slate-600'
+                            }`}
+                          >
+                            {product.isActive ? 'Dang ban' : 'An'}
+                          </button>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleEditProduct(product)}
+                              className="p-2 rounded-lg hover:bg-slate-100 text-slate-600"
+                              title="Chinh sua"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteProduct(product.id)}
+                              className="p-2 rounded-lg hover:bg-rose-100 text-rose-600"
+                              title="Xoa"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {products.length === 0 && (
+                <div className="p-8 text-center text-slate-500">
+                  {productsLoading ? (
+                    <Loader2 size={24} className="animate-spin mx-auto" />
+                  ) : (
+                    'Chua co san pham nao'
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Recent Orders */}
@@ -578,6 +685,15 @@ export default function AdminPage() {
                   </tbody>
                 </table>
               </div>
+              {orders.length === 0 && (
+                <div className="p-8 text-center text-slate-500">
+                  {ordersLoading ? (
+                    <Loader2 size={24} className="animate-spin mx-auto" />
+                  ) : (
+                    'Chua co don hang nao'
+                  )}
+                </div>
+              )}
             </div>
           </>
         )}
@@ -761,7 +877,7 @@ export default function AdminPage() {
                         </button>
                       )}
                     </div>
-                  </div>
+                  </form>
                 </div>
               ))}
               {orders.length === 0 && (
