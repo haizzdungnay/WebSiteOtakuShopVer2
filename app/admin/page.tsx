@@ -9,11 +9,6 @@ import {
   useAdminReviews,
   useAdminCategories,
   useAdminAnnouncements,
-  Product,
-  Order,
-  Review,
-  Category,
-  Announcement,
   CreateProductData,
 } from '@/hooks/useAdminApi';
 import {
@@ -337,6 +332,26 @@ export default function AdminPage() {
     setShowProductModal(true);
   };
 
+  // Handle Toggle Product Status (Active/Inactive)
+  const handleToggleProductStatus = async (product: Product) => {
+    try {
+      const response = await fetch(`/api/admin/products/${product.id}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          ...product,
+          isActive: !product.isActive,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchProducts();
+      }
+    } catch (err) {
+      console.error('Error toggling product status:', err);
+    }
+  };
+
   // Handle Order Status Update
   const handleOrderStatusUpdate = async (orderId: string, status: string) => {
     try {
@@ -492,7 +507,7 @@ export default function AdminPage() {
             </div>
             <div className="flex items-center gap-4">
               <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
-                <div className="text-2xl font-bold">{(products || []).length}</div>
+                <div className="text-2xl font-bold">{products.length}</div>
                 <p className="text-sm text-slate-300">Sản phẩm</p>
               </div>
               <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
@@ -514,11 +529,10 @@ export default function AdminPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all ${
-                activeTab === tab.id
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-white text-slate-600 hover:bg-slate-100'
-              }`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all ${activeTab === tab.id
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-600 hover:bg-slate-100'
+                }`}
             >
               <tab.icon size={18} />
               {tab.label}
@@ -642,24 +656,22 @@ export default function AdminPage() {
                           )}
                         </td>
                         <td className="p-4 text-center">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            product.stockQuantity === 0
-                              ? 'bg-rose-100 text-rose-600'
-                              : product.stockQuantity <= 10
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${product.stockQuantity === 0
+                            ? 'bg-rose-100 text-rose-600'
+                            : product.stockQuantity <= 10
                               ? 'bg-amber-100 text-amber-600'
                               : 'bg-emerald-100 text-emerald-600'
-                          }`}>
+                            }`}>
                             {product.stockQuantity}
                           </span>
                         </td>
                         <td className="p-4 text-center">
                           <button
                             onClick={() => handleToggleProductStatus(product)}
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              product.isActive
-                                ? 'bg-emerald-100 text-emerald-600'
-                                : 'bg-slate-100 text-slate-600'
-                            }`}
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${product.isActive
+                              ? 'bg-emerald-100 text-emerald-600'
+                              : 'bg-slate-100 text-slate-600'
+                              }`}
                           >
                             {product.isActive ? 'Dang ban' : 'An'}
                           </button>
@@ -687,7 +699,7 @@ export default function AdminPage() {
                   </tbody>
                 </table>
               </div>
-              {(products || []).length === 0 && (
+              {products.length === 0 && (
                 <div className="p-8 text-center text-slate-500">
                   {loading ? (
                     <Loader2 size={24} className="animate-spin mx-auto" />
@@ -729,7 +741,7 @@ export default function AdminPage() {
                   </tbody>
                 </table>
               </div>
-              {(orders || []).length === 0 && (
+              {orders.length === 0 && (
                 <div className="p-8 text-center text-slate-500">
                   {loading ? (
                     <Loader2 size={24} className="animate-spin mx-auto" />
@@ -747,7 +759,7 @@ export default function AdminPage() {
           <div className="space-y-6">
             {/* Add Product Button */}
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Quản lý sản phẩm ({(products || []).length})</h2>
+              <h2 className="text-xl font-semibold">Quản lý sản phẩm ({products.length})</h2>
               <button
                 onClick={() => {
                   setEditingProduct(null);
@@ -777,7 +789,7 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {(products || []).map((product) => (
+                    {products.map((product) => (
                       <tr key={product.id} className="border-b border-slate-50">
                         <td className="py-3 px-4">
                           {product.images?.[0] ? (
@@ -800,9 +812,8 @@ export default function AdminPage() {
                         <td className="py-3 px-4">{formatCurrency(Number(product.price))}</td>
                         <td className="py-3 px-4">{product.stockQuantity}</td>
                         <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'
-                          }`}>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'
+                            }`}>
                             {product.isActive ? 'Đang bán' : 'Tạm ẩn'}
                           </span>
                         </td>
@@ -811,12 +822,14 @@ export default function AdminPage() {
                             <button
                               onClick={() => handleEditProduct(product)}
                               className="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100"
+                              title="Chỉnh sửa"
                             >
                               <Edit size={16} />
                             </button>
                             <button
                               onClick={() => handleDeleteProduct(product.id)}
                               className="p-2 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100"
+                              title="Xóa"
                             >
                               <Trash2 size={16} />
                             </button>
@@ -834,9 +847,9 @@ export default function AdminPage() {
         {/* Orders Tab */}
         {activeTab === 'orders' && (
           <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-            <h2 className="text-xl font-semibold mb-6">Quản lý đơn hàng ({(orders || []).length})</h2>
+            <h2 className="text-xl font-semibold mb-6">Quản lý đơn hàng ({orders.length})</h2>
             <div className="space-y-4">
-              {(orders || []).map((order) => (
+              {orders.map((order) => (
                 <div key={order.id} className="rounded-2xl border border-slate-100 p-6">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
@@ -924,7 +937,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               ))}
-              {(orders || []).length === 0 && (
+              {orders.length === 0 && (
                 <p className="text-center text-slate-500 py-8">Chưa có đơn hàng nào</p>
               )}
             </div>
@@ -934,9 +947,9 @@ export default function AdminPage() {
         {/* Reviews Tab */}
         {activeTab === 'reviews' && (
           <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-            <h2 className="text-xl font-semibold mb-6">Quản lý đánh giá ({(reviews || []).length})</h2>
+            <h2 className="text-xl font-semibold mb-6">Quản lý đánh giá ({reviews.length})</h2>
             <div className="space-y-4">
-              {(reviews || []).map((review) => (
+              {reviews.map((review) => (
                 <div key={review.id} className="rounded-2xl border border-slate-100 p-6">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
@@ -951,9 +964,8 @@ export default function AdminPage() {
                             </span>
                           ))}
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          review.isApproved ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-                        }`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${review.isApproved ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                          }`}>
                           {review.isApproved ? 'Đã duyệt' : 'Chờ duyệt'}
                         </span>
                       </div>
@@ -987,7 +999,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               ))}
-              {(reviews || []).length === 0 && (
+              {reviews.length === 0 && (
                 <p className="text-center text-slate-500 py-8">Chưa có đánh giá nào</p>
               )}
             </div>
@@ -1005,6 +1017,7 @@ export default function AdminPage() {
                 <button
                   onClick={() => setShowProductModal(false)}
                   className="p-2 rounded-full hover:bg-slate-100"
+                  title="Đóng"
                 >
                   <X size={20} />
                 </button>
@@ -1114,9 +1127,10 @@ export default function AdminPage() {
                       value={productForm.categoryId}
                       onChange={(e) => setProductForm({ ...productForm, categoryId: e.target.value })}
                       className="input-field"
+                      title="Chọn danh mục sản phẩm"
                     >
                       <option value="">Chọn danh mục</option>
-                      {(categories || []).map((cat) => (
+                      {categories.map((cat) => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                       ))}
                     </select>

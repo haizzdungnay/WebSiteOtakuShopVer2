@@ -101,7 +101,7 @@ export async function verifyAdmin(request: NextRequest): Promise<AdminUser | nul
         // 5. Verify role - hỗ trợ cả chữ hoa và chữ thường
         const roleUpper = dbUser.role?.toUpperCase()
         console.log('[verifyAdmin] Role check:', { dbRole: dbUser.role, roleUpper, isAdmin: roleUpper === 'ADMIN' })
-        
+
         if (roleUpper !== 'ADMIN') {
             console.log('[verifyAdmin] User is not admin')
             return null
