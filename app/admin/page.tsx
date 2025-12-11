@@ -493,8 +493,8 @@ export default function AdminPage() {
                 <p className="text-sm text-slate-300">Sản phẩm</p>
               </div>
               <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
-                <div className="text-2xl font-bold">{pendingOrdersCount}</div>
-                <p className="text-sm text-slate-300">Don cho duyet</p>
+                <div className="text-2xl font-bold">{pendingOrders.length}</div>
+                <p className="text-sm text-slate-300">Đơn chờ duyệt</p>
               </div>
             </div>
           </div>
@@ -686,10 +686,10 @@ export default function AdminPage() {
               </div>
               {products.length === 0 && (
                 <div className="p-8 text-center text-slate-500">
-                  {productsLoading ? (
+                  {loading ? (
                     <Loader2 size={24} className="animate-spin mx-auto" />
                   ) : (
-                    'Chua co san pham nao'
+                    'Chưa có sản phẩm nào'
                   )}
                 </div>
               )}
@@ -728,10 +728,10 @@ export default function AdminPage() {
               </div>
               {orders.length === 0 && (
                 <div className="p-8 text-center text-slate-500">
-                  {ordersLoading ? (
+                  {loading ? (
                     <Loader2 size={24} className="animate-spin mx-auto" />
                   ) : (
-                    'Chua co don hang nao'
+                    'Chưa có đơn hàng nào'
                   )}
                 </div>
               )}
