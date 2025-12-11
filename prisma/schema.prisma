@@ -12,14 +12,14 @@ datasource db {
 // CATEGORY
 // ==========================================
 model Category {
-  id          String    @id @default(cuid())
+  id          String   @id @default(cuid())
   name        String
-  slug        String    @unique
-  description String?   @db.Text
+  slug        String   @unique
+  description String?  @db.Text
   imageUrl    String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
   products Product[]
 
   @@index([slug])
@@ -30,37 +30,73 @@ model Category {
 // PRODUCT
 // ==========================================
 model Product {
-  id            String   @id @default(cuid())
-  name          String
-  slug          String   @unique
-  description   String   @db.Text
-  price         Decimal  @db.Decimal(10, 2)
-  comparePrice  Decimal? @db.Decimal(10, 2)
-  stockQuantity Int      @default(0)
-  images        String[]
-  isActive      Boolean  @default(true)
-  featured      Boolean  @default(false)
-  categoryId    String
-  
+  id               String   @id @default(cuid())
+  name             String
+  slug             String   @unique
+  shortDescription String?  @db.VarChar(600)
+  description      String   @db.Text
+  productCode      String?  @db.VarChar(64)
+  price            Decimal  @db.Decimal(12, 2)
+  comparePrice     Decimal? @db.Decimal(12, 2)
+  stockQuantity    Int      @default(0)
+  images           String[]
+  isActive         Boolean  @default(true)
+  featured         Boolean  @default(false)
+  categoryId       String
+  brandId          String?
+
+  // Pre-order system
+  preorderStatus PreorderStatus @default(NONE)
+  preorderCutoff DateTime? // Ngày hết hạn đặt trước
+  releaseDate    DateTime? // Ngày phát hành
+  releaseCountry ReleaseCountry @default(JP)
+
+  // MSRP (Manufacturer's Suggested Retail Price)
+  msrpValue    Decimal? @db.Decimal(12, 2)
+  msrpCurrency String?  @default("JPY") @db.Char(3)
+
   // Review aggregates (cached for performance)
   reviewCount   Int     @default(0)
   averageRating Decimal @default(0) @db.Decimal(2, 1)
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
-  category   Category    @relation(fields: [categoryId], references: [id])
+
+  // Relations
+  category   Category           @relation(fields: [categoryId], references: [id])
+  brand      Brand?             @relation(fields: [brandId], references: [id])
   cartItems  CartItem[]
   orderItems OrderItem[]
   wishlists  Wishlist[]
   reviews    Review[]
+  variants   ProductVariant[]
+  characters ProductCharacter[]
+  series     ProductSeries[]
+  tags       ProductTag[]
 
   @@index([categoryId])
+  @@index([brandId])
   @@index([slug])
   @@index([isActive])
   @@index([featured])
   @@index([averageRating])
+  @@index([preorderStatus])
+  @@index([releaseDate])
   @@map("products")
+}
+
+enum PreorderStatus {
+  NONE // Hàng có sẵn
+  PREORDER // Đặt trước (chưa phát hành)
+  ORDER // Đặt hàng (phải order từ nhà sản xuất)
+}
+
+enum ReleaseCountry {
+  JP // Japan
+  CN // China
+  US // United States
+  VN // Vietnam
+  OTHER // Other
 }
 
 // ==========================================
@@ -78,7 +114,7 @@ model User {
   role         Role      @default(CUSTOMER)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
-  
+
   cartItems   CartItem[]
   orders      Order[]
   wishlists   Wishlist[]
@@ -135,7 +171,7 @@ model CartItem {
   productId String
   quantity  Int      @default(1)
   addedAt   DateTime @default(now())
-  
+
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
@@ -148,15 +184,15 @@ model CartItem {
 // ORDER
 // ==========================================
 model Order {
-  id          String      @id @default(cuid())
-  orderNumber String      @unique
+  id          String  @id @default(cuid())
+  orderNumber String  @unique
   userId      String?
-  
+
   // Snapshot customer info
   customerName  String
   customerEmail String?
   customerPhone String
-  
+
   // Snapshot shipping address
   shippingFullName String
   shippingPhone    String
@@ -164,20 +200,20 @@ model Order {
   shippingWard     String?
   shippingDistrict String
   shippingCity     String
-  
+
   totalAmount Decimal     @db.Decimal(10, 2)
   status      OrderStatus @default(PENDING)
   note        String?     @db.Text
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  
+
   // Relations
-  user      User?     @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
   addressId String?
-  address   Address?  @relation(fields: [addressId], references: [id])
+  address   Address? @relation(fields: [addressId], references: [id])
   couponId  String?
-  coupon    Coupon?   @relation(fields: [couponId], references: [id])
-  
+  coupon    Coupon?  @relation(fields: [couponId], references: [id])
+
   orderItems OrderItem[]
   payment    Payment?
   shipping   Shipping?
@@ -209,7 +245,7 @@ model OrderItem {
   productId String
   quantity  Int
   price     Decimal @db.Decimal(10, 2)
-  
+
   order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product Product @relation(fields: [productId], references: [id])
 
@@ -371,21 +407,21 @@ model Review {
   orderId   String? // Liên kết với đơn hàng (verify đã mua)
   rating    Int // 1-5 sao
   title     String? // Tiêu đề review (optional)
-  comment   String? @db.Text
+  comment   String?  @db.Text
   images    String[] // Ảnh review từ khách
-  
+
   // Moderation
   isVerified Boolean @default(false) // Badge "Đã mua hàng"
   isApproved Boolean @default(true) // Admin duyệt
   isPinned   Boolean @default(false) // Ghim review hay
-  
+
   // Social
   helpfulCount   Int @default(0) // Cache số votes helpful
   unhelpfulCount Int @default(0) // Cache số votes unhelpful
-  
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   product Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   user    User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   order   Order?       @relation(fields: [orderId], references: [id])
@@ -405,7 +441,7 @@ model Review {
 // REVIEW VOTE (NEW!)
 // ==========================================
 model ReviewVote {
-  id        String  @id @default(cuid())
+  id        String   @id @default(cuid())
   reviewId  String
   userId    String
   isHelpful Boolean // true = helpful, false = not helpful
@@ -435,4 +471,167 @@ model Announcement {
   @@index([isActive])
   @@index([createdAt])
   @@map("announcements")
+}
+
+// ==========================================
+// BRAND (Thương hiệu sản xuất figure)
+// ==========================================
+model Brand {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  products Product[]
+
+  @@index([slug])
+  @@map("brands")
+}
+
+// ==========================================
+// CHARACTER (Nhân vật anime/manga)
+// ==========================================
+model Character {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  products ProductCharacter[]
+
+  @@index([slug])
+  @@map("characters")
+}
+
+// ==========================================
+// SERIES (Bộ anime/manga/game)
+// ==========================================
+model Series {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  products ProductSeries[]
+
+  @@index([slug])
+  @@map("series")
+}
+
+// ==========================================
+// TAG (Tag sản phẩm)
+// ==========================================
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  products ProductTag[]
+
+  @@index([slug])
+  @@map("tags")
+}
+
+// ==========================================
+// PRODUCT - CHARACTER (Many-to-Many)
+// ==========================================
+model ProductCharacter {
+  productId   String
+  characterId String
+
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  character Character @relation(fields: [characterId], references: [id], onDelete: Cascade)
+
+  @@id([productId, characterId])
+  @@map("product_characters")
+}
+
+// ==========================================
+// PRODUCT - SERIES (Many-to-Many)
+// ==========================================
+model ProductSeries {
+  productId String
+  seriesId  String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  series  Series  @relation(fields: [seriesId], references: [id], onDelete: Cascade)
+
+  @@id([productId, seriesId])
+  @@map("product_series")
+}
+
+// ==========================================
+// PRODUCT - TAG (Many-to-Many)
+// ==========================================
+model ProductTag {
+  productId String
+  tagId     String
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag     Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([productId, tagId])
+  @@map("product_tags")
+}
+
+// ==========================================
+// PRODUCT VARIANT (Biến thể sản phẩm)
+// ==========================================
+model ProductVariant {
+  id           String    @id @default(cuid())
+  productId    String
+  sku          String    @unique
+  variantName  String? // Tên biến thể (VD: "Limited Edition")
+  edition      String? // Phiên bản (Standard, Limited, Exclusive)
+  scale        String? // Tỉ lệ (1/7, 1/8, 1/4)
+  material     String? // Chất liệu (PVC, ABS, Resin)
+  heightMm     Int? // Chiều cao (mm)
+  widthMm      Int? // Chiều rộng (mm)
+  depthMm      Int? // Chiều sâu (mm)
+  weightGrams  Int? // Cân nặng (gram)
+  price        Decimal   @db.Decimal(12, 2)
+  comparePrice Decimal?  @db.Decimal(12, 2)
+  saleStartsAt DateTime?
+  saleEndsAt   DateTime?
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  product   Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  inventory Inventory[]
+
+  @@index([productId, isActive])
+  @@index([sku])
+  @@index([saleStartsAt, saleEndsAt])
+  @@map("product_variants")
+}
+
+// ==========================================
+// WAREHOUSE (Kho hàng)
+// ==========================================
+model Warehouse {
+  id       String  @id @default(cuid())
+  code     String  @unique
+  name     String
+  address  String?
+  city     String?
+  isActive Boolean @default(true)
+
+  inventory Inventory[]
+
+  @@index([code])
+  @@map("warehouses")
+}
+
+// ==========================================
+// INVENTORY (Tồn kho theo kho)
+// ==========================================
+model Inventory {
+  variantId   String
+  warehouseId String
+  qtyOnHand   Int    @default(0) // Số lượng hiện có
+  qtyReserved Int    @default(0) // Số lượng đã đặt trước
+
+  variant   ProductVariant @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  warehouse Warehouse      @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+
+  @@id([variantId, warehouseId])
+  @@map("inventory")
 }
