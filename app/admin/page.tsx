@@ -173,7 +173,9 @@ export default function AdminPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setProducts(data.data || data.products || []);
+        // API trả về data.data.products
+        const productsList = data.data?.products || data.products || data.data || [];
+        setProducts(Array.isArray(productsList) ? productsList : []);
       }
     } catch (err) {
       console.error('Error fetching products:', err);
@@ -203,7 +205,8 @@ export default function AdminPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setOrders(data.data || data.orders || []);
+        // API trả về data.data.orders
+        setOrders(data.data?.orders || data.orders || data.data || []);
       }
     } catch (err) {
       console.error('Error fetching orders:', err);
@@ -395,7 +398,7 @@ export default function AdminPage() {
 
   // Calculate pending orders
   const pendingOrders = useMemo(
-    () => orders.filter((o) => o.status === 'PENDING'),
+    () => (orders || []).filter((o) => o.status === 'PENDING'),
     [orders]
   );
 
@@ -489,7 +492,7 @@ export default function AdminPage() {
             </div>
             <div className="flex items-center gap-4">
               <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
-                <div className="text-2xl font-bold">{products.length}</div>
+                <div className="text-2xl font-bold">{(products || []).length}</div>
                 <p className="text-sm text-slate-300">Sản phẩm</p>
               </div>
               <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
@@ -616,11 +619,11 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {products.map((product) => (
+                    {(products || []).map((product) => (
                       <tr key={product.id} className="hover:bg-slate-50">
                         <td className="p-4">
                           <div className="flex items-center gap-3">
-                            {product.images[0] && (
+                            {product.images && product.images[0] && (
                               <img src={product.images[0]} alt="" className="w-12 h-12 object-cover rounded-lg" />
                             )}
                             <div>
@@ -684,7 +687,7 @@ export default function AdminPage() {
                   </tbody>
                 </table>
               </div>
-              {products.length === 0 && (
+              {(products || []).length === 0 && (
                 <div className="p-8 text-center text-slate-500">
                   {loading ? (
                     <Loader2 size={24} className="animate-spin mx-auto" />
@@ -726,7 +729,7 @@ export default function AdminPage() {
                   </tbody>
                 </table>
               </div>
-              {orders.length === 0 && (
+              {(orders || []).length === 0 && (
                 <div className="p-8 text-center text-slate-500">
                   {loading ? (
                     <Loader2 size={24} className="animate-spin mx-auto" />
@@ -744,7 +747,7 @@ export default function AdminPage() {
           <div className="space-y-6">
             {/* Add Product Button */}
             <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Quản lý sản phẩm ({products.length})</h2>
+              <h2 className="text-xl font-semibold">Quản lý sản phẩm ({(products || []).length})</h2>
               <button
                 onClick={() => {
                   setEditingProduct(null);
@@ -774,7 +777,7 @@ export default function AdminPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {products.map((product) => (
+                    {(products || []).map((product) => (
                       <tr key={product.id} className="border-b border-slate-50">
                         <td className="py-3 px-4">
                           {product.images?.[0] ? (
@@ -831,9 +834,9 @@ export default function AdminPage() {
         {/* Orders Tab */}
         {activeTab === 'orders' && (
           <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-            <h2 className="text-xl font-semibold mb-6">Quản lý đơn hàng ({orders.length})</h2>
+            <h2 className="text-xl font-semibold mb-6">Quản lý đơn hàng ({(orders || []).length})</h2>
             <div className="space-y-4">
-              {orders.map((order) => (
+              {(orders || []).map((order) => (
                 <div key={order.id} className="rounded-2xl border border-slate-100 p-6">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
@@ -921,7 +924,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               ))}
-              {orders.length === 0 && (
+              {(orders || []).length === 0 && (
                 <p className="text-center text-slate-500 py-8">Chưa có đơn hàng nào</p>
               )}
             </div>
@@ -931,9 +934,9 @@ export default function AdminPage() {
         {/* Reviews Tab */}
         {activeTab === 'reviews' && (
           <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-            <h2 className="text-xl font-semibold mb-6">Quản lý đánh giá ({reviews.length})</h2>
+            <h2 className="text-xl font-semibold mb-6">Quản lý đánh giá ({(reviews || []).length})</h2>
             <div className="space-y-4">
-              {reviews.map((review) => (
+              {(reviews || []).map((review) => (
                 <div key={review.id} className="rounded-2xl border border-slate-100 p-6">
                   <div className="flex flex-wrap items-start justify-between gap-4">
                     <div>
@@ -984,7 +987,7 @@ export default function AdminPage() {
                   </div>
                 </div>
               ))}
-              {reviews.length === 0 && (
+              {(reviews || []).length === 0 && (
                 <p className="text-center text-slate-500 py-8">Chưa có đánh giá nào</p>
               )}
             </div>
@@ -1113,7 +1116,7 @@ export default function AdminPage() {
                       className="input-field"
                     >
                       <option value="">Chọn danh mục</option>
-                      {categories.map((cat) => (
+                      {(categories || []).map((cat) => (
                         <option key={cat.id} value={cat.id}>{cat.name}</option>
                       ))}
                     </select>

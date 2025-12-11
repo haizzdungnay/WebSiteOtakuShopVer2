@@ -35,8 +35,8 @@ export async function middleware(request: NextRequest) {
         role: payload.role
       })
 
-      // If not admin role, redirect to home with error
-      if (payload.role !== 'admin') {
+      // If not admin role, redirect to home with error (hỗ trợ cả chữ hoa và chữ thường)
+      if (payload.role?.toLowerCase() !== 'admin') {
         console.log('[Middleware] ❌ User role is not admin:', payload.role)
         const url = request.nextUrl.clone()
         url.pathname = '/'
