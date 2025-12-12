@@ -9,7 +9,7 @@ import { verifyAdmin } from '@/lib/admin-auth'
 function getDateRanges() {
   const now = new Date()
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  
+
   return {
     today: today,
     yesterday: new Date(today.getTime() - 24 * 60 * 60 * 1000),
@@ -62,22 +62,22 @@ export async function GET(request: NextRequest) {
     ] = await Promise.all([
       // Tổng sản phẩm
       prisma.product.count({ where: { isActive: true } }),
-      
+
       // Tổng đơn hàng
       prisma.order.count(),
-      
+
       // Tổng khách hàng
       prisma.user.count(),
-      
+
       // Đơn hàng chờ xử lý
       prisma.order.count({ where: { status: 'PENDING' } }),
-      
+
       // Tổng doanh thu (đơn đã hoàn thành hoặc đã giao)
       prisma.order.aggregate({
         where: { status: { in: ['DELIVERED', 'COMPLETED'] } },
         _sum: { totalAmount: true }
       }),
-      
+
       // 5 đơn hàng gần nhất
       prisma.order.findMany({
         take: 5,
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
           createdAt: true
         }
       }),
-      
+
       // Top 5 sản phẩm bán chạy
       prisma.orderItem.groupBy({
         by: ['productId'],
@@ -99,7 +99,7 @@ export async function GET(request: NextRequest) {
         orderBy: { _sum: { quantity: 'desc' } },
         take: 5
       }),
-      
+
       // Đếm đơn hàng theo trạng thái
       prisma.order.groupBy({
         by: ['status'],
@@ -128,7 +128,7 @@ export async function GET(request: NextRequest) {
     // Tính doanh thu theo tháng (6 tháng gần nhất)
     const sixMonthsAgo = new Date()
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
-    
+
     const monthlyRevenue = await prisma.order.groupBy({
       by: ['createdAt'],
       where: {
