@@ -26,43 +26,47 @@ async function main() {
 
   // ===== 1. ADMIN =====
   console.log('👤 Creating admin...')
-  const adminPassword = await bcrypt.hash('admin123', 10)
+  // Use environment variables or fallback to defaults
+  const adminEmail = process.env.ADMIN_USERNAME || 'admin@otakushop.com'
+  const adminRawPassword = process.env.ADMIN_PASSWORD || 'admin123'
+  const adminDisplayName = process.env.ADMIN_DISPLAY_NAME || 'Admin Otaku Shop'
+  const adminPassword = await bcrypt.hash(adminRawPassword, 10)
   const admin = await prisma.admin.create({
     data: {
       username: 'admin',
       passwordHash: adminPassword,
-      fullName: 'Admin Otaku Shop',
-      email: 'admin@otakushop.com'
+      fullName: adminDisplayName,
+      email: adminEmail
     }
   })
-  console.log(`✅ Created admin: ${admin.username}\n`)
+  console.log(`✅ Created admin: ${admin.username} (${adminEmail})\n`)
 
   // ===== 2. CATEGORIES =====
   console.log('📁 Creating categories...')
   const categoriesData = [
-    { 
-      name: 'Figures & Models', 
-      slug: 'figures-models', 
+    {
+      name: 'Figures & Models',
+      slug: 'figures-models',
       description: 'Mô hình nhân vật anime, game cao cấp'
     },
-    { 
-      name: 'Gaming Gear', 
-      slug: 'gaming-gear', 
+    {
+      name: 'Gaming Gear',
+      slug: 'gaming-gear',
       description: 'Phụ kiện gaming: chuột, bàn phím, tai nghe'
     },
-    { 
-      name: 'Manga & Comics', 
-      slug: 'manga-comics', 
+    {
+      name: 'Manga & Comics',
+      slug: 'manga-comics',
       description: 'Truyện tranh Nhật Bản, Hàn Quốc'
     },
-    { 
-      name: 'Apparel', 
-      slug: 'apparel', 
+    {
+      name: 'Apparel',
+      slug: 'apparel',
       description: 'Áo thun, hoodie, mũ anime/game'
     },
-    { 
-      name: 'Collectibles', 
-      slug: 'collectibles', 
+    {
+      name: 'Collectibles',
+      slug: 'collectibles',
       description: 'Đồ sưu tầm, poster, keychain'
     },
   ]
@@ -199,7 +203,7 @@ async function main() {
   // ===== 4. TEST USERS =====
   console.log('👤 Creating test users...')
   const userPassword = await bcrypt.hash('user123', 10)
-  
+
   const user1 = await prisma.user.create({
     data: {
       email: 'user@example.com',
@@ -308,7 +312,7 @@ async function main() {
 
   // ===== 7. SAMPLE REVIEWS =====
   console.log('⭐ Creating sample reviews...')
-  
+
   // Reviews for Tanjiro Figure
   const reviewsData = [
     {
@@ -341,7 +345,7 @@ async function main() {
       isApproved: true,
       helpfulCount: 3
     },
-    
+
     // Reviews for Razer Mouse
     {
       productId: createdProducts[3].id, // Razer
@@ -406,7 +410,7 @@ async function main() {
 
   console.log('🎉 Seed completed!\n')
   console.log('📊 Summary:')
-  console.log('  - Admin: admin / admin123')
+  console.log(`  - Admin: ${adminEmail} / ${adminRawPassword}`)
   console.log('  - Users: user@example.com / user123 (+ 2 more)')
   console.log('  - Categories: 5')
   console.log('  - Products: 9 (with review stats)')
@@ -415,7 +419,7 @@ async function main() {
   console.log('  - Reviews: 8')
   console.log('')
   console.log('🔐 Login Credentials:')
-  console.log('  Admin: admin / admin123')
+  console.log(`  Admin: ${adminEmail} / ${adminRawPassword}`)
   console.log('  User 1: user@example.com / user123')
   console.log('  User 2: user2@example.com / user123')
   console.log('  User 3: user3@example.com / user123')

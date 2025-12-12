@@ -152,6 +152,7 @@ const initialProductForm: ProductFormState = {
 export default function AdminPage() {
   const { user } = useAuth();
   const csrfToken = Cookies.get('csrf-token') || '';
+  const isAdmin = user?.role === 'admin';
 
   // States
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'reviews'>('dashboard');
@@ -339,32 +340,32 @@ export default function AdminPage() {
       ]);
       setLoading(false);
     };
-    if (token) {
+    if (isAdmin) {
       loadData();
     }
-  }, [token]);
+  }, [isAdmin]);
 
   // Refetch when filters/pagination change
   useEffect(() => {
-    if (token) {
+    if (isAdmin) {
       fetchProducts();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, productPage, productFilters]);
+  }, [isAdmin, productPage, productFilters]);
 
   useEffect(() => {
-    if (token) {
+    if (isAdmin) {
       fetchOrders();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, orderPage, orderFilters]);
+  }, [isAdmin, orderPage, orderFilters]);
 
   useEffect(() => {
-    if (token) {
+    if (isAdmin) {
       fetchReviews();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, reviewPage, reviewFilters]);
+  }, [isAdmin, reviewPage, reviewFilters]);
 
   // Generate slug from name
   const generateSlug = (name: string) => {

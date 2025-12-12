@@ -45,14 +45,18 @@ export async function middleware(request: NextRequest) {
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
   response.headers.set('X-Frame-Options', 'SAMEORIGIN')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  // CSP relaxed for development - Next.js requires 'unsafe-eval' for hot reload
+  // In production, consider tightening these policies
   response.headers.set(
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "img-src 'self' data: https:",
+      "img-src 'self' data: https: http: blob:",
       "style-src 'self' 'unsafe-inline'",
-      "script-src 'self' 'unsafe-inline'",
-      "connect-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "connect-src 'self' ws: wss: http: https:",
+      "font-src 'self' data: https:",
+      "frame-ancestors 'self'",
     ].join('; ')
   )
 
