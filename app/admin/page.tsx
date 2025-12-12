@@ -149,7 +149,7 @@ const initialProductForm: ProductFormState = {
 
 export default function AdminPage() {
   const { user } = useAuth();
-  const token = Cookies.get('token');
+  const csrfToken = Cookies.get('csrf-token') || '';
 
   // States
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'reviews'>('dashboard');
@@ -177,7 +177,7 @@ export default function AdminPage() {
   // API Headers
   const getHeaders = () => ({
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
+    'X-CSRF-Token': csrfToken,
   });
 
   // Fetch Dashboard Stats
@@ -185,6 +185,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin/dashboard/stats', {
         headers: getHeaders(),
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -200,6 +201,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin/products', {
         headers: getHeaders(),
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -217,6 +219,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/categories', {
         headers: getHeaders(),
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -232,6 +235,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin/orders', {
         headers: getHeaders(),
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -248,6 +252,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin/reviews', {
         headers: getHeaders(),
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
 
 interface CartItem {
   id: string;
@@ -27,57 +28,221 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { user } = useAuth();
+
+  const storageAvailable = () => {
+    try {
+      const testKey = '__cart_test__'
+      window.localStorage.setItem(testKey, testKey)
+      window.localStorage.removeItem(testKey)
+      return true
+    } catch (error) {
+      console.error('LocalStorage unavailable:', error)
+      return false
+    }
+  }
+
+  const readLocalCart = (): CartItem[] => {
+    if (typeof window === 'undefined' || !storageAvailable()) return []
+
+    const savedCart = window.localStorage.getItem('cart')
+    if (!savedCart) return []
+
+    try {
+      return JSON.parse(savedCart)
+    } catch (error) {
+      console.error('Error parsing local cart:', error)
+      return []
+    }
+  }
+
+  const persistLocalCart = (cartItems: CartItem[]) => {
+    if (typeof window === 'undefined' || !storageAvailable()) return
+
+    try {
+      window.localStorage.setItem('cart', JSON.stringify(cartItems))
+    } catch (error) {
+      console.error('Error saving cart:', error)
+    }
+  }
 
   // Load cart from localStorage on mount - CLIENT SIDE ONLY
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedCart = localStorage.getItem('cart');
-      if (savedCart) {
-        try {
-          setItems(JSON.parse(savedCart));
-        } catch (error) {
-          console.error('Error loading cart:', error);
-        }
-      }
+      setItems(readLocalCart());
       setIsLoaded(true);
     }
   }, []);
 
   // Save cart to localStorage whenever it changes - CLIENT SIDE ONLY
   useEffect(() => {
-    if (typeof window !== 'undefined' && isLoaded) {
-      localStorage.setItem('cart', JSON.stringify(items));
+    if (typeof window !== 'undefined' && isLoaded && !user) {
+      persistLocalCart(items);
     }
-  }, [items, isLoaded]);
+  }, [items, isLoaded, user]);
+
+  // Sync server cart when user changes
+  useEffect(() => {
+    if (!isLoaded) return
+
+    if (!user) {
+      setItems(readLocalCart())
+      return
+    }
+
+    const syncCart = async () => {
+      const localItems = readLocalCart()
+
+      if (localItems.length > 0) {
+        for (const item of localItems) {
+          await fetch('/api/cart', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ productId: item.id, quantity: item.quantity })
+          }).catch(error => console.error('Sync cart error:', error))
+        }
+
+        persistLocalCart([])
+      }
+
+      try {
+        const response = await fetch('/api/cart', { credentials: 'include' })
+        if (response.ok) {
+          const data = await response.json()
+          const normalizedItems: CartItem[] = (data.data?.items || []).map((item: any) => {
+            const basePrice = Number(item.product.price)
+            const comparePrice = item.product.comparePrice ? Number(item.product.comparePrice) : undefined
+            const finalPrice = comparePrice && comparePrice < basePrice ? comparePrice : basePrice
+
+            return {
+              id: item.product.id,
+              name: item.product.name,
+              price: finalPrice,
+              discountPrice: comparePrice && comparePrice < basePrice ? comparePrice : undefined,
+              image: item.product.images?.[0] || '',
+              quantity: item.quantity,
+              slug: item.product.slug,
+            }
+          })
+          setItems(normalizedItems)
+        }
+      } catch (error) {
+        console.error('Failed to load cart from server:', error)
+      }
+    }
+
+    syncCart()
+  }, [user, isLoaded])
 
   const addToCart = (item: Omit<CartItem, 'quantity'>) => {
-    setItems((prevItems) => {
-      const existingItem = prevItems.find((i) => i.id === item.id);
+    const optimisticUpdate = (prevItems: CartItem[]) => {
+      const existingItem = prevItems.find((i) => i.id === item.id)
       if (existingItem) {
         return prevItems.map((i) =>
           i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
-        );
+        )
       }
-      return [...prevItems, { ...item, quantity: 1 }];
-    });
+      return [...prevItems, { ...item, quantity: 1 }]
+    }
+
+    const previousItems = items
+    setItems(optimisticUpdate)
+
+    if (!user) {
+      return
+    }
+
+    fetch('/api/cart', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ productId: item.id, quantity: 1 })
+    }).then(async response => {
+      if (!response.ok) {
+        setItems(previousItems)
+        return
+      }
+
+      const data = await response.json()
+      const product = data.data?.product
+      if (product) {
+        const basePrice = Number(product.price)
+        const comparePrice = product.comparePrice ? Number(product.comparePrice) : undefined
+        const finalPrice = comparePrice && comparePrice < basePrice ? comparePrice : basePrice
+
+        setItems((current) => current.map((cartItem) => cartItem.id === product.id ? {
+          id: product.id,
+          name: product.name,
+          price: finalPrice,
+          discountPrice: comparePrice && comparePrice < basePrice ? comparePrice : undefined,
+          image: product.images?.[0] || item.image,
+          quantity: data.data.quantity,
+          slug: product.slug,
+        } : cartItem))
+      }
+    }).catch(error => {
+      console.error('Add to cart failed:', error)
+      setItems(previousItems)
+    })
   };
 
   const removeFromCart = (id: string) => {
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    const previousItems = items
+    setItems((prevItems) => prevItems.filter((item) => item.id !== id))
+
+    if (!user) return
+
+    fetch(`/api/cart/${id}`, {
+      method: 'DELETE',
+      credentials: 'include'
+    }).then(response => {
+      if (!response.ok) {
+        setItems(previousItems)
+      }
+    }).catch(error => {
+      console.error('Remove from cart failed:', error)
+      setItems(previousItems)
+    })
   };
 
   const updateQuantity = (id: string, quantity: number) => {
     if (quantity <= 0) {
-      removeFromCart(id);
-      return;
+      removeFromCart(id)
+      return
     }
+
+    const previousItems = items
     setItems((prevItems) =>
       prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
-    );
+    )
+
+    if (!user) return
+
+    fetch(`/api/cart/${id}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ quantity })
+    }).then(response => {
+      if (!response.ok) {
+        setItems(previousItems)
+      }
+    }).catch(error => {
+      console.error('Update quantity failed:', error)
+      setItems(previousItems)
+    })
   };
 
   const clearCart = () => {
-    setItems([]);
+    setItems([])
+
+    if (!user) return
+
+    fetch('/api/cart', {
+      method: 'DELETE',
+      credentials: 'include'
+    }).catch(error => console.error('Clear cart failed:', error))
   };
 
   const getTotalItems = () => {

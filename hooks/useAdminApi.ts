@@ -9,14 +9,13 @@ async function adminFetch<T>(
   options: RequestInit = {}
 ): Promise<{ success: boolean; data?: T; error?: string }> {
   try {
-    const token = Cookies.get('token')
     const csrfToken = Cookies.get('csrf-token') || ''
 
     const response = await fetch(endpoint, {
       ...options,
+      credentials: 'include',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
         'X-CSRF-Token': csrfToken,
         ...options.headers,
       },

@@ -4,10 +4,14 @@ import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { z } from 'zod'
 
-// Fallback admin credentials from env
-const ENV_ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin@otakushop.local'
-const ENV_ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ChangeMeNow!'
-const ENV_ADMIN_DISPLAY_NAME = process.env.ADMIN_DISPLAY_NAME || 'Quản trị viên'
+const ACCESS_TOKEN_TTL = '1h'
+const REFRESH_TOKEN_TTL = '7d'
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax' as const,
+  path: '/',
+}
 
 const loginSchema = z.object({
   email: z.string().email('Email không hợp lệ').toLowerCase(),
@@ -35,18 +39,26 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      const tokenPayload = {
+        userId: admin.id,
+        email: admin.email,
+        role: 'admin',
+        isAdmin: true
+      }
+
       const token = jwt.sign(
-        {
-          userId: admin.id,
-          email: admin.email,
-          role: 'admin',
-          isAdmin: true
-        },
+        { ...tokenPayload, tokenType: 'access' },
         process.env.JWT_SECRET!,
-        { expiresIn: '7d' }
+        { expiresIn: ACCESS_TOKEN_TTL }
       )
 
-      return NextResponse.json({
+      const refreshToken = jwt.sign(
+        { ...tokenPayload, tokenType: 'refresh' },
+        process.env.JWT_SECRET!,
+        { expiresIn: REFRESH_TOKEN_TTL }
+      )
+
+      const response = NextResponse.json({
         success: true,
         message: 'Đăng nhập quản trị thành công',
         user: {
@@ -56,8 +68,12 @@ export async function POST(request: NextRequest) {
           fullName: admin.fullName,
           role: 'admin'
         },
-        token
       })
+
+      response.cookies.set('token', token, { ...COOKIE_OPTIONS, maxAge: 60 * 60 })
+      response.cookies.set('refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: 60 * 60 * 24 * 7 })
+
+      return response
     }
 
     // Also check if user has ADMIN role
@@ -75,18 +91,26 @@ export async function POST(request: NextRequest) {
         )
       }
 
+      const tokenPayload = {
+        userId: userAdmin.id,
+        email: userAdmin.email,
+        role: 'admin',
+        isAdmin: true
+      }
+
       const token = jwt.sign(
-        {
-          userId: userAdmin.id,
-          email: userAdmin.email,
-          role: 'admin',
-          isAdmin: true
-        },
+        { ...tokenPayload, tokenType: 'access' },
         process.env.JWT_SECRET!,
-        { expiresIn: '7d' }
+        { expiresIn: ACCESS_TOKEN_TTL }
       )
 
-      return NextResponse.json({
+      const refreshToken = jwt.sign(
+        { ...tokenPayload, tokenType: 'refresh' },
+        process.env.JWT_SECRET!,
+        { expiresIn: REFRESH_TOKEN_TTL }
+      )
+
+      const response = NextResponse.json({
         success: true,
         message: 'Đăng nhập quản trị thành công',
         user: {
@@ -96,38 +120,12 @@ export async function POST(request: NextRequest) {
           fullName: userAdmin.fullName,
           role: 'admin'
         },
-        token
       })
-    }
 
-    // Fallback: Check environment variables for admin (for development/initial setup)
-    const emailMatch = email === ENV_ADMIN_USERNAME.toLowerCase()
-    const passwordMatch = password === ENV_ADMIN_PASSWORD
+      response.cookies.set('token', token, { ...COOKIE_OPTIONS, maxAge: 60 * 60 })
+      response.cookies.set('refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: 60 * 60 * 24 * 7 })
 
-    if (emailMatch && passwordMatch) {
-      const token = jwt.sign(
-        {
-          userId: 'env-admin',
-          email: ENV_ADMIN_USERNAME,
-          role: 'admin',
-          isAdmin: true
-        },
-        process.env.JWT_SECRET!,
-        { expiresIn: '7d' }
-      )
-
-      return NextResponse.json({
-        success: true,
-        message: 'Đăng nhập quản trị thành công',
-        user: {
-          id: 'env-admin',
-          email: ENV_ADMIN_USERNAME,
-          username: ENV_ADMIN_DISPLAY_NAME,
-          fullName: ENV_ADMIN_DISPLAY_NAME,
-          role: 'admin'
-        },
-        token
-      })
+      return response
     }
 
     return NextResponse.json(
