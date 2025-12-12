@@ -31,7 +31,9 @@ export function getTokenFromRequest(request: NextRequest): string | null {
         return authHeader.substring(7) // Lấy phần <token>
     }
 
-    return null
+    const cookieToken = request.cookies.get('token')?.value
+
+    return cookieToken || null
 }
 
 // Helper: Get user from request

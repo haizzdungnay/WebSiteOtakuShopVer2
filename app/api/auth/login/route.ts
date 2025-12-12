@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
@@ -10,7 +10,16 @@ const loginSchema = z.object({
     password: z.string().min(8, 'Mật khẩu phải có ít nhất 8 ký tự')
 })
 
-export async function POST(request: Request) {
+const ACCESS_TOKEN_TTL = '1h'
+const REFRESH_TOKEN_TTL = '7d'
+const COOKIE_OPTIONS = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax' as const,
+    path: '/',
+}
+
+export async function POST(request: NextRequest) {
     try {
         // Parse body từ request
         const body = await request.json()
@@ -48,25 +57,33 @@ export async function POST(request: Request) {
         }
 
         // Case 3: Password đúng -> tạo JWT
+        const tokenPayload = {
+            userId: user.id,
+            email: user.email,
+            role: user.role,
+        }
+
         const token = jwt.sign(
+            { ...tokenPayload, tokenType: 'access' },
+            process.env.JWT_SECRET!,
             {
-                // Payload
-                userId: user.id,
-                email: user.email,
-                role: user.role
-            },
-            process.env.JWT_SECRET!, // secret key
+                expiresIn: ACCESS_TOKEN_TTL
+            }
+        )
+
+        const refreshToken = jwt.sign(
+            { ...tokenPayload, tokenType: 'refresh' },
+            process.env.JWT_SECRET!,
             {
-                expiresIn: '7d' // tạo token có hạn trong 7 ngày
+                expiresIn: REFRESH_TOKEN_TTL
             }
         )
 
         // trả về token và user info lưu ý không trả về passwordHash
-        return NextResponse.json({
+        const response = NextResponse.json({
             success: true,
             message: 'Đăng nhập thành công',
             data: {
-                token,
                 user: {
                     id: user.id,
                     email: user.email,
@@ -76,6 +93,11 @@ export async function POST(request: Request) {
                 }
             }
         })
+
+        response.cookies.set('token', token, { ...COOKIE_OPTIONS, maxAge: 60 * 60 })
+        response.cookies.set('refresh_token', refreshToken, { ...COOKIE_OPTIONS, maxAge: 60 * 60 * 24 * 7 })
+
+        return response
     }
     catch (error) {
         // validatation error

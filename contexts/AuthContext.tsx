@@ -59,29 +59,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const checkAuth = async () => {
     try {
-      const token = Cookies.get('token')
-      if (token) {
-        const response = await fetch('/api/auth/me', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+      const response = await fetch('/api/auth/me', { credentials: 'include' })
+
+      if (response.ok) {
+        const data = await response.json()
+        const userData = data.user
+        setUser({
+          id: userData.id,
+          email: userData.email,
+          username: userData.username || userData.fullName,
+          fullName: userData.fullName,
+          phone: userData.phone,
+          role: userData.role,
+          avatar: userData.avatar
         })
-        if (response.ok) {
-          const data = await response.json()
-          const userData = data.user
-          setUser({
-            id: userData.id,
-            email: userData.email,
-            username: userData.username || userData.fullName,
-            fullName: userData.fullName,
-            phone: userData.phone,
-            role: userData.role,
-            avatar: userData.avatar
-          })
-        } else {
-          Cookies.remove('token')
+        return
+      }
+
+      if (response.status === 401) {
+        const refreshed = await refreshSession()
+        if (refreshed) {
+          return
         }
       }
+
+      setUser(null)
     } catch (error) {
       console.error('Auth check failed:', error)
     } finally {
@@ -91,6 +93,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const refreshUser = async () => {
     await checkAuth()
+  }
+
+  const refreshSession = async () => {
+    try {
+      const refreshResponse = await fetch('/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include'
+      })
+
+      if (!refreshResponse.ok) {
+        return false
+      }
+
+      const meResponse = await fetch('/api/auth/me', { credentials: 'include' })
+      if (meResponse.ok) {
+        const data = await meResponse.json()
+        const userData = data.user
+        setUser({
+          id: userData.id,
+          email: userData.email,
+          username: userData.username || userData.fullName,
+          fullName: userData.fullName,
+          phone: userData.phone,
+          role: userData.role,
+          avatar: userData.avatar
+        })
+        return true
+      }
+    } catch (error) {
+      console.error('Refresh session failed:', error)
+    }
+
+    setUser(null)
+    return false
   }
 
   const login = async (email: string, password: string): Promise<LoginResult> => {
@@ -104,6 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           'Content-Type': 'application/json',
           'X-CSRF-Token': csrfToken,
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       })
 
@@ -117,11 +154,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fullName: userData.fullName,
           role: 'admin'
         })
-        Cookies.set('token', data.token, {
-          expires: 7,
-          sameSite: 'strict',
-          secure: process.env.NODE_ENV === 'production'
-        })
         return { success: true, isAdmin: true }
       }
 
@@ -132,6 +164,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           'Content-Type': 'application/json',
           'X-CSRF-Token': csrfToken,
         },
+        credentials: 'include',
         body: JSON.stringify({ email, password }),
       })
 
@@ -139,7 +172,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const data = await userResponse.json()
         // API mới trả về data.data.user và data.data.token
         const userData = data.data?.user || data.user
-        const token = data.data?.token || data.token
 
         setUser({
           id: userData.id,
@@ -148,11 +180,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fullName: userData.fullName,
           phone: userData.phone,
           role: 'user'
-        })
-        Cookies.set('token', token, {
-          expires: 7,
-          sameSite: 'strict',
-          secure: process.env.NODE_ENV === 'production'
         })
         return { success: true, isAdmin: false }
       }
@@ -206,9 +233,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   const logout = () => {
-    setUser(null)
-    Cookies.remove('token')
-    window.location.href = '/'
+    fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+      .catch(error => console.error('Logout failed:', error))
+      .finally(() => {
+        setUser(null)
+        window.location.href = '/'
+      })
   }
 
   return (
