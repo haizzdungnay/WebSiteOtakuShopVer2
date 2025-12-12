@@ -169,6 +169,11 @@ export default function AdminPage() {
   const [showProductModal, setShowProductModal] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
 
+  // Shipping modal states
+  const [showShippingModal, setShowShippingModal] = useState(false);
+  const [shippingOrderId, setShippingOrderId] = useState<string | null>(null);
+  const [shippingForm, setShippingForm] = useState({ trackingCode: '', carrier: 'GHN' });
+
   // API Headers
   const getHeaders = () => ({
     'Content-Type': 'application/json',
@@ -246,7 +251,8 @@ export default function AdminPage() {
       });
       if (response.ok) {
         const data = await response.json();
-        setReviews(data.data || data.reviews || []);
+        // API trả về data.data.reviews
+        setReviews(data.data?.reviews || data.reviews || data.data || []);
       }
     } catch (err) {
       console.error('Error fetching reviews:', err);
@@ -403,20 +409,51 @@ export default function AdminPage() {
   };
 
   // Handle Order Status Update
-  const handleOrderStatusUpdate = async (orderId: string, status: string) => {
+  const handleOrderStatusUpdate = async (orderId: string, status: string, extraData?: { trackingCode?: string; carrier?: string }) => {
     try {
       const response = await fetch(`/api/admin/orders/${orderId}/status`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: getHeaders(),
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, ...extraData }),
       });
 
       if (response.ok) {
         await fetchOrders();
         await fetchDashboardStats();
+        return true;
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Không thể cập nhật trạng thái đơn hàng');
+        return false;
       }
     } catch (err) {
       console.error('Error updating order:', err);
+      alert('Có lỗi xảy ra khi cập nhật đơn hàng');
+      return false;
+    }
+  };
+
+  // Handle Shipping - mở modal nhập thông tin vận chuyển
+  const handleShipping = (orderId: string) => {
+    setShippingOrderId(orderId);
+    setShippingForm({ trackingCode: '', carrier: 'GHN' });
+    setShowShippingModal(true);
+  };
+
+  // Submit shipping info
+  const handleShippingSubmit = async () => {
+    if (!shippingOrderId) return;
+    if (!shippingForm.trackingCode.trim()) {
+      alert('Vui lòng nhập mã vận đơn');
+      return;
+    }
+    const success = await handleOrderStatusUpdate(shippingOrderId, 'SHIPPING', {
+      trackingCode: shippingForm.trackingCode,
+      carrier: shippingForm.carrier
+    });
+    if (success) {
+      setShowShippingModal(false);
+      setShippingOrderId(null);
     }
   };
 
@@ -961,7 +998,7 @@ export default function AdminPage() {
                       )}
                       {order.status === 'PREPARING' && (
                         <button
-                          onClick={() => handleOrderStatusUpdate(order.id, 'SHIPPING')}
+                          onClick={() => handleShipping(order.id)}
                           className="px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 text-sm font-semibold hover:bg-indigo-100"
                         >
                           Giao hàng
@@ -1435,6 +1472,74 @@ export default function AdminPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Shipping Modal - Nhập thông tin vận chuyển */}
+        {showShippingModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-slate-900">Thông tin vận chuyển</h2>
+                <button
+                  onClick={() => setShowShippingModal(false)}
+                  className="p-2 rounded-full hover:bg-slate-100"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Đơn vị vận chuyển <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={shippingForm.carrier}
+                    onChange={(e) => setShippingForm({ ...shippingForm, carrier: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                  >
+                    <option value="GHN">Giao Hàng Nhanh (GHN)</option>
+                    <option value="GHTK">Giao Hàng Tiết Kiệm (GHTK)</option>
+                    <option value="VNPost">VNPost</option>
+                    <option value="ViettelPost">Viettel Post</option>
+                    <option value="JT">J&T Express</option>
+                    <option value="Ninja">Ninja Van</option>
+                    <option value="Other">Khác</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Mã vận đơn <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={shippingForm.trackingCode}
+                    onChange={(e) => setShippingForm({ ...shippingForm, trackingCode: e.target.value })}
+                    placeholder="Nhập mã vận đơn..."
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowShippingModal(false)}
+                  className="flex-1 py-3 rounded-2xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShippingSubmit}
+                  className="flex-1 py-3 rounded-2xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
+                >
+                  Xác nhận giao hàng
+                </button>
+              </div>
             </div>
           </div>
         )}
