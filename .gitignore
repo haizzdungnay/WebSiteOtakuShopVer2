@@ -39,3 +39,12 @@ next-env.d.ts
 
 # Prisma
 app/generated/prisma
+
+# PostgreSQL data directory - IMPORTANT: Keep data persistent, don't commit to git
+data/postgres/*
+!data/postgres/.gitkeep
+
+# Backups - optional, keep structure but not actual backup files
+backups/*.sql
+backups/*.dump
+!backups/.gitkeep

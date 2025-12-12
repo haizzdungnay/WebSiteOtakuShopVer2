@@ -1,0 +1,3 @@
+# This file ensures the backups directory exists when cloning the repository.
+# Backup files (.sql, .dump) are ignored by .gitignore.
+# Use backup-db.bat or backup-db.sh to create database backups.
