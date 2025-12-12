@@ -14,6 +14,8 @@ export async function GET(request: NextRequest) {
         const sort = searchParams.get('sort') || 'createdAt' // field để sort
         const order = searchParams.get('order') || 'desc' // asc hoặc desc
         const featured = searchParams.get('featured') // 'true' hoặc null
+        const inStock = searchParams.get('inStock') // 'true' = only in-stock products
+        const preorder = searchParams.get('preorder') // 'true' = only pre-order products
 
         // Build where condition
         const where: any = {
@@ -32,7 +34,18 @@ export async function GET(request: NextRequest) {
             where.featured = true
         }
 
-        //search by name hoặc description
+        // Filter by stock status - In-stock products (preorderStatus = NONE and stockQuantity > 0)
+        if (inStock === 'true') {
+            where.preorderStatus = 'NONE'
+            where.stockQuantity = { gt: 0 }
+        }
+
+        // Filter by pre-order status
+        if (preorder === 'true') {
+            where.preorderStatus = { in: ['PREORDER', 'ORDER'] }
+        }
+
+        //search by name, description, shortDescription, productCode
         if (search) {
             where.OR = [
                 {
@@ -43,6 +56,18 @@ export async function GET(request: NextRequest) {
                 },
                 {
                     description: {
+                        contains: search,
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    shortDescription: {
+                        contains: search,
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    productCode: {
                         contains: search,
                         mode: 'insensitive'
                     }
@@ -83,14 +108,14 @@ export async function GET(request: NextRequest) {
                 hasMore: page * limit < total
             }
         })
-} catch (error) {
-    console.error('Error fetching products:', error)
-    return NextResponse.json(
-        {
-            success: false,
-            error: 'Không thể lấy danh sách sản phẩm'
-        },
-        { status: 500 }
-    )
-}
+    } catch (error) {
+        console.error('Error fetching products:', error)
+        return NextResponse.json(
+            {
+                success: false,
+                error: 'Không thể lấy danh sách sản phẩm'
+            },
+            { status: 500 }
+        )
+    }
 }

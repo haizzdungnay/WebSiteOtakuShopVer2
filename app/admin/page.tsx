@@ -46,6 +46,16 @@ interface Product {
   category?: { name: string };
   reviewCount: number;
   averageRating: number;
+  preorderStatus: 'NONE' | 'PREORDER' | 'ORDER';
+  // New detail fields
+  seriesName?: string;
+  brandName?: string;
+  releaseDate?: string;
+  msrpValue?: number;
+  msrpCurrency?: string;
+  productCode?: string;
+  features?: string;
+  condition?: string;
 }
 
 interface Category {
@@ -102,6 +112,16 @@ interface ProductFormState {
   images: string[];
   isActive: boolean;
   featured: boolean;
+  preorderStatus: 'NONE' | 'PREORDER' | 'ORDER';
+  // New detail fields
+  seriesName: string;
+  brandName: string;
+  releaseDate: string;
+  msrpValue: string;
+  msrpCurrency: string;
+  productCode: string;
+  features: string;
+  condition: string;
 }
 
 const initialProductForm: ProductFormState = {
@@ -115,6 +135,16 @@ const initialProductForm: ProductFormState = {
   images: [],
   isActive: true,
   featured: false,
+  preorderStatus: 'NONE',
+  // New detail fields
+  seriesName: '',
+  brandName: '',
+  releaseDate: '',
+  msrpValue: '',
+  msrpCurrency: 'JPY',
+  productCode: '',
+  features: '',
+  condition: 'New',
 };
 
 export default function AdminPage() {
@@ -268,6 +298,16 @@ export default function AdminPage() {
       images: productForm.images,
       isActive: productForm.isActive,
       featured: productForm.featured,
+      preorderStatus: productForm.preorderStatus,
+      // New detail fields
+      seriesName: productForm.seriesName || null,
+      brandName: productForm.brandName || null,
+      releaseDate: productForm.releaseDate || null,
+      msrpValue: productForm.msrpValue ? parseFloat(productForm.msrpValue) : null,
+      msrpCurrency: productForm.msrpCurrency || 'JPY',
+      productCode: productForm.productCode || null,
+      features: productForm.features || null,
+      condition: productForm.condition || null,
     };
 
     try {
@@ -328,6 +368,16 @@ export default function AdminPage() {
       images: product.images || [],
       isActive: product.isActive,
       featured: product.featured,
+      preorderStatus: product.preorderStatus || 'NONE',
+      // New detail fields
+      seriesName: product.seriesName || '',
+      brandName: product.brandName || '',
+      releaseDate: product.releaseDate ? product.releaseDate.split('T')[0] : '',
+      msrpValue: product.msrpValue?.toString() || '',
+      msrpCurrency: product.msrpCurrency || 'JPY',
+      productCode: product.productCode || '',
+      features: product.features || '',
+      condition: product.condition || 'New',
     });
     setShowProductModal(true);
   };
@@ -596,18 +646,7 @@ export default function AdminPage() {
                 <button
                   onClick={() => {
                     setEditingProduct(null);
-                    setProductForm({
-                      name: '',
-                      slug: '',
-                      description: '',
-                      price: '',
-                      comparePrice: '',
-                      stockQuantity: '',
-                      categoryId: '',
-                      images: [],
-                      isActive: true,
-                      featured: false,
-                    });
+                    setProductForm(initialProductForm);
                     setShowProductModal(true);
                   }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-colors"
@@ -628,6 +667,7 @@ export default function AdminPage() {
                       <th className="text-left p-4 font-medium text-slate-600">Danh muc</th>
                       <th className="text-right p-4 font-medium text-slate-600">Gia</th>
                       <th className="text-center p-4 font-medium text-slate-600">Ton kho</th>
+                      <th className="text-center p-4 font-medium text-slate-600">Phan loai</th>
                       <th className="text-center p-4 font-medium text-slate-600">Trang thai</th>
                       <th className="text-center p-4 font-medium text-slate-600">Thao tac</th>
                     </tr>
@@ -663,6 +703,16 @@ export default function AdminPage() {
                               : 'bg-emerald-100 text-emerald-600'
                             }`}>
                             {product.stockQuantity}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${product.preorderStatus === 'NONE'
+                            ? 'bg-green-100 text-green-600'
+                            : product.preorderStatus === 'PREORDER'
+                              ? 'bg-orange-100 text-orange-600'
+                              : 'bg-blue-100 text-blue-600'
+                            }`}>
+                            {product.preorderStatus === 'NONE' ? 'Sẵn hàng' : product.preorderStatus === 'PREORDER' ? 'Pre-order' : 'Đặt hàng'}
                           </span>
                         </td>
                         <td className="p-4 text-center">
@@ -1136,6 +1186,125 @@ export default function AdminPage() {
                     </select>
                   </div>
 
+                  {/* Product Details Section */}
+                  <div className="md:col-span-2 border-t border-slate-200 pt-4 mt-2">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-4">Thông tin chi tiết sản phẩm</h3>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Series (Anime/Manga) *
+                    </label>
+                    <input
+                      required
+                      value={productForm.seriesName}
+                      onChange={(e) => setProductForm({ ...productForm, seriesName: e.target.value })}
+                      className="input-field"
+                      placeholder="VD: Naruto, One Piece, Demon Slayer..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Thương hiệu *
+                    </label>
+                    <input
+                      required
+                      value={productForm.brandName}
+                      onChange={(e) => setProductForm({ ...productForm, brandName: e.target.value })}
+                      className="input-field"
+                      placeholder="VD: Bandai, Good Smile, Kotobukiya..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Ngày phát hành
+                    </label>
+                    <input
+                      type="date"
+                      value={productForm.releaseDate}
+                      onChange={(e) => setProductForm({ ...productForm, releaseDate: e.target.value })}
+                      className="input-field"
+                      title="Ngày phát hành sản phẩm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Mã sản phẩm (Code) *
+                    </label>
+                    <input
+                      required
+                      value={productForm.productCode}
+                      onChange={(e) => setProductForm({ ...productForm, productCode: e.target.value })}
+                      className="input-field"
+                      placeholder="VD: GSC-12345"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Giá hãng đề xuất (MSRP)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        value={productForm.msrpValue}
+                        onChange={(e) => setProductForm({ ...productForm, msrpValue: e.target.value })}
+                        className="input-field flex-1"
+                        placeholder="0"
+                      />
+                      <select
+                        value={productForm.msrpCurrency}
+                        onChange={(e) => setProductForm({ ...productForm, msrpCurrency: e.target.value })}
+                        className="input-field w-24"
+                        title="Đơn vị tiền tệ"
+                      >
+                        <option value="JPY">JPY</option>
+                        <option value="USD">USD</option>
+                        <option value="VND">VND</option>
+                        <option value="CNY">CNY</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Tình trạng *
+                    </label>
+                    <select
+                      required
+                      value={productForm.condition}
+                      onChange={(e) => setProductForm({ ...productForm, condition: e.target.value })}
+                      className="input-field"
+                      title="Tình trạng sản phẩm"
+                    >
+                      <option value="New">Mới 100%</option>
+                      <option value="Like New">Như mới</option>
+                      <option value="Used">Đã qua sử dụng</option>
+                      <option value="Damaged Box">Hộp bị móp/hư</option>
+                      <option value="No Box">Không có hộp</option>
+                    </select>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Đặc điểm sản phẩm *
+                    </label>
+                    <textarea
+                      required
+                      rows={3}
+                      value={productForm.features}
+                      onChange={(e) => setProductForm({ ...productForm, features: e.target.value })}
+                      className="input-field"
+                      placeholder="Mô tả các đặc điểm nổi bật: kích thước, chất liệu, phụ kiện đi kèm..."
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 border-t border-slate-200 pt-4 mt-2"></div>
+
                   {/* Images */}
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -1193,6 +1362,60 @@ export default function AdminPage() {
                       className="w-4 h-4"
                     />
                     <label htmlFor="featured" className="text-sm text-slate-700">Sản phẩm nổi bật</label>
+                  </div>
+
+                  {/* Preorder Status */}
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Trạng thái hàng hóa
+                    </label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="preorderStatus"
+                          value="NONE"
+                          checked={productForm.preorderStatus === 'NONE'}
+                          onChange={() => setProductForm({ ...productForm, preorderStatus: 'NONE' })}
+                          className="w-4 h-4 text-green-600"
+                        />
+                        <span className="text-sm">
+                          <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                          Sẵn hàng
+                        </span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="preorderStatus"
+                          value="PREORDER"
+                          checked={productForm.preorderStatus === 'PREORDER'}
+                          onChange={() => setProductForm({ ...productForm, preorderStatus: 'PREORDER' })}
+                          className="w-4 h-4 text-orange-600"
+                        />
+                        <span className="text-sm">
+                          <span className="inline-block w-2 h-2 bg-orange-500 rounded-full mr-1"></span>
+                          Pre-order
+                        </span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="preorderStatus"
+                          value="ORDER"
+                          checked={productForm.preorderStatus === 'ORDER'}
+                          onChange={() => setProductForm({ ...productForm, preorderStatus: 'ORDER' })}
+                          className="w-4 h-4 text-blue-600"
+                        />
+                        <span className="text-sm">
+                          <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
+                          Đặt hàng
+                        </span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Sẵn hàng: Giao ngay | Pre-order: Đặt trước chờ phát hành | Đặt hàng: Phải order từ nhà sản xuất
+                    </p>
                   </div>
                 </div>
 

@@ -1,92 +1,147 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronRight, Search as SearchIcon } from 'lucide-react';
+import { ChevronRight, Search as SearchIcon, Loader2 } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 
-// Mock search results
-const mockSearchResults = [
-  {
-    id: 1,
-    name: 'Hatsune Miku - VOCALOID / Model Kit',
-    price: 2300000,
-    image: 'https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=400&h=400&fit=crop',
-    badge: 'new',
-  },
-  {
-    id: 2,
-    name: 'Miku Snow Miku 2025 Ver. - Character Vocal Series',
-    price: 1800000,
-    image: 'https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=400&h=400&fit=crop',
-    badge: 'preorder',
-  },
-  {
-    id: 3,
-    name: 'Racing Miku 2024 Ver. - Hatsune Miku GT Project',
-    price: 4500000,
-    image: 'https://images.unsplash.com/photo-1614680376408-81e0d76bfcdf?w=400&h=400&fit=crop',
-    discount: 10,
-  },
-  {
-    id: 4,
-    name: 'Hatsune Miku Symphony 2024 Concert Ver.',
-    price: 3200000,
-    image: 'https://images.unsplash.com/photo-1618336752974-aae8e04506aa?w=400&h=400&fit=crop',
-    badge: 'hot',
-  },
-  {
-    id: 5,
-    name: 'Miku Sakura 2025 - Hatsune Miku Spring Ver.',
-    price: 2100000,
-    image: 'https://images.unsplash.com/photo-1614680376739-5dc71c0d8b84?w=400&h=400&fit=crop',
-  },
-  {
-    id: 6,
-    name: 'Hatsune Miku V4X Bundle - Software + Figure',
-    price: 5600000,
-    image: 'https://images.unsplash.com/photo-1614680376739-5cd0c1a0a1c6?w=400&h=400&fit=crop',
-    discount: 15,
-  },
-];
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  comparePrice?: number;
+  images: string[];
+  featured: boolean;
+  isActive: boolean;
+  createdAt: string;
+  category?: Category;
+}
 
 function SearchContent() {
   const searchParams = useSearchParams();
   const queryParam = searchParams.get('q');
   const [searchQuery, setSearchQuery] = useState(queryParam || '');
-  const [results, setResults] = useState<typeof mockSearchResults>([]);
+  const [results, setResults] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [totalResults, setTotalResults] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
 
+  // Fetch categories for filter
   useEffect(() => {
-    if (queryParam) {
-      performSearch(queryParam);
-    }
-  }, [queryParam]);
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch('/api/categories');
+        if (response.ok) {
+          const data = await response.json();
+          setCategories(data.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
-  const performSearch = (query: string) => {
+  // Transform product for ProductCard
+  const transformProduct = (product: Product) => {
+    const hasDiscount = product.comparePrice && Number(product.comparePrice) > Number(product.price);
+    const salePercentage = hasDiscount
+      ? Math.round(((Number(product.comparePrice) - Number(product.price)) / Number(product.comparePrice)) * 100)
+      : 0;
+
+    let badge: 'hot' | 'new' | 'sale' | undefined;
+    if (product.featured) {
+      badge = 'hot';
+    } else if (new Date(product.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) {
+      badge = 'new';
+    } else if (hasDiscount) {
+      badge = 'sale';
+    }
+
+    return {
+      id: product.id,
+      name: product.name,
+      price: Number(product.comparePrice) || Number(product.price),
+      discountPrice: hasDiscount ? Number(product.price) : undefined,
+      image: product.images?.[0] || '/images/placeholder.jpg',
+      badge,
+      salePercentage: salePercentage > 0 ? salePercentage : undefined,
+      slug: product.slug,
+    };
+  };
+
+  // Perform real search via API
+  const performSearch = useCallback(async (query: string, page: number = 1, category: string = '') => {
+    if (!query.trim()) {
+      setResults([]);
+      setTotalResults(0);
+      return;
+    }
+
     setIsSearching(true);
-    // Simulate API call
-    setTimeout(() => {
-      if (query.trim()) {
-        setResults(mockSearchResults);
+    try {
+      const params = new URLSearchParams();
+      params.set('search', query);
+      params.set('page', page.toString());
+      params.set('limit', '20');
+      if (category) params.set('category', category);
+
+      const response = await fetch(`/api/products?${params.toString()}`);
+      if (response.ok) {
+        const data = await response.json();
+        setResults(data.data || []);
+        setTotalResults(data.pagination?.total || data.data?.length || 0);
       } else {
         setResults([]);
+        setTotalResults(0);
       }
+    } catch (error) {
+      console.error('Search error:', error);
+      setResults([]);
+      setTotalResults(0);
+    } finally {
       setIsSearching(false);
-    }, 500);
-  };
+    }
+  }, []);
+
+  // Search when URL param changes
+  useEffect(() => {
+    if (queryParam) {
+      setSearchQuery(queryParam);
+      performSearch(queryParam, currentPage, selectedCategory);
+    }
+  }, [queryParam, currentPage, selectedCategory, performSearch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
       const newUrl = `/search?q=${encodeURIComponent(searchQuery)}`;
       window.history.pushState({}, '', newUrl);
-      performSearch(searchQuery);
+      setCurrentPage(1);
+      performSearch(searchQuery, 1, selectedCategory);
     }
   };
 
-  const hasSearched = queryParam || results.length > 0;
+  const handleCategoryChange = (categorySlug: string) => {
+    setSelectedCategory(categorySlug);
+    setCurrentPage(1);
+    if (queryParam) {
+      performSearch(queryParam, 1, categorySlug);
+    }
+  };
+
+  const hasSearched = !!queryParam;
+  const totalPages = Math.ceil(totalResults / 20);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -205,21 +260,27 @@ function SearchContent() {
                       <h4 className="font-semibold mb-3">Danh mục</h4>
                       <div className="space-y-2">
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
-                          <span className="text-sm">PVC Figure</span>
+                          <input
+                            type="radio"
+                            name="category"
+                            className="rounded"
+                            checked={selectedCategory === ''}
+                            onChange={() => handleCategoryChange('')}
+                          />
+                          <span className="text-sm">Tất cả</span>
                         </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
-                          <span className="text-sm">Nendoroid</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
-                          <span className="text-sm">Figma</span>
-                        </label>
-                        <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
-                          <span className="text-sm">Scale Figure</span>
-                        </label>
+                        {categories.map((cat) => (
+                          <label key={cat.id} className="flex items-center gap-2 cursor-pointer">
+                            <input
+                              type="radio"
+                              name="category"
+                              className="rounded"
+                              checked={selectedCategory === cat.slug}
+                              onChange={() => handleCategoryChange(cat.slug)}
+                            />
+                            <span className="text-sm">{cat.name}</span>
+                          </label>
+                        ))}
                       </div>
                     </div>
 
@@ -248,7 +309,7 @@ function SearchContent() {
                 <div className="flex-1">
                   <div className="mb-6">
                     <p className="text-gray-600">
-                      Tìm thấy <span className="font-semibold text-gray-900">{results.length}</span> kết quả
+                      Tìm thấy <span className="font-semibold text-gray-900">{totalResults}</span> kết quả
                       {queryParam && (
                         <> cho &quot;<span className="font-semibold text-gray-900">{queryParam}</span>&quot;</>
                       )}
@@ -259,38 +320,56 @@ function SearchContent() {
                     {results.map((product) => (
                       <ProductCard
                         key={product.id}
-                        id={product.id.toString()}
-                        slug={`product-${product.id}`}
-                        name={product.name}
-                        price={product.price}
-                        discountPrice={product.discount ? product.price * (1 - product.discount / 100) : undefined}
-                        image={product.image}
-                        badge={product.badge as 'hot' | 'new' | 'sale' | undefined}
-                        salePercentage={product.discount}
+                        {...transformProduct(product)}
                       />
                     ))}
                   </div>
 
                   {/* Pagination */}
-                  <div className="mt-8 flex justify-center">
-                    <div className="flex gap-2">
-                      <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        1
-                      </button>
-                      <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        2
-                      </button>
-                      <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        3
-                      </button>
-                      <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        4
-                      </button>
-                      <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                        5
-                      </button>
+                  {totalPages > 1 && (
+                    <div className="mt-8 flex justify-center">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                          disabled={currentPage === 1}
+                          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Trước
+                        </button>
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          let pageNum;
+                          if (totalPages <= 5) {
+                            pageNum = i + 1;
+                          } else if (currentPage <= 3) {
+                            pageNum = i + 1;
+                          } else if (currentPage >= totalPages - 2) {
+                            pageNum = totalPages - 4 + i;
+                          } else {
+                            pageNum = currentPage - 2 + i;
+                          }
+                          return (
+                            <button
+                              key={pageNum}
+                              onClick={() => setCurrentPage(pageNum)}
+                              className={`px-4 py-2 border rounded-lg ${currentPage === pageNum
+                                  ? 'bg-accent-red text-white border-accent-red'
+                                  : 'border-gray-300 hover:bg-gray-50'
+                                }`}
+                            >
+                              {pageNum}
+                            </button>
+                          );
+                        })}
+                        <button
+                          onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+                          disabled={currentPage === totalPages}
+                          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Sau
+                        </button>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
               </div>
             ) : (

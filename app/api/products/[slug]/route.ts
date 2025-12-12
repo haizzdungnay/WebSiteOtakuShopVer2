@@ -18,6 +18,22 @@ export async function GET(
                         name: true,
                         slug: true
                     }
+                },
+                brand: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
+                series: {
+                    include: {
+                        series: {
+                            select: {
+                                id: true,
+                                name: true
+                            }
+                        }
+                    }
                 }
             }
         })
@@ -44,10 +60,17 @@ export async function GET(
             )
         }
 
+        // Flatten series and brand for easier frontend access
+        const productData = {
+            ...product,
+            seriesName: product.series?.[0]?.series?.name || null,
+            brandName: product.brand?.name || null,
+        }
+
         // Trả về product
         return NextResponse.json({
             success: true,
-            data: product
+            data: productData
         })
     } catch (error) {
         console.error('Error fetching product:', error)

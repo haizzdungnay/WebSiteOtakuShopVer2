@@ -252,6 +252,9 @@ export default function Header() {
             {/* CỘT GIỮA: Navigation Items */}
             <div className="flex-1">
               <div className="grid grid-flow-col auto-cols-max justify-center gap-10 md:gap-16 lg:gap-20">
+                <NavLink href="/in-stock" icon={<Package size={18} />}>
+                  Hàng sẵn có
+                </NavLink>
                 <NavLink href="/giao-hang" icon={<Truck size={18} />}>
                   Giao hàng & bảo hành
                 </NavLink>

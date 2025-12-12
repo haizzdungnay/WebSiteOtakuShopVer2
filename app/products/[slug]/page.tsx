@@ -26,6 +26,15 @@ interface Product {
   shortDescription?: string;
   featured?: boolean;
   isActive?: boolean;
+  // New detail fields
+  seriesName?: string;
+  brandName?: string;
+  releaseDate?: string;
+  msrpValue?: number;
+  msrpCurrency?: string;
+  features?: string;
+  condition?: string;
+  preorderStatus?: 'NONE' | 'PREORDER' | 'ORDER';
 }
 
 interface RelatedProduct {
@@ -242,18 +251,67 @@ export default function ProductDetailPage() {
                       <span className="text-gray-700 w-2/3">{product.productCode}</span>
                     </div>
                   )}
+                  {product.seriesName && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Series (Anime):</span>
+                      <span className="text-gray-700 w-2/3">{product.seriesName}</span>
+                    </div>
+                  )}
+                  {product.brandName && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Thương hiệu:</span>
+                      <span className="text-gray-700 w-2/3">{product.brandName}</span>
+                    </div>
+                  )}
                   {product.category && (
                     <div className="flex py-3 border-b border-gray-100">
                       <span className="font-semibold text-gray-900 w-1/3">Danh mục:</span>
                       <span className="text-gray-700 w-2/3">{product.category.name}</span>
                     </div>
                   )}
+                  {product.releaseDate && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Ngày phát hành:</span>
+                      <span className="text-gray-700 w-2/3">
+                        {new Date(product.releaseDate).toLocaleDateString('vi-VN')}
+                      </span>
+                    </div>
+                  )}
+                  {product.msrpValue && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Giá hãng (MSRP):</span>
+                      <span className="text-gray-700 w-2/3">
+                        {product.msrpValue.toLocaleString()} {product.msrpCurrency || 'JPY'}
+                      </span>
+                    </div>
+                  )}
+                  {product.condition && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Tình trạng:</span>
+                      <span className="text-gray-700 w-2/3">{product.condition}</span>
+                    </div>
+                  )}
+                  {product.features && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Đặc điểm:</span>
+                      <span className="text-gray-700 w-2/3 whitespace-pre-line">{product.features}</span>
+                    </div>
+                  )}
                   <div className="flex py-3 border-b border-gray-100">
-                    <span className="font-semibold text-gray-900 w-1/3">Tình trạng:</span>
+                    <span className="font-semibold text-gray-900 w-1/3">Kho hàng:</span>
                     <span className="text-gray-700 w-2/3">
                       {product.stockQuantity > 0 ? `Còn ${product.stockQuantity} sản phẩm` : 'Hết hàng'}
                     </span>
                   </div>
+                  {product.preorderStatus && product.preorderStatus !== 'NONE' && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Trạng thái:</span>
+                      <span className={`w-2/3 font-semibold ${product.preorderStatus === 'PREORDER' ? 'text-orange-600' : 'text-blue-600'
+                        }`}>
+                        {product.preorderStatus === 'PREORDER' ? 'Pre-order' : 'Đặt hàng từ nhà sản xuất'}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -58,7 +58,21 @@ const createProductSchema = z.object({
 
     featured: z.boolean()
         .optional()
-        .default(false)
+        .default(false),
+
+    preorderStatus: z.enum(['NONE', 'PREORDER', 'ORDER'])
+        .optional()
+        .default('NONE'),
+
+    // New product detail fields
+    seriesName: z.string().max(200).optional().nullable(),
+    brandName: z.string().max(200).optional().nullable(),
+    releaseDate: z.string().optional().nullable(),
+    msrpValue: z.number().min(0).optional().nullable(),
+    msrpCurrency: z.string().max(3).optional().nullable(),
+    productCode: z.string().max(64).optional().nullable(),
+    features: z.string().max(5000).optional().nullable(),
+    condition: z.string().max(100).optional().nullable(),
 })
 
 // GET /api/admin/products - Lấy danh sách sản phẩm (có phân trang)
@@ -95,7 +109,7 @@ export async function GET(request: NextRequest) {
         if (search) {
             where.OR = [
                 {
-                    name: { 
+                    name: {
                         contains: search,
                         mode: 'insensitive'
                     },
@@ -148,6 +162,22 @@ export async function GET(request: NextRequest) {
                             name: true,
                             slug: true
                         }
+                    },
+                    brand: {
+                        select: {
+                            id: true,
+                            name: true
+                        }
+                    },
+                    series: {
+                        include: {
+                            series: {
+                                select: {
+                                    id: true,
+                                    name: true
+                                }
+                            }
+                        }
                     }
                 },
                 orderBy: [
@@ -164,8 +194,11 @@ export async function GET(request: NextRequest) {
             ...product,
             stockStatus:
                 product.stockQuantity === 0 ? 'out_of_stock' :
-                product.stockQuantity <= 10 ? 'low_stock' :
-                'in_stock'
+                    product.stockQuantity <= 10 ? 'low_stock' :
+                        'in_stock',
+            // Flatten series and brand for easier access
+            seriesName: product.series?.[0]?.series?.name || null,
+            brandName: product.brand?.name || null,
         }))
 
         return NextResponse.json({
@@ -183,10 +216,10 @@ export async function GET(request: NextRequest) {
                     active: await prisma.product.count({ where: { ...where, isActive: true } }),
                     inactive: await prisma.product.count({ where: { ...where, isActive: false } }),
                     outOfStock: await prisma.product.count({ where: { ...where, stockQuantity: 0 } }),
-                    lowStock: await prisma.product.count({ 
+                    lowStock: await prisma.product.count({
                         where: { ...where, stockQuantity: { gt: 0, lte: 10 } }
                     }),
-                    inStock: await prisma.product.count({ 
+                    inStock: await prisma.product.count({
                         where: { ...where, stockQuantity: { gt: 10 } }
                     })
                 }
@@ -274,8 +307,8 @@ export async function POST(request: NextRequest) {
         }
 
         // 5 Validate compareAtPrice
-        if (validatedData.comparePrice !== undefined && 
-            validatedData.comparePrice !== null && 
+        if (validatedData.comparePrice !== undefined &&
+            validatedData.comparePrice !== null &&
             validatedData.comparePrice <= validatedData.price) {
             return NextResponse.json(
                 {
@@ -287,6 +320,30 @@ export async function POST(request: NextRequest) {
         }
 
         // 6 Tạo sản phẩm
+        // Handle series - create or find existing
+        let seriesConnect = undefined;
+        if (validatedData.seriesName) {
+            const seriesSlug = validatedData.seriesName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const series = await prisma.series.upsert({
+                where: { slug: seriesSlug },
+                create: { name: validatedData.seriesName, slug: seriesSlug },
+                update: {}
+            });
+            seriesConnect = { create: { seriesId: series.id } };
+        }
+
+        // Handle brand - create or find existing
+        let brandConnect = undefined;
+        if (validatedData.brandName) {
+            const brandSlug = validatedData.brandName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const brand = await prisma.brand.upsert({
+                where: { slug: brandSlug },
+                create: { name: validatedData.brandName, slug: brandSlug },
+                update: {}
+            });
+            brandConnect = brand.id;
+        }
+
         const product = await prisma.product.create({
             data: {
                 name: validatedData.name,
@@ -299,6 +356,16 @@ export async function POST(request: NextRequest) {
                 images: validatedData.images,
                 isActive: validatedData.isActive,
                 featured: validatedData.featured,
+                preorderStatus: validatedData.preorderStatus,
+                // New detail fields
+                productCode: validatedData.productCode,
+                releaseDate: validatedData.releaseDate ? new Date(validatedData.releaseDate) : null,
+                msrpValue: validatedData.msrpValue,
+                msrpCurrency: validatedData.msrpCurrency || 'JPY',
+                features: validatedData.features,
+                condition: validatedData.condition,
+                brandId: brandConnect,
+                series: seriesConnect,
                 averageRating: 0,
                 reviewCount: 0
             },
@@ -308,6 +375,22 @@ export async function POST(request: NextRequest) {
                         id: true,
                         name: true,
                         slug: true
+                    }
+                },
+                brand: {
+                    select: {
+                        id: true,
+                        name: true
+                    }
+                },
+                series: {
+                    include: {
+                        series: {
+                            select: {
+                                id: true,
+                                name: true
+                            }
+                        }
                     }
                 }
             }

@@ -101,6 +101,22 @@ function getRandomStock(): number {
     return Math.floor(Math.random() * 100) + 5
 }
 
+// Randomly assign preorder status - 60% in-stock, 25% preorder, 15% order
+function getRandomPreorderStatus(): 'NONE' | 'PREORDER' | 'ORDER' {
+    const rand = Math.random()
+    if (rand < 0.6) return 'NONE'      // 60% - hàng có sẵn
+    if (rand < 0.85) return 'PREORDER' // 25% - đặt trước
+    return 'ORDER'                      // 15% - phải order
+}
+
+// Get stock based on preorder status
+function getStockForStatus(status: 'NONE' | 'PREORDER' | 'ORDER'): number {
+    if (status === 'NONE') {
+        return Math.floor(Math.random() * 50) + 10 // 10-60 in stock
+    }
+    return 0 // Pre-order and Order items have 0 stock
+}
+
 function generateDescription(name: string): string {
     return `${name} - Sản phẩm chính hãng 100% từ Otaku Shop. Được nhập khẩu trực tiếp từ Nhật Bản với chất lượng cao nhất. Phù hợp cho các fan anime và manga. Bảo hành chính hãng, đổi trả trong 7 ngày nếu có lỗi từ nhà sản xuất.`
 }
@@ -133,6 +149,7 @@ async function main() {
     if (figuresCategory) {
         console.log('📦 Creating Figure products...')
         for (const product of figureProducts) {
+            const preorderStatus = getRandomPreorderStatus()
             await prisma.product.create({
                 data: {
                     name: product.name,
@@ -140,11 +157,12 @@ async function main() {
                     description: generateDescription(product.name),
                     price: product.price,
                     comparePrice: product.comparePrice || null,
-                    stockQuantity: getRandomStock(),
+                    stockQuantity: getStockForStatus(preorderStatus),
                     images: getRandomImage(),
                     isActive: true,
                     featured: product.featured,
                     categoryId: figuresCategory.id,
+                    preorderStatus: preorderStatus,
                 }
             })
             productCount++
@@ -156,6 +174,7 @@ async function main() {
     if (gamingCategory) {
         console.log('🎮 Creating Gaming products...')
         for (const product of gamingProducts) {
+            const preorderStatus = getRandomPreorderStatus()
             await prisma.product.create({
                 data: {
                     name: product.name,
@@ -163,11 +182,12 @@ async function main() {
                     description: generateDescription(product.name),
                     price: product.price,
                     comparePrice: product.comparePrice || null,
-                    stockQuantity: getRandomStock(),
+                    stockQuantity: getStockForStatus(preorderStatus),
                     images: getRandomImage(),
                     isActive: true,
                     featured: product.featured,
                     categoryId: gamingCategory.id,
+                    preorderStatus: preorderStatus,
                 }
             })
             productCount++
@@ -179,6 +199,7 @@ async function main() {
     if (mangaCategory) {
         console.log('📚 Creating Manga products...')
         for (const product of mangaProducts) {
+            const preorderStatus = getRandomPreorderStatus()
             await prisma.product.create({
                 data: {
                     name: product.name,
@@ -186,11 +207,12 @@ async function main() {
                     description: generateDescription(product.name),
                     price: product.price,
                     comparePrice: product.comparePrice || null,
-                    stockQuantity: getRandomStock(),
+                    stockQuantity: getStockForStatus(preorderStatus),
                     images: getRandomImage(),
                     isActive: true,
                     featured: product.featured,
                     categoryId: mangaCategory.id,
+                    preorderStatus: preorderStatus,
                 }
             })
             productCount++
@@ -202,6 +224,7 @@ async function main() {
     if (apparelCategory) {
         console.log('👕 Creating Apparel products...')
         for (const product of apparelProducts) {
+            const preorderStatus = getRandomPreorderStatus()
             await prisma.product.create({
                 data: {
                     name: product.name,
@@ -209,11 +232,12 @@ async function main() {
                     description: generateDescription(product.name),
                     price: product.price,
                     comparePrice: product.comparePrice || null,
-                    stockQuantity: getRandomStock(),
+                    stockQuantity: getStockForStatus(preorderStatus),
                     images: getRandomImage(),
                     isActive: true,
                     featured: product.featured,
                     categoryId: apparelCategory.id,
+                    preorderStatus: preorderStatus,
                 }
             })
             productCount++
@@ -225,6 +249,7 @@ async function main() {
     if (collectiblesCategory) {
         console.log('🎁 Creating Collectibles products...')
         for (const product of collectibleProducts) {
+            const preorderStatus = getRandomPreorderStatus()
             await prisma.product.create({
                 data: {
                     name: product.name,
@@ -232,11 +257,12 @@ async function main() {
                     description: generateDescription(product.name),
                     price: product.price,
                     comparePrice: product.comparePrice || null,
-                    stockQuantity: getRandomStock(),
+                    stockQuantity: getStockForStatus(preorderStatus),
                     images: getRandomImage(),
                     isActive: true,
                     featured: product.featured,
                     categoryId: collectiblesCategory.id,
+                    preorderStatus: preorderStatus,
                 }
             })
             productCount++
