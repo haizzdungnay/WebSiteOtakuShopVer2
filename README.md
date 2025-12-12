@@ -142,6 +142,11 @@ docker-compose up -d postgres
 
 **Hoặc đảm bảo PostgreSQL local đang chạy.**
 
+> **Lưu ý dữ liệu PostgreSQL**
+> - Container postgres dùng bind mount `./data/postgres` nên dữ liệu sẽ được giữ lại dù bạn xóa container.
+> - Thư mục `data/postgres` đã được ignore khỏi git; chỉ có file `.gitkeep` được commit để giữ cấu trúc thư mục.
+> - Đừng `git add` dữ liệu thật của Postgres. Nếu cần reset sạch, hãy dừng container rồi xóa thư mục `data/postgres` (hoặc rename) trước khi chạy lại `docker-compose up -d postgres`.
+
 ### Bước 5: Khởi tạo Database với Prisma
 
 ```bash
@@ -154,6 +159,8 @@ npx prisma db push
 # (Optional) Seed sample data
 npm run db:seed
 ```
+
+> Seed sẽ tạo admin theo biến môi trường `.env` (`ADMIN_USERNAME`, `ADMIN_PASSWORD`, `ADMIN_DISPLAY_NAME`). Nếu không đặt, giá trị mặc định: `admin@otakushop.com` / `admin123`.
 
 ### Bước 6: Chạy Development Server
 
