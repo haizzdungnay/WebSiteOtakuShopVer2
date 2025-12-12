@@ -11,7 +11,9 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      # Bind mount - Lưu dữ liệu trực tiếp vào thư mục ./data/postgres
+      # Dữ liệu SẼ ĐƯỢC GIỮ LẠI ngay cả khi xóa container hoặc docker-compose down -v
+      - ./data/postgres:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - otakushop-network
@@ -120,7 +122,5 @@ networks:
       config:
         - subnet: 172.20.0.0/16
 
-volumes:
-  postgres_data:
-    driver: local
-    name: otakushop_postgres_data # Đặt tên cố định để dễ quản lý
+# Không cần volumes vì dùng bind mount (./data/postgres)
+# Dữ liệu được lưu trực tiếp trong thư mục project
