@@ -3,14 +3,15 @@ const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   images: {
+    // Cho phép tất cả các nguồn ảnh bên ngoài
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'via.placeholder.com',
+        hostname: '**',
       },
       {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
+        protocol: 'http',
+        hostname: '**',
       },
     ],
   },
