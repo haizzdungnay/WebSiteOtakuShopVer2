@@ -20,9 +20,6 @@ export const ourFileRouter = {
       return { userId: admin.userId }
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Product image uploaded by:", metadata.userId)
-      console.log("File URL:", file.url)
-
       return { uploadedBy: metadata.userId, url: file.url }
     }),
 
@@ -38,9 +35,6 @@ export const ourFileRouter = {
       return { userId: user.userId }
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Review image uploaded by:", metadata.userId)
-      console.log("File URL:", file.url)
-
       return { uploadedBy: metadata.userId, url: file.url }
     }),
 
@@ -56,9 +50,6 @@ export const ourFileRouter = {
       return { userId: user.userId }
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Avatar uploaded by:", metadata.userId)
-      console.log("File URL:", file.url)
-
       return { uploadedBy: metadata.userId, url: file.url }
     }),
 
@@ -74,9 +65,6 @@ export const ourFileRouter = {
       return { userId: user.userId }
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Payment proof uploaded by:", metadata.userId)
-      console.log("File URL:", file.url)
-
       return { uploadedBy: metadata.userId, url: file.url }
     }),
 
@@ -92,9 +80,6 @@ export const ourFileRouter = {
       return { userId: admin.userId }
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      console.log("Category image uploaded by:", metadata.userId)
-      console.log("File URL:", file.url)
-
       return { uploadedBy: metadata.userId, url: file.url }
     }),
 } satisfies FileRouter

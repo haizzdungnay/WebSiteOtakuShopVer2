@@ -43,7 +43,6 @@ export async function PUT(request: NextRequest) {
     if (user.avatar && user.avatar.includes('utfs.io')) {
       try {
         await deleteFileByUrl(user.avatar)
-        console.log('Old avatar deleted:', user.avatar)
       } catch (error) {
         console.error('Failed to delete old avatar:', error)
         // Continue even if deletion fails
@@ -121,7 +120,6 @@ export async function DELETE(request: NextRequest) {
     if (user.avatar.includes('utfs.io')) {
       try {
         await deleteFileByUrl(user.avatar)
-        console.log('Avatar deleted:', user.avatar)
       } catch (error) {
         console.error('Failed to delete avatar:', error)
       }
