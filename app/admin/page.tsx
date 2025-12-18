@@ -4,19 +4,6 @@ import { useState, useEffect, useMemo, FormEvent } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Cookies from 'js-cookie';
 import {
-  useAdminProducts,
-  useAdminOrders,
-  useAdminReviews,
-  useAdminCategories,
-  useAdminAnnouncements,
-  Product,
-  Order,
-  Review,
-  Category,
-  Announcement,
-  CreateProductData,
-} from '@/hooks/useAdminApi';
-import {
   BarChart3,
   Coins,
   Edit,
@@ -51,6 +38,16 @@ interface Product {
   category?: { name: string };
   reviewCount: number;
   averageRating: number;
+  preorderStatus: 'NONE' | 'PREORDER' | 'ORDER';
+  // New detail fields
+  seriesName?: string;
+  brandName?: string;
+  releaseDate?: string;
+  msrpValue?: number;
+  msrpCurrency?: string;
+  productCode?: string;
+  features?: string;
+  condition?: string;
 }
 
 interface Category {
@@ -94,6 +91,8 @@ interface DashboardStats {
   totalCustomers: number;
   pendingOrders: number;
   recentOrders: Order[];
+  topProducts?: Array<{ productId: string; name: string; image?: string | null; price: number; totalSold: number }>;
+  ordersByStatus?: Record<string, number>;
 }
 
 interface ProductFormState {
@@ -107,6 +106,16 @@ interface ProductFormState {
   images: string[];
   isActive: boolean;
   featured: boolean;
+  preorderStatus: 'NONE' | 'PREORDER' | 'ORDER';
+  // New detail fields
+  seriesName: string;
+  brandName: string;
+  releaseDate: string;
+  msrpValue: string;
+  msrpCurrency: string;
+  productCode: string;
+  features: string;
+  condition: string;
 }
 
 const initialProductForm: ProductFormState = {
@@ -120,11 +129,22 @@ const initialProductForm: ProductFormState = {
   images: [],
   isActive: true,
   featured: false,
+  preorderStatus: 'NONE',
+  // New detail fields
+  seriesName: '',
+  brandName: '',
+  releaseDate: '',
+  msrpValue: '',
+  msrpCurrency: 'JPY',
+  productCode: '',
+  features: '',
+  condition: 'New',
 };
 
 export default function AdminPage() {
   const { user } = useAuth();
-  const token = Cookies.get('token');
+  const csrfToken = Cookies.get('csrf-token') || '';
+  const isAdmin = user?.role === 'admin';
 
   // States
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'reviews'>('dashboard');
@@ -144,10 +164,41 @@ export default function AdminPage() {
   const [showProductModal, setShowProductModal] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
 
+  // Shipping modal states
+  const [showShippingModal, setShowShippingModal] = useState(false);
+  const [shippingOrderId, setShippingOrderId] = useState<string | null>(null);
+  const [shippingForm, setShippingForm] = useState({ trackingCode: '', carrier: 'GHN' });
+
+  // Toast notifications
+  const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
+
+  // Products filters & pagination
+  const [productFilters, setProductFilters] = useState({ search: '', categoryId: '', stockStatus: '' });
+  const [productPage, setProductPage] = useState(1);
+  const [productTotalPages, setProductTotalPages] = useState(1);
+  const [productTotal, setProductTotal] = useState(0);
+
+  // Orders filters & pagination
+  const [orderFilters, setOrderFilters] = useState({ search: '', status: '' });
+  const [orderPage, setOrderPage] = useState(1);
+  const [orderTotalPages, setOrderTotalPages] = useState(1);
+  const [orderTotal, setOrderTotal] = useState(0);
+
+  // Reviews filters & pagination
+  const [reviewFilters, setReviewFilters] = useState({ isApproved: '', rating: '' });
+  const [reviewPage, setReviewPage] = useState(1);
+  const [reviewTotalPages, setReviewTotalPages] = useState(1);
+  const [reviewTotal, setReviewTotal] = useState(0);
+
+  // Order detail modal
+  const [showOrderModal, setShowOrderModal] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [orderAdminNote, setOrderAdminNote] = useState('');
+
   // API Headers
   const getHeaders = () => ({
     'Content-Type': 'application/json',
-    'Authorization': `Bearer ${token}`,
+    'X-CSRF-Token': csrfToken,
   });
 
   // Fetch Dashboard Stats
@@ -155,6 +206,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/admin/dashboard/stats', {
         headers: getHeaders(),
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -168,12 +220,27 @@ export default function AdminPage() {
   // Fetch Products
   const fetchProducts = async () => {
     try {
-      const response = await fetch('/api/admin/products', {
+      const params = new URLSearchParams();
+      params.set('page', String(productPage));
+      params.set('limit', '10');
+      if (productFilters.search) params.set('search', productFilters.search);
+      if (productFilters.categoryId) params.set('categoryId', productFilters.categoryId);
+      if (productFilters.stockStatus) params.set('stockStatus', productFilters.stockStatus);
+
+      const response = await fetch(`/api/admin/products?${params.toString()}`, {
         headers: getHeaders(),
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
-        setProducts(data.data || data.products || []);
+        // API trả về data.data.products
+        const productsList = data.data?.products || data.products || data.data || [];
+        setProducts(Array.isArray(productsList) ? productsList : []);
+        const pagination = data.data?.pagination || data.pagination;
+        if (pagination) {
+          setProductTotal(pagination.total || 0);
+          setProductTotalPages(pagination.totalPages || 1);
+        }
       }
     } catch (err) {
       console.error('Error fetching products:', err);
@@ -185,6 +252,7 @@ export default function AdminPage() {
     try {
       const response = await fetch('/api/categories', {
         headers: getHeaders(),
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
@@ -198,12 +266,25 @@ export default function AdminPage() {
   // Fetch Orders
   const fetchOrders = async () => {
     try {
-      const response = await fetch('/api/admin/orders', {
+      const params = new URLSearchParams();
+      params.set('page', String(orderPage));
+      params.set('limit', '10');
+      if (orderFilters.search) params.set('search', orderFilters.search);
+      if (orderFilters.status) params.set('status', orderFilters.status);
+
+      const response = await fetch(`/api/admin/orders?${params.toString()}`, {
         headers: getHeaders(),
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
-        setOrders(data.data || data.orders || []);
+        // API trả về data.data.orders
+        setOrders(data.data?.orders || data.orders || data.data || []);
+        const pagination = data.data?.pagination || data.pagination;
+        if (pagination) {
+          setOrderTotal(pagination.total || 0);
+          setOrderTotalPages(pagination.totalPages || 1);
+        }
       }
     } catch (err) {
       console.error('Error fetching orders:', err);
@@ -213,35 +294,71 @@ export default function AdminPage() {
   // Fetch Reviews
   const fetchReviews = async () => {
     try {
-      const response = await fetch('/api/admin/reviews', {
+      const params = new URLSearchParams();
+      params.set('page', String(reviewPage));
+      params.set('limit', '10');
+      if (reviewFilters.isApproved) params.set('isApproved', reviewFilters.isApproved);
+      if (reviewFilters.rating) params.set('rating', reviewFilters.rating);
+
+      const response = await fetch(`/api/admin/reviews?${params.toString()}`, {
         headers: getHeaders(),
+        credentials: 'include',
       });
       if (response.ok) {
         const data = await response.json();
-        setReviews(data.data || data.reviews || []);
+        // API trả về data.data.reviews
+        setReviews(data.data?.reviews || data.reviews || data.data || []);
+        const pagination = data.data?.pagination || data.pagination;
+        if (pagination) {
+          setReviewTotal(pagination.total || 0);
+          setReviewTotalPages(pagination.totalPages || 1);
+        }
       }
     } catch (err) {
       console.error('Error fetching reviews:', err);
     }
   };
 
-  // Load initial data
+  // Initial load
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       await Promise.all([
         fetchDashboardStats(),
-        fetchProducts(),
         fetchCategories(),
+        fetchProducts(),
         fetchOrders(),
         fetchReviews(),
       ]);
       setLoading(false);
     };
-    if (token) {
+    if (isAdmin) {
       loadData();
     }
-  }, [token]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin]);
+
+  // Refetch when filters/pagination change
+  useEffect(() => {
+    if (isAdmin) {
+      fetchProducts();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, productPage, productFilters]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchOrders();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, orderPage, orderFilters]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchReviews();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, reviewPage, reviewFilters]);
 
   // Generate slug from name
   const generateSlug = (name: string) => {
@@ -270,6 +387,16 @@ export default function AdminPage() {
       images: productForm.images,
       isActive: productForm.isActive,
       featured: productForm.featured,
+      preorderStatus: productForm.preorderStatus,
+      // New detail fields
+      seriesName: productForm.seriesName || null,
+      brandName: productForm.brandName || null,
+      releaseDate: productForm.releaseDate || null,
+      msrpValue: productForm.msrpValue ? parseFloat(productForm.msrpValue) : null,
+      msrpCurrency: productForm.msrpCurrency || 'JPY',
+      productCode: productForm.productCode || null,
+      features: productForm.features || null,
+      condition: productForm.condition || null,
     };
 
     try {
@@ -289,12 +416,15 @@ export default function AdminPage() {
         setShowProductModal(false);
         setProductForm(initialProductForm);
         setEditingProduct(null);
+        showToast(editingProduct ? 'Đã cập nhật sản phẩm' : 'Đã thêm sản phẩm', 'success');
       } else {
         const data = await response.json();
         setError(data.error || 'Có lỗi xảy ra');
+        showToast(data.error || 'Có lỗi xảy ra', 'error');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Không thể kết nối đến server');
+      showToast('Không thể kết nối đến server', 'error');
     }
   };
 
@@ -310,9 +440,16 @@ export default function AdminPage() {
 
       if (response.ok) {
         await fetchProducts();
+        showToast('Đã xóa sản phẩm', 'success');
+      } else {
+        const data = await response.json();
+        setError(data.error || 'Có lỗi xảy ra');
+        showToast(data.error || 'Có lỗi xảy ra', 'error');
       }
     } catch (err) {
       console.error('Error deleting product:', err);
+      setError('Không thể kết nối đến server');
+      showToast('Không thể kết nối đến server', 'error');
     }
   };
 
@@ -330,25 +467,87 @@ export default function AdminPage() {
       images: product.images || [],
       isActive: product.isActive,
       featured: product.featured,
+      preorderStatus: product.preorderStatus || 'NONE',
+      // New detail fields
+      seriesName: product.seriesName || '',
+      brandName: product.brandName || '',
+      releaseDate: product.releaseDate ? product.releaseDate.split('T')[0] : '',
+      msrpValue: product.msrpValue?.toString() || '',
+      msrpCurrency: product.msrpCurrency || 'JPY',
+      productCode: product.productCode || '',
+      features: product.features || '',
+      condition: product.condition || 'New',
     });
     setShowProductModal(true);
   };
 
+  // Handle Toggle Product Status (Active/Inactive)
+  const handleToggleProductStatus = async (product: Product) => {
+    try {
+      const response = await fetch(`/api/admin/products/${product.id}`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({
+          ...product,
+          isActive: !product.isActive,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchProducts();
+      }
+    } catch (err) {
+      console.error('Error toggling product status:', err);
+    }
+  };
+
   // Handle Order Status Update
-  const handleOrderStatusUpdate = async (orderId: string, status: string) => {
+  const handleOrderStatusUpdate = async (orderId: string, status: string, extraData?: { trackingCode?: string; carrier?: string; adminNote?: string }) => {
     try {
       const response = await fetch(`/api/admin/orders/${orderId}/status`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: getHeaders(),
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, ...extraData }),
       });
 
       if (response.ok) {
         await fetchOrders();
         await fetchDashboardStats();
+        showToast('Cập nhật trạng thái đơn hàng thành công', 'success');
+        return true;
+      } else {
+        const data = await response.json();
+        showToast(data.error || 'Không thể cập nhật trạng thái đơn hàng', 'error');
+        return false;
       }
     } catch (err) {
       console.error('Error updating order:', err);
+      showToast('Có lỗi xảy ra khi cập nhật đơn hàng', 'error');
+      return false;
+    }
+  };
+
+  // Handle Shipping - mở modal nhập thông tin vận chuyển
+  const handleShipping = (orderId: string) => {
+    setShippingOrderId(orderId);
+    setShippingForm({ trackingCode: '', carrier: 'GHN' });
+    setShowShippingModal(true);
+  };
+
+  // Submit shipping info
+  const handleShippingSubmit = async () => {
+    if (!shippingOrderId) return;
+    if (!shippingForm.trackingCode.trim()) {
+      showToast('Vui lòng nhập mã vận đơn', 'error');
+      return;
+    }
+    const success = await handleOrderStatusUpdate(shippingOrderId, 'SHIPPING', {
+      trackingCode: shippingForm.trackingCode,
+      carrier: shippingForm.carrier
+    });
+    if (success) {
+      setShowShippingModal(false);
+      setShippingOrderId(null);
     }
   };
 
@@ -395,7 +594,7 @@ export default function AdminPage() {
 
   // Calculate pending orders
   const pendingOrders = useMemo(
-    () => orders.filter((o) => o.status === 'PENDING'),
+    () => (orders || []).filter((o) => o.status === 'PENDING'),
     [orders]
   );
 
@@ -410,6 +609,12 @@ export default function AdminPage() {
   // Format date
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('vi-VN');
+  };
+
+  // Toast helper
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 2800);
   };
 
   // Get status color
@@ -476,6 +681,16 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 py-12">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-xl shadow-lg transition-all ${
+          toast.type === 'success' ? 'bg-emerald-500 text-white' :
+          toast.type === 'error' ? 'bg-rose-500 text-white' :
+          'bg-slate-800 text-white'
+        }`}>
+          {toast.message}
+        </div>
+      )}
       <div className="container-custom space-y-10">
         {/* Header */}
         <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 text-white shadow-2xl">
@@ -493,8 +708,8 @@ export default function AdminPage() {
                 <p className="text-sm text-slate-300">Sản phẩm</p>
               </div>
               <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
-                <div className="text-2xl font-bold">{pendingOrdersCount}</div>
-                <p className="text-sm text-slate-300">Don cho duyet</p>
+                <div className="text-2xl font-bold">{pendingOrders.length}</div>
+                <p className="text-sm text-slate-300">Đơn chờ duyệt</p>
               </div>
             </div>
           </div>
@@ -511,11 +726,10 @@ export default function AdminPage() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all ${
-                activeTab === tab.id
-                  ? 'bg-slate-900 text-white'
-                  : 'bg-white text-slate-600 hover:bg-slate-100'
-              }`}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all ${activeTab === tab.id
+                ? 'bg-slate-900 text-white'
+                : 'bg-white text-slate-600 hover:bg-slate-100'
+                }`}
             >
               <tab.icon size={18} />
               {tab.label}
@@ -559,6 +773,92 @@ export default function AdminPage() {
                 <p className="mt-4 text-3xl font-bold text-slate-900">{stats?.pendingOrders || 0}</p>
               </div>
             </div>
+
+            {/* Status Summary & Top Products */}
+            <div className="grid gap-6 lg:grid-cols-2">
+              <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
+                <h3 className="text-lg font-semibold mb-4">Trạng thái đơn hàng</h3>
+                <div className="flex flex-wrap gap-3">
+                  {Object.entries(stats?.ordersByStatus || {}).map(([status, count]) => (
+                    <div
+                      key={status}
+                      className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-50 text-slate-700 border border-slate-100"
+                    >
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(status)}`}>
+                        {getStatusLabel(status)}
+                      </span>
+                      <span className="text-sm font-semibold">{count}</span>
+                    </div>
+                  ))}
+                  {(!stats?.ordersByStatus || Object.keys(stats.ordersByStatus).length === 0) && (
+                    <p className="text-slate-500 text-sm">Chưa có dữ liệu</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-white p-6 shadow-lg border border-slate-100">
+                <h3 className="text-lg font-semibold mb-4">Top sản phẩm bán chạy</h3>
+                <div className="space-y-3">
+                  {(stats?.topProducts || []).map((p) => (
+                    <div key={p.productId} className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        {p.image ? (
+                          <img src={p.image} alt={p.name} className="w-12 h-12 rounded-lg object-cover" />
+                        ) : (
+                          <div className="w-12 h-12 rounded-lg bg-slate-100 flex items-center justify-center text-slate-400">No</div>
+                        )}
+                        <div>
+                          <p className="font-medium text-slate-900">{p.name}</p>
+                          <p className="text-sm text-slate-500">{formatCurrency(Number(p.price || 0))}</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-slate-900">{p.totalSold} bán</p>
+                      </div>
+                    </div>
+                  ))}
+                  {(stats?.topProducts?.length || 0) === 0 && (
+                    <p className="text-sm text-slate-500">Chưa có dữ liệu</p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Recent Orders from stats */}
+            <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
+              <h2 className="text-xl font-semibold mb-6">Đơn hàng gần đây</h2>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-100">
+                      <th className="text-left py-3 px-4">Mã đơn</th>
+                      <th className="text-left py-3 px-4">Khách hàng</th>
+                      <th className="text-left py-3 px-4">Tổng tiền</th>
+                      <th className="text-left py-3 px-4">Trạng thái</th>
+                      <th className="text-left py-3 px-4">Ngày đặt</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(stats?.recentOrders || []).map((order) => (
+                      <tr key={order.id} className="border-b border-slate-50">
+                        <td className="py-3 px-4 font-medium">{order.orderNumber}</td>
+                        <td className="py-3 px-4">{order.customerName}</td>
+                        <td className="py-3 px-4">{formatCurrency(Number(order.totalAmount))}</td>
+                        <td className="py-3 px-4">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(order.status)}`}>
+                            {getStatusLabel(order.status)}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-slate-500">{formatDate(order.createdAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {(stats?.recentOrders?.length || 0) === 0 && (
+                <div className="p-8 text-center text-slate-500">Chưa có đơn hàng nào</div>
+              )}
+            </div>
           </>
         )}
 
@@ -579,18 +879,7 @@ export default function AdminPage() {
                 <button
                   onClick={() => {
                     setEditingProduct(null);
-                    setProductForm({
-                      name: '',
-                      slug: '',
-                      description: '',
-                      price: '',
-                      comparePrice: '',
-                      stockQuantity: '',
-                      categoryId: '',
-                      images: [],
-                      isActive: true,
-                      featured: false,
-                    });
+                    setProductForm(initialProductForm);
                     setShowProductModal(true);
                   }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 text-white hover:bg-slate-800 transition-colors"
@@ -603,6 +892,51 @@ export default function AdminPage() {
 
             {/* Products List */}
             <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+              {/* Filters */}
+              <div className="p-4 flex flex-wrap gap-4 items-end border-b border-slate-100">
+                <div className="flex-1 min-w-[200px]">
+                  <label className="text-sm text-slate-600">Tìm kiếm</label>
+                  <input
+                    value={productFilters.search}
+                    onChange={(e) => { setProductPage(1); setProductFilters({ ...productFilters, search: e.target.value }); }}
+                    className="input-field mt-1"
+                    placeholder="Tên hoặc slug"
+                  />
+                </div>
+                <div className="min-w-[200px]">
+                  <label className="text-sm text-slate-600">Danh mục</label>
+                  <select
+                    value={productFilters.categoryId}
+                    onChange={(e) => { setProductPage(1); setProductFilters({ ...productFilters, categoryId: e.target.value }); }}
+                    className="input-field mt-1"
+                  >
+                    <option value="">Tất cả</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="min-w-[200px]">
+                  <label className="text-sm text-slate-600">Tồn kho</label>
+                  <select
+                    value={productFilters.stockStatus}
+                    onChange={(e) => { setProductPage(1); setProductFilters({ ...productFilters, stockStatus: e.target.value }); }}
+                    className="input-field mt-1"
+                  >
+                    <option value="">Tất cả</option>
+                    <option value="in_stock">Còn nhiều</option>
+                    <option value="low_stock">Sắp hết</option>
+                    <option value="out_of_stock">Hết hàng</option>
+                  </select>
+                </div>
+                <button
+                  onClick={() => { setProductFilters({ search: '', categoryId: '', stockStatus: '' }); setProductPage(1); }}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-semibold"
+                >
+                  Xóa lọc
+                </button>
+              </div>
+
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-slate-50">
@@ -611,17 +945,18 @@ export default function AdminPage() {
                       <th className="text-left p-4 font-medium text-slate-600">Danh muc</th>
                       <th className="text-right p-4 font-medium text-slate-600">Gia</th>
                       <th className="text-center p-4 font-medium text-slate-600">Ton kho</th>
+                      <th className="text-center p-4 font-medium text-slate-600">Phan loai</th>
                       <th className="text-center p-4 font-medium text-slate-600">Trang thai</th>
                       <th className="text-center p-4 font-medium text-slate-600">Thao tac</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
-                    {products.map((product) => (
+                    {(products || []).map((product) => (
                       <tr key={product.id} className="hover:bg-slate-50">
                         <td className="p-4">
                           <div className="flex items-center gap-3">
-                            {product.images[0] && (
-                              <img src={product.images[0]} alt="" className="w-12 h-12 object-cover rounded-lg" />
+                            {product.images && product.images[0] && (
+                              <img src={product.images[0]} alt={product.name} className="w-12 h-12 object-cover rounded-lg" />
                             )}
                             <div>
                               <p className="font-medium text-slate-900">{product.name}</p>
@@ -639,24 +974,32 @@ export default function AdminPage() {
                           )}
                         </td>
                         <td className="p-4 text-center">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            product.stockQuantity === 0
-                              ? 'bg-rose-100 text-rose-600'
-                              : product.stockQuantity <= 10
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${product.stockQuantity === 0
+                            ? 'bg-rose-100 text-rose-600'
+                            : product.stockQuantity <= 10
                               ? 'bg-amber-100 text-amber-600'
                               : 'bg-emerald-100 text-emerald-600'
-                          }`}>
+                            }`}>
                             {product.stockQuantity}
+                          </span>
+                        </td>
+                        <td className="p-4 text-center">
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${product.preorderStatus === 'NONE'
+                            ? 'bg-green-100 text-green-600'
+                            : product.preorderStatus === 'PREORDER'
+                              ? 'bg-orange-100 text-orange-600'
+                              : 'bg-blue-100 text-blue-600'
+                            }`}>
+                            {product.preorderStatus === 'NONE' ? 'Sẵn hàng' : product.preorderStatus === 'PREORDER' ? 'Pre-order' : 'Đặt hàng'}
                           </span>
                         </td>
                         <td className="p-4 text-center">
                           <button
                             onClick={() => handleToggleProductStatus(product)}
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                              product.isActive
-                                ? 'bg-emerald-100 text-emerald-600'
-                                : 'bg-slate-100 text-slate-600'
-                            }`}
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${product.isActive
+                              ? 'bg-emerald-100 text-emerald-600'
+                              : 'bg-slate-100 text-slate-600'
+                              }`}
                           >
                             {product.isActive ? 'Dang ban' : 'An'}
                           </button>
@@ -686,11 +1029,34 @@ export default function AdminPage() {
               </div>
               {products.length === 0 && (
                 <div className="p-8 text-center text-slate-500">
-                  {productsLoading ? (
+                  {loading ? (
                     <Loader2 size={24} className="animate-spin mx-auto" />
                   ) : (
-                    'Chua co san pham nao'
+                    'Chưa có sản phẩm nào'
                   )}
+                </div>
+              )}
+
+              {/* Pagination */}
+              {productTotalPages > 1 && (
+                <div className="flex items-center justify-between p-4 border-t border-slate-100 text-sm text-slate-600">
+                  <span>Trang {productPage}/{productTotalPages} · {productTotal} sản phẩm</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setProductPage((p) => Math.max(1, p - 1))}
+                      disabled={productPage === 1}
+                      className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
+                    >
+                      Trước
+                    </button>
+                    <button
+                      onClick={() => setProductPage((p) => Math.min(productTotalPages, p + 1))}
+                      disabled={productPage === productTotalPages}
+                      className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
+                    >
+                      Sau
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
@@ -728,10 +1094,10 @@ export default function AdminPage() {
               </div>
               {orders.length === 0 && (
                 <div className="p-8 text-center text-slate-500">
-                  {ordersLoading ? (
+                  {loading ? (
                     <Loader2 size={24} className="animate-spin mx-auto" />
                   ) : (
-                    'Chua co don hang nao'
+                    'Chưa có đơn hàng nào'
                   )}
                 </div>
               )}
@@ -797,9 +1163,8 @@ export default function AdminPage() {
                         <td className="py-3 px-4">{formatCurrency(Number(product.price))}</td>
                         <td className="py-3 px-4">{product.stockQuantity}</td>
                         <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'
-                          }`}>
+                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'
+                            }`}>
                             {product.isActive ? 'Đang bán' : 'Tạm ẩn'}
                           </span>
                         </td>
@@ -808,12 +1173,14 @@ export default function AdminPage() {
                             <button
                               onClick={() => handleEditProduct(product)}
                               className="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100"
+                              title="Chỉnh sửa"
                             >
                               <Edit size={16} />
                             </button>
                             <button
                               onClick={() => handleDeleteProduct(product.id)}
                               className="p-2 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100"
+                              title="Xóa"
                             >
                               <Trash2 size={16} />
                             </button>
@@ -832,6 +1199,36 @@ export default function AdminPage() {
         {activeTab === 'orders' && (
           <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
             <h2 className="text-xl font-semibold mb-6">Quản lý đơn hàng ({orders.length})</h2>
+            <div className="flex flex-wrap gap-4 items-end mb-6">
+              <div className="flex-1 min-w-[200px]">
+                <label className="text-sm text-slate-600">Tìm kiếm</label>
+                <input
+                  value={orderFilters.search}
+                  onChange={(e) => { setOrderPage(1); setOrderFilters({ ...orderFilters, search: e.target.value }); }}
+                  className="input-field mt-1"
+                  placeholder="Mã đơn, khách hàng, email, SĐT"
+                />
+              </div>
+              <div className="min-w-[200px]">
+                <label className="text-sm text-slate-600">Trạng thái</label>
+                <select
+                  value={orderFilters.status}
+                  onChange={(e) => { setOrderPage(1); setOrderFilters({ ...orderFilters, status: e.target.value }); }}
+                  className="input-field mt-1"
+                >
+                  <option value="">Tất cả</option>
+                  {['PENDING', 'CONFIRMED', 'PREPARING', 'SHIPPING', 'DELIVERED', 'COMPLETED', 'CANCELLED'].map((st) => (
+                    <option key={st} value={st}>{getStatusLabel(st)}</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={() => { setOrderFilters({ search: '', status: '' }); setOrderPage(1); }}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-semibold"
+              >
+                Xóa lọc
+              </button>
+            </div>
             <div className="space-y-4">
               {orders.map((order) => (
                 <div key={order.id} className="rounded-2xl border border-slate-100 p-6">
@@ -869,6 +1266,12 @@ export default function AdminPage() {
                       {getStatusLabel(order.status)}
                     </span>
                     <div className="flex gap-2 flex-wrap">
+                      <button
+                        onClick={() => { setSelectedOrder(order); setShowOrderModal(true); setOrderAdminNote(''); }}
+                        className="px-4 py-2 rounded-full bg-slate-100 text-slate-700 text-sm font-semibold hover:bg-slate-200"
+                      >
+                        Chi tiết
+                      </button>
                       {order.status === 'PENDING' && (
                         <>
                           <button
@@ -895,7 +1298,7 @@ export default function AdminPage() {
                       )}
                       {order.status === 'PREPARING' && (
                         <button
-                          onClick={() => handleOrderStatusUpdate(order.id, 'SHIPPING')}
+                          onClick={() => handleShipping(order.id)}
                           className="px-4 py-2 rounded-full bg-indigo-50 text-indigo-600 text-sm font-semibold hover:bg-indigo-100"
                         >
                           Giao hàng
@@ -924,6 +1327,29 @@ export default function AdminPage() {
               {orders.length === 0 && (
                 <p className="text-center text-slate-500 py-8">Chưa có đơn hàng nào</p>
               )}
+
+              {/* Pagination */}
+              {orderTotalPages > 1 && (
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-sm text-slate-600">
+                  <span>Trang {orderPage}/{orderTotalPages} · {orderTotal} đơn</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setOrderPage((p) => Math.max(1, p - 1))}
+                      disabled={orderPage === 1}
+                      className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
+                    >
+                      Trước
+                    </button>
+                    <button
+                      onClick={() => setOrderPage((p) => Math.min(orderTotalPages, p + 1))}
+                      disabled={orderPage === orderTotalPages}
+                      className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
+                    >
+                      Sau
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -932,6 +1358,39 @@ export default function AdminPage() {
         {activeTab === 'reviews' && (
           <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
             <h2 className="text-xl font-semibold mb-6">Quản lý đánh giá ({reviews.length})</h2>
+            <div className="flex flex-wrap gap-4 items-end mb-6">
+              <div className="min-w-[180px]">
+                <label className="text-sm text-slate-600">Trạng thái</label>
+                <select
+                  value={reviewFilters.isApproved}
+                  onChange={(e) => { setReviewPage(1); setReviewFilters({ ...reviewFilters, isApproved: e.target.value }); }}
+                  className="input-field mt-1"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="true">Đã duyệt</option>
+                  <option value="false">Chờ duyệt</option>
+                </select>
+              </div>
+              <div className="min-w-[180px]">
+                <label className="text-sm text-slate-600">Số sao</label>
+                <select
+                  value={reviewFilters.rating}
+                  onChange={(e) => { setReviewPage(1); setReviewFilters({ ...reviewFilters, rating: e.target.value }); }}
+                  className="input-field mt-1"
+                >
+                  <option value="">Tất cả</option>
+                  {[5, 4, 3, 2, 1].map((r) => (
+                    <option key={r} value={String(r)}>{r} sao</option>
+                  ))}
+                </select>
+              </div>
+              <button
+                onClick={() => { setReviewFilters({ isApproved: '', rating: '' }); setReviewPage(1); }}
+                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-semibold"
+              >
+                Xóa lọc
+              </button>
+            </div>
             <div className="space-y-4">
               {reviews.map((review) => (
                 <div key={review.id} className="rounded-2xl border border-slate-100 p-6">
@@ -948,9 +1407,8 @@ export default function AdminPage() {
                             </span>
                           ))}
                         </div>
-                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                          review.isApproved ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
-                        }`}>
+                        <span className={`px-2 py-1 rounded-full text-xs font-semibold ${review.isApproved ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                          }`}>
                           {review.isApproved ? 'Đã duyệt' : 'Chờ duyệt'}
                         </span>
                       </div>
@@ -987,6 +1445,29 @@ export default function AdminPage() {
               {reviews.length === 0 && (
                 <p className="text-center text-slate-500 py-8">Chưa có đánh giá nào</p>
               )}
+
+              {/* Pagination */}
+              {reviewTotalPages > 1 && (
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-sm text-slate-600">
+                  <span>Trang {reviewPage}/{reviewTotalPages} · {reviewTotal} đánh giá</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setReviewPage((p) => Math.max(1, p - 1))}
+                      disabled={reviewPage === 1}
+                      className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
+                    >
+                      Trước
+                    </button>
+                    <button
+                      onClick={() => setReviewPage((p) => Math.min(reviewTotalPages, p + 1))}
+                      disabled={reviewPage === reviewTotalPages}
+                      className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
+                    >
+                      Sau
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -1002,6 +1483,7 @@ export default function AdminPage() {
                 <button
                   onClick={() => setShowProductModal(false)}
                   className="p-2 rounded-full hover:bg-slate-100"
+                  title="Đóng"
                 >
                   <X size={20} />
                 </button>
@@ -1111,6 +1593,7 @@ export default function AdminPage() {
                       value={productForm.categoryId}
                       onChange={(e) => setProductForm({ ...productForm, categoryId: e.target.value })}
                       className="input-field"
+                      title="Chọn danh mục sản phẩm"
                     >
                       <option value="">Chọn danh mục</option>
                       {categories.map((cat) => (
@@ -1118,6 +1601,125 @@ export default function AdminPage() {
                       ))}
                     </select>
                   </div>
+
+                  {/* Product Details Section */}
+                  <div className="md:col-span-2 border-t border-slate-200 pt-4 mt-2">
+                    <h3 className="text-lg font-semibold text-slate-800 mb-4">Thông tin chi tiết sản phẩm</h3>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Series (Anime/Manga) *
+                    </label>
+                    <input
+                      required
+                      value={productForm.seriesName}
+                      onChange={(e) => setProductForm({ ...productForm, seriesName: e.target.value })}
+                      className="input-field"
+                      placeholder="VD: Naruto, One Piece, Demon Slayer..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Thương hiệu *
+                    </label>
+                    <input
+                      required
+                      value={productForm.brandName}
+                      onChange={(e) => setProductForm({ ...productForm, brandName: e.target.value })}
+                      className="input-field"
+                      placeholder="VD: Bandai, Good Smile, Kotobukiya..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Ngày phát hành
+                    </label>
+                    <input
+                      type="date"
+                      value={productForm.releaseDate}
+                      onChange={(e) => setProductForm({ ...productForm, releaseDate: e.target.value })}
+                      className="input-field"
+                      title="Ngày phát hành sản phẩm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Mã sản phẩm (Code) *
+                    </label>
+                    <input
+                      required
+                      value={productForm.productCode}
+                      onChange={(e) => setProductForm({ ...productForm, productCode: e.target.value })}
+                      className="input-field"
+                      placeholder="VD: GSC-12345"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Giá hãng đề xuất (MSRP)
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        min="0"
+                        value={productForm.msrpValue}
+                        onChange={(e) => setProductForm({ ...productForm, msrpValue: e.target.value })}
+                        className="input-field flex-1"
+                        placeholder="0"
+                      />
+                      <select
+                        value={productForm.msrpCurrency}
+                        onChange={(e) => setProductForm({ ...productForm, msrpCurrency: e.target.value })}
+                        className="input-field w-24"
+                        title="Đơn vị tiền tệ"
+                      >
+                        <option value="JPY">JPY</option>
+                        <option value="USD">USD</option>
+                        <option value="VND">VND</option>
+                        <option value="CNY">CNY</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Tình trạng *
+                    </label>
+                    <select
+                      required
+                      value={productForm.condition}
+                      onChange={(e) => setProductForm({ ...productForm, condition: e.target.value })}
+                      className="input-field"
+                      title="Tình trạng sản phẩm"
+                    >
+                      <option value="New">Mới 100%</option>
+                      <option value="Like New">Như mới</option>
+                      <option value="Used">Đã qua sử dụng</option>
+                      <option value="Damaged Box">Hộp bị móp/hư</option>
+                      <option value="No Box">Không có hộp</option>
+                    </select>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-1">
+                      Đặc điểm sản phẩm *
+                    </label>
+                    <textarea
+                      required
+                      rows={3}
+                      value={productForm.features}
+                      onChange={(e) => setProductForm({ ...productForm, features: e.target.value })}
+                      className="input-field"
+                      placeholder="Mô tả các đặc điểm nổi bật: kích thước, chất liệu, phụ kiện đi kèm..."
+                    />
+                  </div>
+
+                  <div className="md:col-span-2 border-t border-slate-200 pt-4 mt-2"></div>
 
                   {/* Images */}
                   <div className="md:col-span-2">
@@ -1142,7 +1744,7 @@ export default function AdminPage() {
                     <div className="flex flex-wrap gap-2">
                       {productForm.images.map((img, index) => (
                         <div key={index} className="relative">
-                          <img src={img} alt="" className="w-20 h-20 object-cover rounded-lg" />
+                          <img src={img} alt={`Hình ảnh sản phẩm ${index + 1}`} className="w-20 h-20 object-cover rounded-lg" />
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(index)}
@@ -1177,6 +1779,60 @@ export default function AdminPage() {
                     />
                     <label htmlFor="featured" className="text-sm text-slate-700">Sản phẩm nổi bật</label>
                   </div>
+
+                  {/* Preorder Status */}
+                  <div className="col-span-2">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      Trạng thái hàng hóa
+                    </label>
+                    <div className="flex gap-4">
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="preorderStatus"
+                          value="NONE"
+                          checked={productForm.preorderStatus === 'NONE'}
+                          onChange={() => setProductForm({ ...productForm, preorderStatus: 'NONE' })}
+                          className="w-4 h-4 text-green-600"
+                        />
+                        <span className="text-sm">
+                          <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+                          Sẵn hàng
+                        </span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="preorderStatus"
+                          value="PREORDER"
+                          checked={productForm.preorderStatus === 'PREORDER'}
+                          onChange={() => setProductForm({ ...productForm, preorderStatus: 'PREORDER' })}
+                          className="w-4 h-4 text-orange-600"
+                        />
+                        <span className="text-sm">
+                          <span className="inline-block w-2 h-2 bg-orange-500 rounded-full mr-1"></span>
+                          Pre-order
+                        </span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="radio"
+                          name="preorderStatus"
+                          value="ORDER"
+                          checked={productForm.preorderStatus === 'ORDER'}
+                          onChange={() => setProductForm({ ...productForm, preorderStatus: 'ORDER' })}
+                          className="w-4 h-4 text-blue-600"
+                        />
+                        <span className="text-sm">
+                          <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
+                          Đặt hàng
+                        </span>
+                      </label>
+                    </div>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Sẵn hàng: Giao ngay | Pre-order: Đặt trước chờ phát hành | Đặt hàng: Phải order từ nhà sản xuất
+                    </p>
+                  </div>
                 </div>
 
                 <div className="flex gap-3 pt-4">
@@ -1195,6 +1851,149 @@ export default function AdminPage() {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        )}
+
+        {/* Order detail modal */}
+        {showOrderModal && selectedOrder && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <p className="text-sm text-slate-500">#{selectedOrder.orderNumber}</p>
+                  <h3 className="text-xl font-semibold text-slate-900">{selectedOrder.customerName}</h3>
+                  <p className="text-sm text-slate-500">{selectedOrder.customerPhone}</p>
+                  {selectedOrder.customerEmail && <p className="text-sm text-slate-500">{selectedOrder.customerEmail}</p>}
+                </div>
+                <button onClick={() => { setShowOrderModal(false); setSelectedOrder(null); }} className="p-2 rounded-full hover:bg-slate-100">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl bg-slate-50">
+                  <p className="text-sm font-semibold text-slate-700 mb-2">Thông tin đơn hàng</p>
+                  <p className="text-sm text-slate-600">Trạng thái: <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(selectedOrder.status)}`}>{getStatusLabel(selectedOrder.status)}</span></p>
+                  <p className="text-sm text-slate-600 mt-1">Tổng tiền: <span className="font-semibold">{formatCurrency(Number(selectedOrder.totalAmount))}</span></p>
+                  <p className="text-sm text-slate-600 mt-1">Ngày đặt: {formatDate(selectedOrder.createdAt)}</p>
+                </div>
+                <div className="p-4 rounded-xl bg-slate-50">
+                  <p className="text-sm font-semibold text-slate-700 mb-2">Ghi chú admin</p>
+                  <textarea
+                    value={orderAdminNote}
+                    onChange={(e) => setOrderAdminNote(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 focus:ring-2 focus:ring-slate-400"
+                    rows={3}
+                    placeholder="Thêm ghi chú khi cập nhật trạng thái"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 p-4 rounded-xl bg-white border border-slate-100">
+                <p className="text-sm font-semibold text-slate-700 mb-2">Sản phẩm</p>
+                <div className="divide-y divide-slate-100">
+                  {selectedOrder.orderItems.map((item) => (
+                    <div key={item.id} className="py-2 flex justify-between text-sm">
+                      <span>{item.product?.name || 'Sản phẩm'} x{item.quantity}</span>
+                      <span>{formatCurrency(Number(item.price))}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-4">
+                <button
+                  onClick={() => { setShowOrderModal(false); setSelectedOrder(null); }}
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50"
+                >
+                  Đóng
+                </button>
+                {selectedOrder.status === 'PENDING' && (
+                  <>
+                    <button
+                      onClick={() => handleOrderStatusUpdate(selectedOrder.id, 'CONFIRMED', { adminNote: orderAdminNote || undefined })}
+                      className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-600 font-semibold hover:bg-emerald-100"
+                    >
+                      Xác nhận
+                    </button>
+                    <button
+                      onClick={() => handleOrderStatusUpdate(selectedOrder.id, 'CANCELLED', { adminNote: orderAdminNote || undefined })}
+                      className="px-4 py-2 rounded-xl bg-rose-50 text-rose-600 font-semibold hover:bg-rose-100"
+                    >
+                      Hủy đơn
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Shipping Modal - Nhập thông tin vận chuyển */}
+        {showShippingModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-slate-900">Thông tin vận chuyển</h2>
+                <button
+                  onClick={() => setShowShippingModal(false)}
+                  className="p-2 rounded-full hover:bg-slate-100"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Đơn vị vận chuyển <span className="text-rose-500">*</span>
+                  </label>
+                  <select
+                    value={shippingForm.carrier}
+                    onChange={(e) => setShippingForm({ ...shippingForm, carrier: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                  >
+                    <option value="GHN">Giao Hàng Nhanh (GHN)</option>
+                    <option value="GHTK">Giao Hàng Tiết Kiệm (GHTK)</option>
+                    <option value="VNPost">VNPost</option>
+                    <option value="ViettelPost">Viettel Post</option>
+                    <option value="JT">J&T Express</option>
+                    <option value="Ninja">Ninja Van</option>
+                    <option value="Other">Khác</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Mã vận đơn <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    value={shippingForm.trackingCode}
+                    onChange={(e) => setShippingForm({ ...shippingForm, trackingCode: e.target.value })}
+                    placeholder="Nhập mã vận đơn..."
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowShippingModal(false)}
+                  className="flex-1 py-3 rounded-2xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="button"
+                  onClick={handleShippingSubmit}
+                  className="flex-1 py-3 rounded-2xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
+                >
+                  Xác nhận giao hàng
+                </button>
+              </div>
             </div>
           </div>
         )}

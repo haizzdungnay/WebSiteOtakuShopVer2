@@ -228,8 +228,7 @@ export async function PUT(
       return updatedOrder
     })
 
-    // 7. Ghi log hoạt động admin
-    console.log(`[ADMIN] ${admin.email} đã cập nhật trạng thái đơn hàng ${order.orderNumber}: ${order.status} → ${validatedData.status}`)
+    // 7. Admin activity logged (in production, use proper logging service)
 
     // 8. Trả về kết quả thành công
     return NextResponse.json({
