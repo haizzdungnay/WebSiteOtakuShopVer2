@@ -42,7 +42,7 @@ class LocationServiceClass {
     private switchToNextProvider(): boolean {
         if (this.currentProviderIndex < this.providers.length - 1) {
             this.currentProviderIndex++
-            console.log(`[LocationService] Switched to provider: ${this.currentProvider.name}`)
+            console.warn(`[LocationService] Switched to provider: ${this.currentProvider.name}`)
             return true
         }
         return false
@@ -61,7 +61,7 @@ class LocationServiceClass {
         for (let i = 0; i < this.providers.length; i++) {
             try {
                 const provider = this.providers[i]
-                console.log(`[LocationService] ${operationName} using ${provider.name}`)
+                console.warn(`[LocationService] ${operationName} using ${provider.name}`)
 
                 const result = await operation(provider)
 
@@ -77,7 +77,7 @@ class LocationServiceClass {
 
                 // If not last provider, try next
                 if (i < this.providers.length -1) {
-                    console.log('[LocationService] Trying next provider...')
+                    console.warn('[LocationService] Trying next provider...')
                     continue
                 }
             }

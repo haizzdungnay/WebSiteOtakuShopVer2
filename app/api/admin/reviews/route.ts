@@ -3,8 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/admin-auth'
 import { z } from 'zod'
 
-// Schema validate update review
-const updateReviewSchema = z.object({
+// Schema validate update review (reserved for future PATCH endpoint)
+const _updateReviewSchema = z.object({
   isApproved: z.boolean().optional(),
   isPinned: z.boolean().optional()
 })

@@ -95,7 +95,7 @@ export default function CharacterPage({ params }: { params: Promise<{ character:
   const resolvedParams = use(params);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [sortBy, setSortBy] = useState<SortOption>('featured');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
+  const [_priceRange, _setPriceRange] = useState<[number, number]>([0, 10000000]); // reserved for future price filter
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
 
   const character = characterData[resolvedParams.character] || {
