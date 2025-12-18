@@ -4,14 +4,6 @@ import { useState, useEffect, useMemo, FormEvent } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Cookies from 'js-cookie';
 import {
-  useAdminProducts,
-  useAdminOrders,
-  useAdminReviews,
-  useAdminCategories,
-  useAdminAnnouncements,
-  CreateProductData,
-} from '@/hooks/useAdminApi';
-import {
   BarChart3,
   Coins,
   Edit,
@@ -343,6 +335,7 @@ export default function AdminPage() {
     if (isAdmin) {
       loadData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
   // Refetch when filters/pagination change
@@ -429,7 +422,7 @@ export default function AdminPage() {
         setError(data.error || 'Có lỗi xảy ra');
         showToast(data.error || 'Có lỗi xảy ra', 'error');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Không thể kết nối đến server');
       showToast('Không thể kết nối đến server', 'error');
     }
@@ -688,6 +681,16 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 py-12">
+      {/* Toast Notification */}
+      {toast && (
+        <div className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-xl shadow-lg transition-all ${
+          toast.type === 'success' ? 'bg-emerald-500 text-white' :
+          toast.type === 'error' ? 'bg-rose-500 text-white' :
+          'bg-slate-800 text-white'
+        }`}>
+          {toast.message}
+        </div>
+      )}
       <div className="container-custom space-y-10">
         {/* Header */}
         <div className="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 p-8 text-white shadow-2xl">
@@ -953,7 +956,7 @@ export default function AdminPage() {
                         <td className="p-4">
                           <div className="flex items-center gap-3">
                             {product.images && product.images[0] && (
-                              <img src={product.images[0]} alt="" className="w-12 h-12 object-cover rounded-lg" />
+                              <img src={product.images[0]} alt={product.name} className="w-12 h-12 object-cover rounded-lg" />
                             )}
                             <div>
                               <p className="font-medium text-slate-900">{product.name}</p>
@@ -1741,7 +1744,7 @@ export default function AdminPage() {
                     <div className="flex flex-wrap gap-2">
                       {productForm.images.map((img, index) => (
                         <div key={index} className="relative">
-                          <img src={img} alt="" className="w-20 h-20 object-cover rounded-lg" />
+                          <img src={img} alt={`Hình ảnh sản phẩm ${index + 1}`} className="w-20 h-20 object-cover rounded-lg" />
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(index)}
