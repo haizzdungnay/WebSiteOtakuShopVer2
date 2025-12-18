@@ -11,9 +11,47 @@ export async function GET(request: NextRequest) {
         const limit = parseInt(searchParams.get('limit') || '20')
         const category = searchParams.get('category') // slug của category (chỉ lấy 1)
         const search = searchParams.get('search')
-        const sort = searchParams.get('sort') || 'createdAt' // field để sort
-        const order = searchParams.get('order') || 'desc' // asc hoặc desc
+        const sortParam = searchParams.get('sort') || 'newest' // sort option
         const featured = searchParams.get('featured') // 'true' hoặc null
+        const inStock = searchParams.get('inStock') // 'true' = only in-stock products
+        const preorder = searchParams.get('preorder') // 'true' = only pre-order products
+
+        // Map sort param to actual field and order
+        let sortField = 'createdAt'
+        let sortOrder: 'asc' | 'desc' = 'desc'
+
+        switch (sortParam) {
+            case 'newest':
+                sortField = 'createdAt'
+                sortOrder = 'desc'
+                break
+            case 'oldest':
+                sortField = 'createdAt'
+                sortOrder = 'asc'
+                break
+            case 'price-asc':
+                sortField = 'price'
+                sortOrder = 'asc'
+                break
+            case 'price-desc':
+                sortField = 'price'
+                sortOrder = 'desc'
+                break
+            case 'name-asc':
+                sortField = 'name'
+                sortOrder = 'asc'
+                break
+            case 'name-desc':
+                sortField = 'name'
+                sortOrder = 'desc'
+                break
+            default:
+                // If it's a valid field name, use it directly
+                if (['createdAt', 'updatedAt', 'price', 'name', 'stockQuantity'].includes(sortParam)) {
+                    sortField = sortParam
+                    sortOrder = searchParams.get('order') === 'asc' ? 'asc' : 'desc'
+                }
+        }
 
         // Build where condition
         const where: any = {
@@ -32,7 +70,18 @@ export async function GET(request: NextRequest) {
             where.featured = true
         }
 
-        //search by name hoặc description
+        // Filter by stock status - In-stock products (preorderStatus = NONE and stockQuantity > 0)
+        if (inStock === 'true') {
+            where.preorderStatus = 'NONE'
+            where.stockQuantity = { gt: 0 }
+        }
+
+        // Filter by pre-order status
+        if (preorder === 'true') {
+            where.preorderStatus = { in: ['PREORDER', 'ORDER'] }
+        }
+
+        //search by name, description, shortDescription, productCode
         if (search) {
             where.OR = [
                 {
@@ -43,6 +92,18 @@ export async function GET(request: NextRequest) {
                 },
                 {
                     description: {
+                        contains: search,
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    shortDescription: {
+                        contains: search,
+                        mode: 'insensitive'
+                    }
+                },
+                {
+                    productCode: {
                         contains: search,
                         mode: 'insensitive'
                     }
@@ -63,7 +124,7 @@ export async function GET(request: NextRequest) {
                     }
                 },
                 orderBy: {
-                    [sort]: order
+                    [sortField]: sortOrder
                 },
                 skip: (page - 1) * limit,
                 take: limit
@@ -83,14 +144,14 @@ export async function GET(request: NextRequest) {
                 hasMore: page * limit < total
             }
         })
-} catch (error) {
-    console.error('Error fetching products:', error)
-    return NextResponse.json(
-        {
-            success: false,
-            error: 'Không thể lấy danh sách sản phẩm'
-        },
-        { status: 500 }
-    )
-}
+    } catch (error) {
+        console.error('Error fetching products:', error)
+        return NextResponse.json(
+            {
+                success: false,
+                error: 'Không thể lấy danh sách sản phẩm'
+            },
+            { status: 500 }
+        )
+    }
 }

@@ -106,8 +106,13 @@ echo   Password: ChangeMeNow!
 echo.
 echo Lenh huu ich:
 echo   - Xem logs: docker logs -f otakushop-db
-echo   - Dung DB: docker-compose stop postgres
+echo   - Dung DB (giu du lieu): docker-compose stop postgres
 echo   - Vao psql: docker exec -it otakushop-db psql -U postgres -d otakushop
+echo.
+echo ⚠️  LUU Y QUAN TRONG:
+echo   - Dung "docker-compose down" de tat DB (GIU du lieu)
+echo   - KHONG dung "docker-compose down -v" (se XOA du lieu!)
+echo   - Du lieu duoc luu trong Docker volume: otakushop_postgres_data
 echo.
 
 pause

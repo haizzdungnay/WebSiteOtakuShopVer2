@@ -1,86 +1,88 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import ProductCard from '@/components/ProductCard';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-// Sample products - replace with actual data fetching
-const sampleProducts = [
-  {
-    id: '1',
-    name: 'Nendoroid Hatsune Miku: Snow Miku 2024',
-    price: 850000,
-    discountPrice: 595000,
-    image: '/images/products/product1.jpg',
-    badge: 'hot' as const,
-    slug: 'nendoroid-miku-snow-2024',
-  },
-  {
-    id: '2',
-    name: 'Figma Spy x Family - Anya Forger',
-    price: 1200000,
-    discountPrice: 1050000,
-    image: '/images/products/product2.jpg',
-    badge: 'new' as const,
-    slug: 'figma-anya-forger',
-  },
-  {
-    id: '3',
-    name: 'Scale Figure - Rem - 1/7',
-    price: 3500000,
-    discountPrice: 2800000,
-    image: '/images/products/product3.jpg',
-    salePercentage: 20,
-    slug: 'scale-figure-rem',
-  },
-  {
-    id: '4',
-    name: 'Pop Up Parade - Gojo Satoru',
-    price: 750000,
-    image: '/images/products/product4.jpg',
-    badge: 'new' as const,
-    slug: 'popup-parade-gojo',
-  },
-  {
-    id: '5',
-    name: 'Nendoroid Chainsaw Man - Denji',
-    price: 900000,
-    discountPrice: 720000,
-    image: '/images/products/product5.jpg',
-    badge: 'hot' as const,
-    slug: 'nendoroid-denji',
-  },
-  {
-    id: '6',
-    name: 'Figma Attack on Titan - Eren Yeager',
-    price: 1350000,
-    image: '/images/products/product6.jpg',
-    slug: 'figma-eren-yeager',
-  },
-  {
-    id: '7',
-    name: 'Scale Figure - Miku Racing 2023',
-    price: 4200000,
-    discountPrice: 3360000,
-    image: '/images/products/product7.jpg',
-    salePercentage: 20,
-    slug: 'scale-miku-racing',
-  },
-  {
-    id: '8',
-    name: 'Nendoroid Demon Slayer - Nezuko',
-    price: 850000,
-    discountPrice: 680000,
-    image: '/images/products/product8.jpg',
-    badge: 'hot' as const,
-    slug: 'nendoroid-nezuko',
-  },
-];
+// Interface for product from database
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  comparePrice?: number;
+  images: string[];
+  featured: boolean;
+  createdAt: string;
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+}
 
 export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch products from database
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/api/products?limit=50');
+        if (response.ok) {
+          const data = await response.json();
+          setProducts(data.data || []);
+        }
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Transform product for ProductCard component
+  const transformProduct = (product: Product) => {
+    const hasDiscount = product.comparePrice && product.comparePrice > product.price;
+    const salePercentage = hasDiscount
+      ? Math.round(((Number(product.comparePrice) - Number(product.price)) / Number(product.comparePrice)) * 100)
+      : 0;
+
+    // Determine badge based on product attributes
+    let badge: 'hot' | 'new' | 'sale' | undefined;
+    if (product.featured) {
+      badge = 'hot';
+    } else if (new Date(product.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)) {
+      badge = 'new'; // Products created within last 7 days
+    }
+
+    return {
+      id: product.id,
+      name: product.name,
+      price: Number(product.comparePrice) || Number(product.price),
+      discountPrice: hasDiscount ? Number(product.price) : undefined,
+      image: product.images?.[0] || '/images/placeholder.jpg',
+      badge,
+      salePercentage: salePercentage > 0 ? salePercentage : undefined,
+      slug: product.slug,
+    };
+  };
+
+  // Filter products
+  const hotProducts = products.filter(p => p.featured).slice(0, 8);
+  const newProducts = products
+    .filter(p => new Date(p.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
+    .slice(0, 8);
+  const saleProducts = products
+    .filter(p => p.comparePrice && Number(p.comparePrice) > Number(p.price))
+    .slice(0, 8);
+  const allProducts = products.slice(0, 10);
 
   return (
     <div className="bg-background-light">
@@ -164,89 +166,109 @@ export default function Home() {
 
           {/* HÀNG DƯỚI: các section sản phẩm – full chiều ngang phần content */}
           <div>
-            {/* SẢN PHẨM HOT */}
-            <div className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                  <span className="w-1 h-8 bg-accent-red" />
-                  SẢN PHẨM HOT
-                </h2>
-                <Link
-                  href="/products?filter=hot"
-                  className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
-                >
-                  Xem tất cả <ChevronRight size={16} />
-                </Link>
+            {loading ? (
+              <div className="flex items-center justify-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+                <span className="ml-3 text-gray-500">Đang tải sản phẩm...</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {sampleProducts
-                  .filter((p) => p.badge === 'hot')
-                  .map((product) => (
-                    <ProductCard key={product.id} {...product} />
-                  ))}
-              </div>
-            </div>
+            ) : (
+              <>
+                {/* SẢN PHẨM HOT */}
+                {hotProducts.length > 0 && (
+                  <div className="mb-12">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <span className="w-1 h-8 bg-accent-red" />
+                        SẢN PHẨM HOT
+                      </h2>
+                      <Link
+                        href="/products?featured=true"
+                        className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
+                      >
+                        Xem tất cả <ChevronRight size={16} />
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                      {hotProducts.map((product) => (
+                        <ProductCard key={product.id} {...transformProduct(product)} />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-            {/* HÀNG MỚI VỀ */}
-            <div className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                  <span className="w-1 h-8 bg-green-500" />
-                  HÀNG MỚI VỀ
-                </h2>
-                <Link
-                  href="/products?filter=new"
-                  className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
-                >
-                  Xem tất cả <ChevronRight size={16} />
-                </Link>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {sampleProducts
-                  .filter((p) => p.badge === 'new')
-                  .map((product) => (
-                    <ProductCard key={product.id} {...product} />
-                  ))}
-              </div>
-            </div>
+                {/* HÀNG MỚI VỀ */}
+                {newProducts.length > 0 && (
+                  <div className="mb-12">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <span className="w-1 h-8 bg-green-500" />
+                        HÀNG MỚI VỀ
+                      </h2>
+                      <Link
+                        href="/products?sort=createdAt&order=desc"
+                        className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
+                      >
+                        Xem tất cả <ChevronRight size={16} />
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                      {newProducts.map((product) => (
+                        <ProductCard key={product.id} {...transformProduct(product)} />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-            {/* ĐANG GIẢM GIÁ */}
-            <div className="mb-12">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                  <span className="w-1 h-8 bg-orange-500" />
-                  ĐANG GIẢM GIÁ
-                </h2>
-                <Link
-                  href="/products?filter=sale"
-                  className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
-                >
-                  Xem tất cả <ChevronRight size={16} />
-                </Link>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {sampleProducts
-                  .filter((p) => p.discountPrice)
-                  .map((product) => (
-                    <ProductCard key={product.id} {...product} />
-                  ))}
-              </div>
-            </div>
+                {/* ĐANG GIẢM GIÁ */}
+                {saleProducts.length > 0 && (
+                  <div className="mb-12">
+                    <div className="flex items-center justify-between mb-6">
+                      <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <span className="w-1 h-8 bg-orange-500" />
+                        ĐANG GIẢM GIÁ
+                      </h2>
+                      <Link
+                        href="/products"
+                        className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
+                      >
+                        Xem tất cả <ChevronRight size={16} />
+                      </Link>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                      {saleProducts.map((product) => (
+                        <ProductCard key={product.id} {...transformProduct(product)} />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-            {/* TẤT CẢ SẢN PHẨM */}
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                  <span className="w-1 h-8 bg-primary" />
-                  TẤT CẢ SẢN PHẨM
-                </h2>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                {sampleProducts.map((product) => (
-                  <ProductCard key={product.id} {...product} />
-                ))}
-              </div>
-            </div>
+                {/* TẤT CẢ SẢN PHẨM */}
+                <div className="mb-4">
+                  <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+                      <span className="w-1 h-8 bg-primary" />
+                      TẤT CẢ SẢN PHẨM
+                    </h2>
+                    <Link
+                      href="/products"
+                      className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
+                    >
+                      Xem tất cả <ChevronRight size={16} />
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    {allProducts.map((product) => (
+                      <ProductCard key={product.id} {...transformProduct(product)} />
+                    ))}
+                  </div>
+                  {products.length === 0 && (
+                    <div className="text-center py-10 text-gray-500">
+                      Chưa có sản phẩm nào. Vui lòng thêm sản phẩm từ trang quản trị.
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </section>

@@ -7,46 +7,28 @@ export async function middleware(request: NextRequest) {
 
   // Check if the request is for admin routes
   if (pathname.startsWith('/admin')) {
-    console.log('[Middleware] Admin route accessed:', pathname)
-
     const token = request.cookies.get('token')?.value
-    const allCookies = request.cookies.getAll()
-    console.log('[Middleware] Cookies found:', allCookies.map(c => c.name))
 
     // If no token, redirect to login
     if (!token) {
-      console.log('[Middleware] ❌ No token found, redirecting to login')
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('redirect', pathname)
       return NextResponse.redirect(url)
     }
 
-    console.log('[Middleware] Token found, length:', token.length)
-
     try {
       // Verify token and check role
       const payload = await verifyTokenEdge(token)
-      console.log('[Middleware] ✅ Token verified successfully')
-      console.log('[Middleware] User payload:', {
-        userId: payload.userId,
-        email: payload.email,
-        username: payload.username,
-        role: payload.role
-      })
 
-      // If not admin role, redirect to home with error
-      if (payload.role !== 'admin') {
-        console.log('[Middleware] ❌ User role is not admin:', payload.role)
+      // If not admin role, redirect to home with error (hỗ trợ cả chữ hoa và chữ thường)
+      if (payload.role?.toLowerCase() !== 'admin') {
         const url = request.nextUrl.clone()
         url.pathname = '/'
         return NextResponse.redirect(url)
       }
-
-      console.log('[Middleware] ✅ Admin access granted for:', payload.username)
     } catch (error) {
       // Invalid token, redirect to login
-      console.error('[Middleware] ❌ Token verification failed:', error)
       const url = request.nextUrl.clone()
       url.pathname = '/login'
       url.searchParams.set('redirect', pathname)
@@ -61,6 +43,22 @@ export async function middleware(request: NextRequest) {
   // Add security headers
   response.headers.set('X-DNS-Prefetch-Control', 'on')
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  // CSP relaxed for development - Next.js requires 'unsafe-eval' for hot reload
+  // In production, consider tightening these policies
+  response.headers.set(
+    'Content-Security-Policy',
+    [
+      "default-src 'self'",
+      "img-src 'self' data: https: http: blob:",
+      "style-src 'self' 'unsafe-inline'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "connect-src 'self' ws: wss: http: https:",
+      "font-src 'self' data: https:",
+      "frame-ancestors 'self'",
+    ].join('; ')
+  )
 
   return response
 }

@@ -69,6 +69,11 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (!shippingInfo.district || !shippingInfo.city) {
+      alert('Vui lòng nhập quận/huyện và thành phố');
+      return;
+    }
+
     if (items.length === 0) {
       alert('Giỏ hàng trống');
       return;
@@ -76,12 +81,45 @@ export default function CheckoutPage() {
 
     setIsProcessing(true);
 
-    // Mock order submission
-    setTimeout(() => {
-      clearCart();
-      alert('Đặt hàng thành công! Cảm ơn bạn đã mua hàng.');
-      router.push('/');
-    }, 2000);
+    try {
+      // Gọi API tạo đơn hàng
+      const response = await fetch('/api/orders/guest', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          customerName: shippingInfo.fullName,
+          customerPhone: shippingInfo.phone,
+          customerEmail: shippingInfo.email || '',
+          shippingAddress: shippingInfo.address,
+          shippingWard: shippingInfo.ward || '',
+          shippingDistrict: shippingInfo.district,
+          shippingCity: shippingInfo.city,
+          items: items.map(item => ({
+            productId: item.id,
+            quantity: item.quantity
+          })),
+          paymentMethod: paymentMethod === 'cod' ? 'COD' : 'BANK_TRANSFER',
+          note: shippingInfo.note || ''
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        clearCart();
+        alert(`Đặt hàng thành công! Mã đơn hàng: ${data.data.orderNumber}`);
+        router.push('/');
+      } else {
+        alert(data.error || 'Không thể đặt hàng. Vui lòng thử lại.');
+      }
+    } catch (error) {
+      console.error('Error creating order:', error);
+      alert('Có lỗi xảy ra. Vui lòng thử lại sau.');
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (items.length === 0) {

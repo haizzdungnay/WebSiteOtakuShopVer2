@@ -12,16 +12,38 @@ interface Product {
   id: string;
   name: string;
   price: number;
+  comparePrice?: number;
+  images: string[];
+  slug: string;
+  productCode?: string;
+  stockQuantity: number;
+  category?: {
+    id: string;
+    name: string;
+    slug: string;
+  };
+  description: string;
+  shortDescription?: string;
+  featured?: boolean;
+  isActive?: boolean;
+  // New detail fields
+  seriesName?: string;
+  brandName?: string;
+  releaseDate?: string;
+  msrpValue?: number;
+  msrpCurrency?: string;
+  features?: string;
+  condition?: string;
+  preorderStatus?: 'NONE' | 'PREORDER' | 'ORDER';
+}
+
+interface RelatedProduct {
+  id: string;
+  name: string;
+  price: number;
   discountPrice?: number;
   image: string;
-  images?: string[];
   slug: string;
-  sku: string;
-  stock: number;
-  category: string;
-  description: string;
-  specifications: Record<string, string>;
-  saleEndsAt?: string;
 }
 
 export default function ProductDetailPage() {
@@ -31,119 +53,62 @@ export default function ProductDetailPage() {
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'specifications'>('description');
-  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+  const [relatedProducts, setRelatedProducts] = useState<RelatedProduct[]>([]);
 
-  // Mock product data - replace with API call
+  // Fetch product from API
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const mockProduct: Product = {
-        id: '1',
-        name: 'Nendoroid Hatsune Miku: Snow Miku 2024 Ver.',
-        price: 1500000,
-        discountPrice: 1200000,
-        image: '/images/products/product-1.jpg',
-        images: [
-          '/images/products/product-1.jpg',
-          '/images/products/product-2.jpg',
-          '/images/products/product-3.jpg',
-          '/images/products/product-4.jpg',
-        ],
-        slug: slug,
-        sku: 'GSC-NEN-001',
-        stock: 15,
-        category: 'Nendoroid',
-        description: `Mô hình Nendoroid Hatsune Miku phiên bản Snow Miku 2024 được sản xuất bởi Good Smile Company.
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi tư thế linh hoạt. Đi kèm với nhiều phụ kiện như mặt thay đổi biểu cảm, tay thay đổi, và các vật phẩm trang trí theo chủ đề mùa đông.
+        const response = await fetch(`/api/products/${slug}`);
+        const data = await response.json();
 
-Đây là phiên bản giới hạn chỉ có trong sự kiện Snow Miku 2024, rất được yêu thích bởi các fan của Hatsune Miku và người sưu tập figure.`,
-        specifications: {
-          'Nhà sản xuất': 'Good Smile Company',
-          'Series': 'Nendoroid',
-          'Chất liệu': 'ABS & PVC',
-          'Chiều cao': 'Khoảng 10cm',
-          'Trọng lượng': '200g',
-          'Xuất xứ': 'Nhật Bản',
-          'Ngày phát hành': 'Tháng 2/2024',
-          'Độ tuổi khuyến nghị': '15+',
-        },
-        saleEndsAt: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString(),
-      };
-      setProduct(mockProduct);
-      setLoading(false);
+        if (!response.ok || !data.success) {
+          setError(data.error || 'Không tìm thấy sản phẩm');
+          setProduct(null);
+          return;
+        }
 
-      // Mock related products
-      setRelatedProducts([
-        {
-          id: '2',
-          name: 'Nendoroid Miku: Winter Ver.',
-          price: 1400000,
-          image: '/images/products/product-2.jpg',
-          slug: 'nendoroid-miku-winter',
-          sku: 'GSC-NEN-002',
-          stock: 10,
-          category: 'Nendoroid',
-          description: '',
-          specifications: {},
-        },
-        {
-          id: '3',
-          name: 'figma Hatsune Miku',
-          price: 1800000,
-          discountPrice: 1600000,
-          image: '/images/products/product-3.jpg',
-          slug: 'figma-hatsune-miku',
-          sku: 'GSC-FIG-001',
-          stock: 5,
-          category: 'figma',
-          description: '',
-          specifications: {},
-        },
-        {
-          id: '4',
-          name: 'Scale Figure Miku 1/7',
-          price: 4500000,
-          image: '/images/products/product-4.jpg',
-          slug: 'scale-miku-1-7',
-          sku: 'GSC-SCL-001',
-          stock: 3,
-          category: 'Scale Figure',
-          description: '',
-          specifications: {},
-        },
-      ]);
-    }, 500);
-  }, [slug]);
+        setProduct(data.data);
 
-  // Countdown timer
-  useEffect(() => {
-    if (!product?.saleEndsAt) return;
-
-    const timer = setInterval(() => {
-      const now = new Date().getTime();
-      const end = new Date(product.saleEndsAt!).getTime();
-      const distance = end - now;
-
-      if (distance < 0) {
-        clearInterval(timer);
-        return;
+        // Fetch related products from same category
+        if (data.data?.category?.slug) {
+          const relatedResponse = await fetch(`/api/products?category=${data.data.category.slug}&limit=4`);
+          const relatedData = await relatedResponse.json();
+          if (relatedData.success && relatedData.data) {
+            // Filter out current product and transform data
+            const related = relatedData.data
+              .filter((p: Product) => p.id !== data.data.id)
+              .slice(0, 3)
+              .map((p: Product) => ({
+                id: p.id,
+                name: p.name,
+                price: Number(p.comparePrice) || Number(p.price),
+                discountPrice: p.comparePrice ? Number(p.price) : undefined,
+                image: p.images?.[0] || '/images/placeholder.jpg',
+                slug: p.slug,
+              }));
+            setRelatedProducts(related);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching product:', err);
+        setError('Không thể tải thông tin sản phẩm');
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setTimeLeft({
-        days: Math.floor(distance / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-        minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((distance % (1000 * 60)) / 1000),
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [product]);
+    if (slug) {
+      fetchProduct();
+    }
+  }, [slug]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -158,9 +123,9 @@ Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi t�
       addToCart({
         id: product.id,
         name: product.name,
-        price: product.price,
-        discountPrice: product.discountPrice,
-        image: product.image,
+        price: Number(product.price),
+        discountPrice: product.comparePrice ? Number(product.price) : undefined,
+        image: product.images?.[0] || '/images/placeholder.jpg',
         slug: product.slug,
       });
     }
@@ -182,7 +147,9 @@ Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi t�
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Không tìm thấy sản phẩm</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">
+            {error || 'Không tìm thấy sản phẩm'}
+          </h2>
           <Link href="/products" className="text-accent-red hover:underline">
             Quay lại danh sách sản phẩm
           </Link>
@@ -191,9 +158,11 @@ Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi t�
     );
   }
 
-  const displayPrice = product.discountPrice || product.price;
-  const discount = product.discountPrice
-    ? Math.round(((product.price - product.discountPrice) / product.price) * 100)
+  // Price logic: comparePrice is original, price is current/sale price
+  const currentPrice = Number(product.price);
+  const originalPrice = product.comparePrice ? Number(product.comparePrice) : null;
+  const discount = originalPrice
+    ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
     : 0;
 
   return (
@@ -215,7 +184,7 @@ Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi t�
               {/* Main Image */}
               <div className="relative w-full aspect-square mb-4 bg-gray-100 rounded-lg overflow-hidden">
                 <Image
-                  src={product.images?.[selectedImage] || product.image}
+                  src={product.images?.[selectedImage] || '/images/placeholder.jpg'}
                   alt={product.name}
                   fill
                   className="object-cover"
@@ -234,9 +203,9 @@ Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi t�
                     <button
                       key={idx}
                       onClick={() => setSelectedImage(idx)}
-                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${
-                        selectedImage === idx ? 'border-accent-red' : 'border-gray-200 hover:border-gray-300'
-                      }`}
+                      title={`Xem ảnh ${idx + 1}`}
+                      className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all ${selectedImage === idx ? 'border-accent-red' : 'border-gray-200 hover:border-gray-300'
+                        }`}
                     >
                       <Image src={img} alt={`${product.name} ${idx + 1}`} fill className="object-cover" />
                     </button>
@@ -251,21 +220,19 @@ Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi t�
                 <div className="flex gap-6">
                   <button
                     onClick={() => setActiveTab('description')}
-                    className={`pb-3 font-semibold transition-colors ${
-                      activeTab === 'description'
-                        ? 'text-accent-red border-b-2 border-accent-red'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                    className={`pb-3 font-semibold transition-colors ${activeTab === 'description'
+                      ? 'text-accent-red border-b-2 border-accent-red'
+                      : 'text-gray-600 hover:text-gray-900'
+                      }`}
                   >
                     Mô tả sản phẩm
                   </button>
                   <button
                     onClick={() => setActiveTab('specifications')}
-                    className={`pb-3 font-semibold transition-colors ${
-                      activeTab === 'specifications'
-                        ? 'text-accent-red border-b-2 border-accent-red'
-                        : 'text-gray-600 hover:text-gray-900'
-                    }`}
+                    className={`pb-3 font-semibold transition-colors ${activeTab === 'specifications'
+                      ? 'text-accent-red border-b-2 border-accent-red'
+                      : 'text-gray-600 hover:text-gray-900'
+                      }`}
                   >
                     Thông số kỹ thuật
                   </button>
@@ -274,16 +241,77 @@ Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi t�
 
               {activeTab === 'description' ? (
                 <div className="prose max-w-none">
-                  <p className="text-gray-700 whitespace-pre-line">{product.description}</p>
+                  <p className="text-gray-700 whitespace-pre-line">{product.description || 'Chưa có mô tả cho sản phẩm này.'}</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {Object.entries(product.specifications).map(([key, value]) => (
-                    <div key={key} className="flex py-3 border-b border-gray-100 last:border-0">
-                      <span className="font-semibold text-gray-900 w-1/3">{key}:</span>
-                      <span className="text-gray-700 w-2/3">{value}</span>
+                  {product.productCode && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Mã sản phẩm:</span>
+                      <span className="text-gray-700 w-2/3">{product.productCode}</span>
                     </div>
-                  ))}
+                  )}
+                  {product.seriesName && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Series (Anime):</span>
+                      <span className="text-gray-700 w-2/3">{product.seriesName}</span>
+                    </div>
+                  )}
+                  {product.brandName && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Thương hiệu:</span>
+                      <span className="text-gray-700 w-2/3">{product.brandName}</span>
+                    </div>
+                  )}
+                  {product.category && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Danh mục:</span>
+                      <span className="text-gray-700 w-2/3">{product.category.name}</span>
+                    </div>
+                  )}
+                  {product.releaseDate && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Ngày phát hành:</span>
+                      <span className="text-gray-700 w-2/3">
+                        {new Date(product.releaseDate).toLocaleDateString('vi-VN')}
+                      </span>
+                    </div>
+                  )}
+                  {product.msrpValue && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Giá hãng (MSRP):</span>
+                      <span className="text-gray-700 w-2/3">
+                        {product.msrpValue.toLocaleString()} {product.msrpCurrency || 'JPY'}
+                      </span>
+                    </div>
+                  )}
+                  {product.condition && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Tình trạng:</span>
+                      <span className="text-gray-700 w-2/3">{product.condition}</span>
+                    </div>
+                  )}
+                  {product.features && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Đặc điểm:</span>
+                      <span className="text-gray-700 w-2/3 whitespace-pre-line">{product.features}</span>
+                    </div>
+                  )}
+                  <div className="flex py-3 border-b border-gray-100">
+                    <span className="font-semibold text-gray-900 w-1/3">Kho hàng:</span>
+                    <span className="text-gray-700 w-2/3">
+                      {product.stockQuantity > 0 ? `Còn ${product.stockQuantity} sản phẩm` : 'Hết hàng'}
+                    </span>
+                  </div>
+                  {product.preorderStatus && product.preorderStatus !== 'NONE' && (
+                    <div className="flex py-3 border-b border-gray-100">
+                      <span className="font-semibold text-gray-900 w-1/3">Trạng thái:</span>
+                      <span className={`w-2/3 font-semibold ${product.preorderStatus === 'PREORDER' ? 'text-orange-600' : 'text-blue-600'
+                        }`}>
+                        {product.preorderStatus === 'PREORDER' ? 'Pre-order' : 'Đặt hàng từ nhà sản xuất'}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -296,71 +324,49 @@ Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi t�
 
               {/* Price */}
               <div className="mb-4">
-                {product.discountPrice ? (
+                {originalPrice ? (
                   <div className="flex items-center gap-3">
                     <span className="text-3xl font-bold text-accent-red">
-                      {formatPrice(product.discountPrice)}
+                      {formatPrice(currentPrice)}
                     </span>
                     <span className="text-lg text-gray-400 line-through">
-                      {formatPrice(product.price)}
+                      {formatPrice(originalPrice)}
                     </span>
                   </div>
                 ) : (
                   <span className="text-3xl font-bold text-accent-red">
-                    {formatPrice(product.price)}
+                    {formatPrice(currentPrice)}
                   </span>
                 )}
               </div>
 
-              {/* Sale Countdown */}
-              {product.saleEndsAt && discount > 0 && (
+              {/* Sale Badge */}
+              {discount > 0 && (
                 <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-                  <p className="text-sm font-semibold text-red-800 mb-2">⏰ Ưu đãi kết thúc sau:</p>
-                  <div className="grid grid-cols-4 gap-2 text-center">
-                    <div>
-                      <div className="bg-red-600 text-white rounded py-1 font-bold text-lg">
-                        {timeLeft.days}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">Ngày</div>
-                    </div>
-                    <div>
-                      <div className="bg-red-600 text-white rounded py-1 font-bold text-lg">
-                        {timeLeft.hours}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">Giờ</div>
-                    </div>
-                    <div>
-                      <div className="bg-red-600 text-white rounded py-1 font-bold text-lg">
-                        {timeLeft.minutes}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">Phút</div>
-                    </div>
-                    <div>
-                      <div className="bg-red-600 text-white rounded py-1 font-bold text-lg">
-                        {timeLeft.seconds}
-                      </div>
-                      <div className="text-xs text-gray-600 mt-1">Giây</div>
-                    </div>
-                  </div>
+                  <p className="text-sm font-semibold text-red-800">🔥 Đang giảm giá {discount}%!</p>
                 </div>
               )}
 
               {/* Product Info */}
               <div className="border-t border-b border-gray-200 py-4 mb-4 space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">SKU:</span>
-                  <span className="font-semibold">{product.sku}</span>
-                </div>
+                {product.productCode && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Mã SP:</span>
+                    <span className="font-semibold">{product.productCode}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tình trạng:</span>
-                  <span className={`font-semibold ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {product.stock > 0 ? `Còn ${product.stock} sản phẩm` : 'Hết hàng'}
+                  <span className={`font-semibold ${product.stockQuantity > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    {product.stockQuantity > 0 ? `Còn ${product.stockQuantity} sản phẩm` : 'Hết hàng'}
                   </span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Danh mục:</span>
-                  <span className="font-semibold">{product.category}</span>
-                </div>
+                {product.category && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Danh mục:</span>
+                    <span className="font-semibold">{product.category.name}</span>
+                  </div>
+                )}
               </div>
 
               {/* Quantity Selector */}
@@ -371,6 +377,7 @@ Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi t�
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    title="Giảm số lượng"
                     className="w-10 h-10 rounded-lg border-2 border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
                   >
                     <Minus size={18} />
@@ -379,10 +386,12 @@ Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi t�
                     type="number"
                     value={quantity}
                     onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                    title="Số lượng sản phẩm"
                     className="w-20 h-10 text-center border-2 border-gray-300 rounded-lg font-semibold"
                   />
                   <button
-                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                    onClick={() => setQuantity(Math.min(product.stockQuantity, quantity + 1))}
+                    title="Tăng số lượng"
                     className="w-10 h-10 rounded-lg border-2 border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
                   >
                     <Plus size={18} />
@@ -394,7 +403,7 @@ Sản phẩm cao khoảng 10cm, với khả năng tháo rời và thay đổi t�
               <div className="space-y-3 mb-6">
                 <button
                   onClick={handleAddToCart}
-                  disabled={product.stock === 0}
+                  disabled={product.stockQuantity === 0}
                   className="w-full bg-accent-red text-white py-3 rounded-lg font-bold text-lg hover:bg-red-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   <ShoppingCart size={20} />

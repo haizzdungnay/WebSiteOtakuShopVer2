@@ -55,6 +55,10 @@ model Product {
   msrpValue    Decimal? @db.Decimal(12, 2)
   msrpCurrency String?  @default("JPY") @db.Char(3)
 
+  // Product details
+  features  String? @db.Text // Đặc điểm sản phẩm
+  condition String? @db.VarChar(100) // Tình trạng: New, Used, Like New, etc.
+
   // Review aggregates (cached for performance)
   reviewCount   Int     @default(0)
   averageRating Decimal @default(0) @db.Decimal(2, 1)

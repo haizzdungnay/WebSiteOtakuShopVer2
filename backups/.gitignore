@@ -1,0 +1,4 @@
+# Thư mục backup database
+# Các file .sql backup sẽ được lưu ở đây
+*.sql
+!.gitignore

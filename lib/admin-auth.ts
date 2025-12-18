@@ -19,8 +19,8 @@ export function getAdminFromRequest(request: NextRequest): AdminUser | null {
             return null
         }
 
-        // 2. Kiểm tra role (JWT đã có role)
-        if (user.role !== 'ADMIN') {
+        // 2. Kiểm tra role (JWT đã có role) - hỗ trợ cả chữ hoa và chữ thường
+        if (user.role?.toUpperCase() !== 'ADMIN') {
             return null
         }
 
@@ -42,10 +42,44 @@ export async function verifyAdmin(request: NextRequest): Promise<AdminUser | nul
         const user = getUserFromRequest(request)
 
         if (!user) {
+            console.log('[verifyAdmin] No user from JWT')
             return null
         }
 
-        // 2. Kiểm tra trong DB để chắc chắn
+        console.log('[verifyAdmin] JWT user:', { userId: user.userId, email: user.email, role: user.role })
+
+        // 2. Nếu là env-admin (fallback admin từ biến môi trường), cho phép luôn
+        if (user.userId === 'env-admin' && user.role?.toLowerCase() === 'admin') {
+            console.log('[verifyAdmin] Env admin detected, granting access')
+            return {
+                userId: user.userId,
+                email: user.email,
+                role: 'ADMIN'
+            }
+        }
+
+        // 3. Kiểm tra trong bảng admins trước
+        const dbAdmin = await prisma.admin.findUnique({
+            where: {
+                id: user.userId
+            },
+            select: {
+                id: true,
+                email: true,
+                isActive: true
+            }
+        })
+
+        if (dbAdmin && dbAdmin.isActive) {
+            console.log('[verifyAdmin] Found in admins table:', dbAdmin)
+            return {
+                userId: dbAdmin.id,
+                email: dbAdmin.email,
+                role: 'ADMIN'
+            }
+        }
+
+        // 4. Kiểm tra trong bảng users
         const dbUser = await prisma.user.findUnique({
             where: {
                 id: user.userId
@@ -57,12 +91,19 @@ export async function verifyAdmin(request: NextRequest): Promise<AdminUser | nul
             }
         })
 
+        console.log('[verifyAdmin] DB user:', dbUser)
+
         if (!dbUser) {
+            console.log('[verifyAdmin] User not found in DB')
             return null
         }
 
-        // 3. Verify role
-        if (dbUser.role !== 'ADMIN') {
+        // 5. Verify role - hỗ trợ cả chữ hoa và chữ thường
+        const roleUpper = dbUser.role?.toUpperCase()
+        console.log('[verifyAdmin] Role check:', { dbRole: dbUser.role, roleUpper, isAdmin: roleUpper === 'ADMIN' })
+
+        if (roleUpper !== 'ADMIN') {
+            console.log('[verifyAdmin] User is not admin')
             return null
         }
 

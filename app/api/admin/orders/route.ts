@@ -77,6 +77,20 @@ export async function GET(request: NextRequest) {
               avatar: true
             }
           },
+          orderItems: {
+            select: {
+              id: true,
+              quantity: true,
+              price: true,
+              product: {
+                select: {
+                  name: true,
+                  slug: true,
+                  images: true
+                }
+              }
+            }
+          },
           _count: {
             select: { orderItems: true }
           }

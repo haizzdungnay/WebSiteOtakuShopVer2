@@ -54,7 +54,20 @@ const updateProductSchema = z.object({
     .optional(),
 
   featured: z.boolean()
-    .optional()
+    .optional(),
+
+  preorderStatus: z.enum(['NONE', 'PREORDER', 'ORDER'])
+    .optional(),
+
+  // New product detail fields
+  seriesName: z.string().max(200).optional().nullable(),
+  brandName: z.string().max(200).optional().nullable(),
+  releaseDate: z.string().optional().nullable(),
+  msrpValue: z.number().min(0).optional().nullable(),
+  msrpCurrency: z.string().max(3).optional().nullable(),
+  productCode: z.string().max(64).optional().nullable(),
+  features: z.string().max(5000).optional().nullable(),
+  condition: z.string().max(100).optional().nullable(),
 })
 
 // PUT /api/admin/products/[id] - Cập nhật sản phẩm
@@ -125,8 +138,8 @@ export async function PUT(
     // 6. Validate comparePrice
     const finalPrice = validatedData.price ?? Number(product.price)
     if (
-      validatedData.comparePrice !== undefined && 
-      validatedData.comparePrice !== null && 
+      validatedData.comparePrice !== undefined &&
+      validatedData.comparePrice !== null &&
       validatedData.comparePrice <= finalPrice
     ) {
       return NextResponse.json(
@@ -135,7 +148,33 @@ export async function PUT(
       )
     }
 
-    // 7. Update sản phẩm
+    // 7. Handle series - create or find existing
+    let seriesConnect = undefined;
+    if (validatedData.seriesName) {
+      const seriesSlug = validatedData.seriesName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const series = await prisma.series.upsert({
+        where: { slug: seriesSlug },
+        create: { name: validatedData.seriesName, slug: seriesSlug },
+        update: {}
+      });
+      // Remove old series relations and add new one
+      await prisma.productSeries.deleteMany({ where: { productId: id } });
+      seriesConnect = { create: { seriesId: series.id } };
+    }
+
+    // Handle brand - create or find existing
+    let brandId = undefined;
+    if (validatedData.brandName) {
+      const brandSlug = validatedData.brandName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const brand = await prisma.brand.upsert({
+        where: { slug: brandSlug },
+        create: { name: validatedData.brandName, slug: brandSlug },
+        update: {}
+      });
+      brandId = brand.id;
+    }
+
+    // 8. Update sản phẩm
     const updatedProduct = await prisma.product.update({
       where: { id },
       data: {
@@ -147,7 +186,17 @@ export async function PUT(
         ...(validatedData.stockQuantity !== undefined && { stockQuantity: validatedData.stockQuantity }),
         ...(validatedData.images && { images: validatedData.images }),
         ...(validatedData.isActive !== undefined && { isActive: validatedData.isActive }),
-        ...(validatedData.featured !== undefined && { featured: validatedData.featured })
+        ...(validatedData.featured !== undefined && { featured: validatedData.featured }),
+        ...(validatedData.preorderStatus !== undefined && { preorderStatus: validatedData.preorderStatus }),
+        // New detail fields
+        ...(validatedData.productCode !== undefined && { productCode: validatedData.productCode }),
+        ...(validatedData.releaseDate !== undefined && { releaseDate: validatedData.releaseDate ? new Date(validatedData.releaseDate) : null }),
+        ...(validatedData.msrpValue !== undefined && { msrpValue: validatedData.msrpValue }),
+        ...(validatedData.msrpCurrency !== undefined && { msrpCurrency: validatedData.msrpCurrency }),
+        ...(validatedData.features !== undefined && { features: validatedData.features }),
+        ...(validatedData.condition !== undefined && { condition: validatedData.condition }),
+        ...(brandId && { brandId }),
+        ...(seriesConnect && { series: seriesConnect }),
       },
       include: {
         category: {
@@ -155,6 +204,22 @@ export async function PUT(
             id: true,
             name: true,
             slug: true
+          }
+        },
+        brand: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        series: {
+          include: {
+            series: {
+              select: {
+                id: true,
+                name: true
+              }
+            }
           }
         }
       }
@@ -223,7 +288,7 @@ export async function DELETE(
 
     // 3. Kiểm tra dependencies
     const dependencies = []
-    
+
     if (product._count.orderItems > 0) {
       dependencies.push(`${product._count.orderItems} đơn hàng`)
     }
@@ -239,9 +304,9 @@ export async function DELETE(
 
     if (dependencies.length > 0) {
       return NextResponse.json(
-        { 
-          success: false, 
-          error: `Không thể xóa sản phẩm đang có ${dependencies.join(', ')}. Vui lòng vô hiệu hóa thay vì xóa.` 
+        {
+          success: false,
+          error: `Không thể xóa sản phẩm đang có ${dependencies.join(', ')}. Vui lòng vô hiệu hóa thay vì xóa.`
         },
         { status: 400 }
       )
