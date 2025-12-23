@@ -18,6 +18,24 @@ interface SubMenuItem {
   count?: number;
 }
 
+const submenuData: Record<string, SubMenuItem[]> = {
+  '/pvc-figure': [
+    { label: 'Nendoroid', href: '/pvc-figure/nendoroid', count: 150 },
+    { label: 'figma', href: '/pvc-figure/figma', count: 85 },
+    { label: 'Pop Up Parade', href: '/pvc-figure/pop-up-parade', count: 42 },
+    { label: 'Scale Figure 1/7', href: '/pvc-figure/scale-1-7', count: 120 },
+    { label: 'Scale Figure 1/8', href: '/pvc-figure/scale-1-8', count: 95 },
+    { label: 'Prize Figure', href: '/pvc-figure/prize', count: 68 },
+  ],
+  '/resin-figure': [
+    { label: 'GK Model Kit', href: '/resin-figure/gk-model', count: 45 },
+    { label: 'Statue', href: '/resin-figure/statue', count: 32 },
+    { label: 'Diorama', href: '/resin-figure/diorama', count: 28 },
+    { label: 'Bust', href: '/resin-figure/bust', count: 15 },
+    { label: 'Custom Figure', href: '/resin-figure/custom', count: 22 },
+  ],
+};
+
 const menuItems: SidebarItem[] = [
   {
     href: '/new-releases',
@@ -64,27 +82,8 @@ const menuItems: SidebarItem[] = [
   },
 ];
 
-const submenuData: Record<string, SubMenuItem[]> = {
-  '/pvc-figure': [
-    { label: 'Nendoroid', href: '/pvc-figure/nendoroid', count: 150 },
-    { label: 'figma', href: '/pvc-figure/figma', count: 85 },
-    { label: 'Pop Up Parade', href: '/pvc-figure/pop-up-parade', count: 42 },
-    { label: 'Scale Figure 1/7', href: '/pvc-figure/scale-1-7', count: 120 },
-    { label: 'Scale Figure 1/8', href: '/pvc-figure/scale-1-8', count: 95 },
-    { label: 'Prize Figure', href: '/pvc-figure/prize', count: 68 },
-  ],
-  '/resin-figure': [
-    { label: 'GK Model Kit', href: '/resin-figure/gk-model', count: 45 },
-    { label: 'Statue', href: '/resin-figure/statue', count: 32 },
-    { label: 'Diorama', href: '/resin-figure/diorama', count: 28 },
-    { label: 'Bust', href: '/resin-figure/bust', count: 15 },
-    { label: 'Custom Figure', href: '/resin-figure/custom', count: 22 },
-  ],
-};
-
 export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
-  const [submenuTimeout, setSubmenuTimeout] = useState<NodeJS.Timeout | null>(null);
 
   return (
     <>
@@ -111,26 +110,8 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
                 <li
                   key={index}
                   className="relative"
-                  onMouseEnter={() => {
-                    if (item.hasSubmenu) {
-                      // Clear any existing timeout
-                      if (submenuTimeout) {
-                        clearTimeout(submenuTimeout);
-                        setSubmenuTimeout(null);
-                      }
-                      setHoveredItem(item.href);
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    if (item.hasSubmenu) {
-                      // Set timeout to hide submenu after 300ms
-                      const timeout = setTimeout(() => {
-                        setHoveredItem(null);
-                        setSubmenuTimeout(null);
-                      }, 300);
-                      setSubmenuTimeout(timeout);
-                    }
-                  }}
+                  onMouseEnter={() => item.hasSubmenu && setHoveredItem(item.href)}
+                  onMouseLeave={() => setHoveredItem(null)}
                 >
                   <Link
                     href={item.href}
@@ -152,24 +133,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
 
                   {/* Submenu - Shows on Hover */}
                   {item.hasSubmenu && hoveredItem === item.href && submenuData[item.href] && (
-                    <div
-                      className="absolute left-full top-0 ml-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-[60] hidden lg:block"
-                      onMouseEnter={() => {
-                        // Clear timeout when entering submenu
-                        if (submenuTimeout) {
-                          clearTimeout(submenuTimeout);
-                          setSubmenuTimeout(null);
-                        }
-                      }}
-                      onMouseLeave={() => {
-                        // Set timeout to hide submenu when leaving submenu
-                        const timeout = setTimeout(() => {
-                          setHoveredItem(null);
-                          setSubmenuTimeout(null);
-                        }, 300);
-                        setSubmenuTimeout(timeout);
-                      }}
-                    >
+                    <div className="absolute left-full top-0 ml-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-[60] hidden lg:block">
                       <div className="mb-2 px-2 py-1 border-b border-gray-200">
                         <span className="font-bold text-gray-900 text-sm">{item.label}</span>
                       </div>
