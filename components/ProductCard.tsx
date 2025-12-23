@@ -72,7 +72,7 @@ export default function ProductCard({
           </h3>
 
           {/* Price */}
-          <div className="flex flex-col gap-1">
+          <div className="flex flex-col gap-1 min-h-[48px] justify-end">
             {discountPrice ? (
               <>
                 <span className="text-gray-400 line-through text-xs">

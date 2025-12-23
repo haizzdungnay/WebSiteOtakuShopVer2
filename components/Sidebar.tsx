@@ -84,6 +84,7 @@ const menuItems: SidebarItem[] = [
 
 export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+  const [submenuTimeout, setSubmenuTimeout] = useState<NodeJS.Timeout | null>(null);
 
   return (
     <>
@@ -110,8 +111,26 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
                 <li
                   key={index}
                   className="relative"
-                  onMouseEnter={() => item.hasSubmenu && setHoveredItem(item.href)}
-                  onMouseLeave={() => setHoveredItem(null)}
+                  onMouseEnter={() => {
+                    if (item.hasSubmenu) {
+                      // Clear any existing timeout
+                      if (submenuTimeout) {
+                        clearTimeout(submenuTimeout);
+                        setSubmenuTimeout(null);
+                      }
+                      setHoveredItem(item.href);
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (item.hasSubmenu) {
+                      // Set timeout to hide submenu after 300ms
+                      const timeout = setTimeout(() => {
+                        setHoveredItem(null);
+                        setSubmenuTimeout(null);
+                      }, 300);
+                      setSubmenuTimeout(timeout);
+                    }
+                  }}
                 >
                   <Link
                     href={item.href}
@@ -133,7 +152,24 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
 
                   {/* Submenu - Shows on Hover */}
                   {item.hasSubmenu && hoveredItem === item.href && submenuData[item.href] && (
-                    <div className="absolute left-full top-0 ml-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-[60] hidden lg:block">
+                    <div
+                      className="absolute left-full top-0 ml-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-[60] hidden lg:block"
+                      onMouseEnter={() => {
+                        // Clear timeout when entering submenu
+                        if (submenuTimeout) {
+                          clearTimeout(submenuTimeout);
+                          setSubmenuTimeout(null);
+                        }
+                      }}
+                      onMouseLeave={() => {
+                        // Set timeout to hide submenu when leaving submenu
+                        const timeout = setTimeout(() => {
+                          setHoveredItem(null);
+                          setSubmenuTimeout(null);
+                        }, 300);
+                        setSubmenuTimeout(timeout);
+                      }}
+                    >
                       <div className="mb-2 px-2 py-1 border-b border-gray-200">
                         <span className="font-bold text-gray-900 text-sm">{item.label}</span>
                       </div>
