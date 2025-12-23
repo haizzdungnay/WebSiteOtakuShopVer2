@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
-import { useRouter } from 'next/navigation';
-import { ChevronRight, MapPin, CreditCard, Truck, Receipt } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { ChevronRight, MapPin, CreditCard, Truck, Receipt, AlertTriangle } from 'lucide-react';
 
 interface ShippingInfo {
   fullName: string;
@@ -18,7 +18,7 @@ interface ShippingInfo {
   note: string;
 }
 
-type PaymentMethod = 'cod' | 'bank-transfer' | 'qr' | 'store-pickup';
+type PaymentMethod = 'cod' | 'bank-transfer' | 'qr' | 'store-pickup' | 'vnpay';
 type ShippingMethod = 'standard' | 'express' | 'store-pickup';
 
 export default function CheckoutPage() {
@@ -31,6 +31,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cod');
   const [needInvoice, setNeedInvoice] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     fullName: '',
@@ -42,6 +43,38 @@ export default function CheckoutPage() {
     city: '',
     note: '',
   });
+
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // Check for error parameters from VNPAY return
+    const error = searchParams.get('error');
+    if (error) {
+      const errorMessages: { [key: string]: string } = {
+        'invalid_signature': 'Chữ ký thanh toán không hợp lệ',
+        'order_not_found': 'Không tìm thấy đơn hàng',
+        'payment_config_error': 'Lỗi cấu hình thanh toán',
+        'processing_error': 'Lỗi xử lý thanh toán',
+        'transaction_failed': 'Giao dịch thất bại',
+        'transaction_reversed': 'Giao dịch đã bị đảo ngược',
+        'processing': 'Giao dịch đang được xử lý',
+        'suspicious_transaction': 'Giao dịch đáng ngờ',
+        'refund_rejected': 'Từ chối hoàn tiền',
+        'wrong_credentials': 'Thông tin đăng nhập không đúng',
+        'timeout': 'Quá thời gian chờ thanh toán',
+        'account_locked': 'Tài khoản bị khóa',
+        'wrong_otp': 'Mã OTP không đúng',
+        'cancelled': 'Giao dịch đã bị hủy',
+        'insufficient_funds': 'Không đủ số dư',
+        'exceeded_limit': 'Vượt quá hạn mức',
+        'maintenance': 'Hệ thống đang bảo trì',
+        'wrong_password': 'Mật khẩu không đúng',
+        'unknown_error': 'Lỗi không xác định'
+      };
+
+      setErrorMessage(errorMessages[error] || 'Có lỗi xảy ra trong quá trình thanh toán');
+    }
+  }, [searchParams]);
 
   const subtotal = getTotalPrice();
   const shippingFee = shippingMethod === 'express' ? 50000 : shippingMethod === 'store-pickup' ? 0 : 30000;
@@ -82,6 +115,13 @@ export default function CheckoutPage() {
     setIsProcessing(true);
 
     try {
+      // Map payment method to API value
+      let apiPaymentMethod = 'COD';
+      if (paymentMethod === 'cod') apiPaymentMethod = 'COD';
+      else if (paymentMethod === 'bank-transfer') apiPaymentMethod = 'BANK_TRANSFER';
+      else if (paymentMethod === 'vnpay') apiPaymentMethod = 'VNPAY';
+      else apiPaymentMethod = 'COD';
+
       // Gọi API tạo đơn hàng
       const response = await fetch('/api/orders/guest', {
         method: 'POST',
@@ -100,7 +140,7 @@ export default function CheckoutPage() {
             productId: item.id,
             quantity: item.quantity
           })),
-          paymentMethod: paymentMethod === 'cod' ? 'COD' : 'BANK_TRANSFER',
+          paymentMethod: apiPaymentMethod,
           note: shippingInfo.note || ''
         }),
       });
@@ -108,8 +148,48 @@ export default function CheckoutPage() {
       const data = await response.json();
 
       if (data.success) {
+        const orderId = data.data.order?.id;
+        const orderNumber = data.data.orderNumber;
+
+        // Handle VNPAY payment
+        if (paymentMethod === 'vnpay') {
+          try {
+            // Call VNPAY API to create payment URL
+            const vnpayResponse = await fetch('/api/payment/vnpay', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderId: orderId,
+                amount: totalAmount,
+                orderInfo: `Thanh toan don hang ${orderNumber}`,
+                bankCode: '' // Let user choose on VNPAY
+              }),
+            });
+
+            const vnpayData = await vnpayResponse.json();
+
+            if (vnpayData.success) {
+              // Clear cart and redirect to VNPAY
+              clearCart();
+              window.location.href = vnpayData.paymentUrl;
+              return; // Don't set isProcessing to false
+            } else {
+              // VNPAY failed, cancel the order
+              alert('Không thể tạo thanh toán VNPAY. Vui lòng thử lại.');
+              return;
+            }
+          } catch (error) {
+            console.error('VNPAY payment error:', error);
+            alert('Lỗi thanh toán VNPAY. Vui lòng thử lại.');
+            return;
+          }
+        }
+
+        // For non-VNPAY payments
         clearCart();
-        alert(`Đặt hàng thành công! Mã đơn hàng: ${data.data.orderNumber}`);
+        alert(`Đặt hàng thành công! Mã đơn hàng: ${orderNumber}`);
         router.push('/');
       } else {
         alert(data.error || 'Không thể đặt hàng. Vui lòng thử lại.');
@@ -152,6 +232,20 @@ export default function CheckoutPage() {
         </nav>
 
         <h1 className="text-3xl font-bold mb-8">Thanh toán</h1>
+
+        {/* Error Message */}
+        {errorMessage && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+            <AlertTriangle size={20} className="text-red-500 mt-0.5 flex-shrink-0" />
+            <div>
+              <h3 className="text-red-800 font-semibold">Lỗi thanh toán</h3>
+              <p className="text-red-700 mt-1">{errorMessage}</p>
+              <p className="text-red-600 text-sm mt-2">
+                Vui lòng thử lại hoặc chọn phương thức thanh toán khác.
+              </p>
+            </div>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -360,6 +454,20 @@ export default function CheckoutPage() {
                     <div className="flex-1">
                       <div className="font-semibold">Chuyển khoản qua QR - Techcombank</div>
                       <div className="text-sm text-gray-600">Quét mã QR để thanh toán nhanh chóng</div>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-accent-red transition-colors">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="vnpay"
+                      checked={paymentMethod === 'vnpay'}
+                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="font-semibold">Thanh toán qua VNPAY</div>
+                      <div className="text-sm text-gray-600">Thanh toán an toàn qua cổng VNPAY với nhiều phương thức</div>
                     </div>
                   </label>
                   <label className="flex items-start gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-accent-red transition-colors">
