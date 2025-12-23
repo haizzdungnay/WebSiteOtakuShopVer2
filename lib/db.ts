@@ -1,5 +1,7 @@
 import { Pool } from 'pg'
 
+const DEBUG_DB = process.env.NODE_ENV === 'development' && process.env.DEBUG_DB === 'true'
+
 const pool = new Pool({
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '5432'),
@@ -8,12 +10,12 @@ const pool = new Pool({
   password: process.env.DB_PASSWORD || 'postgres',
 })
 
-export const query = async (text: string, params?: any[]) => {
+export const query = async (text: string, params?: unknown[]) => {
   const start = Date.now()
   try {
     const res = await pool.query(text, params)
     const duration = Date.now() - start
-    console.log('Executed query', { text, duration, rows: res.rowCount })
+    if (DEBUG_DB) console.warn('Executed query', { text, duration, rows: res.rowCount })
     return res
   } catch (error) {
     console.error('Database query error:', error)

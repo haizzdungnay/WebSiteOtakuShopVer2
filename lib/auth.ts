@@ -16,7 +16,7 @@ export function verifyToken(token: string): JWTPayLoad | null {
         const decoded = jwt.verify(token, process.env.JWT_SECRET!) as JWTPayLoad
         return decoded
     }
-    catch (error) {
+    catch (_error) {
         // Nếu token không hợp lệ hoặc hết hạn
         return null
     }

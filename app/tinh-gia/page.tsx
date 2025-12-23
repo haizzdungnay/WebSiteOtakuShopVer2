@@ -214,7 +214,7 @@ export default function ShippingCalculatorPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 font-bold">3.</span>
-                  <span>Nhấn "Tính giá" để xem chi phí dự kiến</span>
+                  <span>Nhấn &quot;Tính giá&quot; để xem chi phí dự kiến</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 font-bold">4.</span>

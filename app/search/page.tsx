@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronRight, Search as SearchIcon, Loader2 } from 'lucide-react';
+import { ChevronRight, Search as SearchIcon } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
 
 interface Category {

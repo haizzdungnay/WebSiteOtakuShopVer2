@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     // 2. Parse query params
     const { searchParams } = new URL(request.url)
     const limit = parseInt(searchParams.get('limit') || '10')
-    const period = searchParams.get('period') || 'month' // day, week, month, year
+    const _period = searchParams.get('period') || 'month' // day, week, month, year (reserved for future use)
 
     // 3. Calculate date ranges
     const now = new Date()
@@ -146,7 +146,7 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const repeatCustomers = await prisma.user.count({
+    const _repeatCustomers = await prisma.user.count({
       where: {
         role: 'CUSTOMER',
         orders: {

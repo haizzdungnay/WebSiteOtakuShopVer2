@@ -28,7 +28,7 @@ function getDateRanges() {
 // Helper: Calculate growth rate
 // ==========================================
 
-function calculateGrowthRate(current: number, previous: number): number {
+function _calculateGrowthRate(current: number, previous: number): number {
   if (previous === 0) return current > 0 ? 100 : 0
   return Math.round(((current - previous) / previous) * 100)
 }
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    const dates = getDateRanges()
+    const _dates = getDateRanges() // reserved for future use
 
     // Lấy thống kê từ database
     const [
@@ -129,7 +129,7 @@ export async function GET(request: NextRequest) {
     const sixMonthsAgo = new Date()
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6)
 
-    const monthlyRevenue = await prisma.order.groupBy({
+    const _monthlyRevenue = await prisma.order.groupBy({
       by: ['createdAt'],
       where: {
         status: { in: ['DELIVERED', 'COMPLETED'] },

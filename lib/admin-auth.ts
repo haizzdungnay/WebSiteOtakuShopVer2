@@ -2,6 +2,9 @@ import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getUserFromRequest } from '@/lib/auth'
 
+// Debug mode - set to true in development for verbose logging
+const DEBUG = process.env.NODE_ENV === 'development' && process.env.DEBUG_AUTH === 'true'
+
 // Admin authorization Helper - Kiểm tra user có phải admin không
 export interface AdminUser {
     userId: string
@@ -42,15 +45,15 @@ export async function verifyAdmin(request: NextRequest): Promise<AdminUser | nul
         const user = getUserFromRequest(request)
 
         if (!user) {
-            console.log('[verifyAdmin] No user from JWT')
+            if (DEBUG) console.warn('[verifyAdmin] No user from JWT')
             return null
         }
 
-        console.log('[verifyAdmin] JWT user:', { userId: user.userId, email: user.email, role: user.role })
+        if (DEBUG) console.warn('[verifyAdmin] JWT user:', { userId: user.userId, email: user.email, role: user.role })
 
         // 2. Nếu là env-admin (fallback admin từ biến môi trường), cho phép luôn
         if (user.userId === 'env-admin' && user.role?.toLowerCase() === 'admin') {
-            console.log('[verifyAdmin] Env admin detected, granting access')
+            if (DEBUG) console.warn('[verifyAdmin] Env admin detected, granting access')
             return {
                 userId: user.userId,
                 email: user.email,
@@ -71,7 +74,7 @@ export async function verifyAdmin(request: NextRequest): Promise<AdminUser | nul
         })
 
         if (dbAdmin && dbAdmin.isActive) {
-            console.log('[verifyAdmin] Found in admins table:', dbAdmin)
+            if (DEBUG) console.warn('[verifyAdmin] Found in admins table:', dbAdmin)
             return {
                 userId: dbAdmin.id,
                 email: dbAdmin.email,
@@ -91,19 +94,19 @@ export async function verifyAdmin(request: NextRequest): Promise<AdminUser | nul
             }
         })
 
-        console.log('[verifyAdmin] DB user:', dbUser)
+        if (DEBUG) console.warn('[verifyAdmin] DB user:', dbUser)
 
         if (!dbUser) {
-            console.log('[verifyAdmin] User not found in DB')
+            if (DEBUG) console.warn('[verifyAdmin] User not found in DB')
             return null
         }
 
         // 5. Verify role - hỗ trợ cả chữ hoa và chữ thường
         const roleUpper = dbUser.role?.toUpperCase()
-        console.log('[verifyAdmin] Role check:', { dbRole: dbUser.role, roleUpper, isAdmin: roleUpper === 'ADMIN' })
+        if (DEBUG) console.warn('[verifyAdmin] Role check:', { dbRole: dbUser.role, roleUpper, isAdmin: roleUpper === 'ADMIN' })
 
         if (roleUpper !== 'ADMIN') {
-            console.log('[verifyAdmin] User is not admin')
+            if (DEBUG) console.warn('[verifyAdmin] User is not admin')
             return null
         }
 

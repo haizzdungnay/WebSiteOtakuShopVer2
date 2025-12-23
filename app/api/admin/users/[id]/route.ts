@@ -161,7 +161,7 @@ export async function GET(
     }
 
     // Remove password hash from response
-    const { passwordHash, ...userWithoutPassword } = user
+    const { passwordHash: _passwordHash, ...userWithoutPassword } = user
 
     return NextResponse.json({
       success: true,

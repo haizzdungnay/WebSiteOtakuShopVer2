@@ -1,5 +1,5 @@
 import { PrismaClient } from '@/app/generated/prisma'
-import { Prisma } from '@prisma/client'
+// Prisma namespace import removed - not currently used
 
 // Extend global type để lưu prisma instance
 const globalForPrisma = globalThis as unknown as {

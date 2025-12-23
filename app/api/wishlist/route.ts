@@ -78,7 +78,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 5 thêm sản phẩm vào wishlist
-        const wishlistItem = await prisma.wishlist.create({
+        const _wishlistItem = await prisma.wishlist.create({
             data: {
                 userId: user.userId,
                 productId: productId

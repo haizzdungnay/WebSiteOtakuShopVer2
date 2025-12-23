@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/admin-auth'
 import { z } from 'zod'
-import { compare } from 'bcryptjs'
+// bcryptjs compare import removed - not needed for product routes
 
 // Helper generate slug từ tên sản phẩm
 

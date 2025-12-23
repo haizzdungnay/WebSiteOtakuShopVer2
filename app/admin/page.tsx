@@ -9,7 +9,7 @@ import {
   Edit,
   FilePlus,
   FolderPlus,
-  Image,
+  Image as ImageIcon,
   ListChecks,
   Loader2,
   MessageSquare,
@@ -1151,7 +1151,7 @@ export default function AdminPage() {
                             />
                           ) : (
                             <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                              <Image size={20} className="text-slate-400" />
+                              <ImageIcon size={20} className="text-slate-400" />
                             </div>
                           )}
                         </td>

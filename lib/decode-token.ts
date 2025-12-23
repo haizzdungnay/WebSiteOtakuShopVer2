@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+// This is a development utility script for debugging JWT tokens
 import jwt from 'jsonwebtoken'
 import * as dotenv from 'dotenv'
 
