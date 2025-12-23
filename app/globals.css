@@ -4,16 +4,16 @@
 
 @layer base {
   /* Body defaults */
-  body {
+  html, body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    overflow-x: hidden; /* Prevent horizontal scroll */
   }
 }
 
 @layer components {
   /* Container */
   .container-custom {
-    @apply container mx-auto px-4;
-    max-width: 1400px;
+    @apply w-full max-w-7xl mx-auto px-4;
   }
 
   /* Buttons */

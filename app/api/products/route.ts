@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
         const featured = searchParams.get('featured') // 'true' hoặc null
         const inStock = searchParams.get('inStock') // 'true' = only in-stock products
         const preorder = searchParams.get('preorder') // 'true' = only pre-order products
+        const onSale = searchParams.get('onSale') // 'true' = only products with discounts
 
         // Map sort param to actual field and order
         let sortField = 'createdAt'
@@ -76,9 +77,15 @@ export async function GET(request: NextRequest) {
             where.stockQuantity = { gt: 0 }
         }
 
-        // Filter by pre-order status
+        // Filter by pre-order status (PREORDER or ORDER)
         if (preorder === 'true') {
             where.preorderStatus = { in: ['PREORDER', 'ORDER'] }
+        }
+
+        // Filter by on sale - products with discounts (comparePrice is set and > price)
+        if (onSale === 'true') {
+            where.comparePrice = { not: null }
+            where.price = { lt: prisma.product.fields.comparePrice }
         }
 
         //search by name, description, shortDescription, productCode

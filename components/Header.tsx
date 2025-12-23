@@ -6,8 +6,6 @@ import Link from 'next/link';
 import {
   ShoppingCart,
   Search,
-  Phone,
-  MapPin,
   User,
   Package,
   HelpCircle,
@@ -55,7 +53,7 @@ export default function Header() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchQuery)}`;
+      window.location.href = `/products?q=${encodeURIComponent(searchQuery)}`;
     }
   };
 
@@ -99,27 +97,6 @@ export default function Header() {
 
             {/* Right Section */}
             <div className="flex items-center gap-4 order-2 lg:order-3 flex-wrap lg:flex-nowrap">
-              {/* Hotline */}
-              <div className="hidden lg:flex items-center gap-2 text-gray-800">
-                <Phone size={20} className="text-accent-red" />
-                <div>
-                  <div className="text-xs text-gray-600">Hotline</div>
-                  <div className="text-sm font-semibold">0396686826</div>
-                </div>
-              </div>
-
-              {/* Hệ thống cửa hàng */}
-              <Link
-                href="/stores"
-                className="hidden lg:flex items-center gap-2 text-gray-800 hover:text-accent-red transition-colors"
-              >
-                <MapPin size={20} />
-                <div>
-                  <div className="text-xs text-gray-600">Hệ thống</div>
-                  <div className="text-sm font-semibold">cửa hàng</div>
-                </div>
-              </Link>
-
               {/* Đăng nhập / Đăng ký */}
               {user ? (
                 <div className="relative" ref={dropdownRef}>
