@@ -15,7 +15,12 @@ export async function GET() {
                 slug: true,
                 description: true,
                 imageUrl: true,
-                createdAt: true
+                createdAt: true,
+                _count: {
+                    select: {
+                        products: true
+                    }
+                }
             }
         })
 

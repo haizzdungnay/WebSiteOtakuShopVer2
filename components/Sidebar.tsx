@@ -1,90 +1,80 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Gift, Package, ShoppingBag, Box, Boxes, Backpack, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  Gift,
+  Package,
+  ShoppingBag,
+  Percent,
+  FolderOpen,
+  User,
+  ChevronRight,
+  Heart,
+  MapPin,
+  LogOut,
+  LogIn
+} from 'lucide-react';
 
-interface SidebarItem {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  badge?: string;
-  hasSubmenu?: boolean;
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  _count?: {
+    products: number;
+  };
 }
-
-interface SubMenuItem {
-  label: string;
-  href: string;
-  count?: number;
-}
-
-const submenuData: Record<string, SubMenuItem[]> = {
-  '/pvc-figure': [
-    { label: 'Nendoroid', href: '/pvc-figure/nendoroid', count: 150 },
-    { label: 'figma', href: '/pvc-figure/figma', count: 85 },
-    { label: 'Pop Up Parade', href: '/pvc-figure/pop-up-parade', count: 42 },
-    { label: 'Scale Figure 1/7', href: '/pvc-figure/scale-1-7', count: 120 },
-    { label: 'Scale Figure 1/8', href: '/pvc-figure/scale-1-8', count: 95 },
-    { label: 'Prize Figure', href: '/pvc-figure/prize', count: 68 },
-  ],
-  '/resin-figure': [
-    { label: 'GK Model Kit', href: '/resin-figure/gk-model', count: 45 },
-    { label: 'Statue', href: '/resin-figure/statue', count: 32 },
-    { label: 'Diorama', href: '/resin-figure/diorama', count: 28 },
-    { label: 'Bust', href: '/resin-figure/bust', count: 15 },
-    { label: 'Custom Figure', href: '/resin-figure/custom', count: 22 },
-  ],
-};
-
-const menuItems: SidebarItem[] = [
-  {
-    href: '/new-releases',
-    icon: <Gift size={20} className="text-accent-red" />,
-    label: 'NEW RELEASES !!!',
-    badge: 'hot',
-  },
-  {
-    href: '/in-stock',
-    icon: <Package size={20} className="text-green-600" />,
-    label: 'NOW In Stock!',
-  },
-  {
-    href: '/products',
-    icon: <ShoppingBag size={20} className="text-blue-600" />,
-    label: 'ALL PRODUCTS',
-  },
-  {
-    href: '/pvc-figure',
-    icon: <Box size={20} />,
-    label: 'PVC Figure',
-    hasSubmenu: true,
-  },
-  {
-    href: '/resin-figure',
-    icon: <Box size={20} />,
-    label: 'RESIN Figure',
-    hasSubmenu: true,
-  },
-  {
-    href: '/blindbox',
-    icon: <Boxes size={20} />,
-    label: 'Blindbox Arttoy',
-  },
-  {
-    href: '/gundam',
-    icon: <Boxes size={20} />,
-    label: 'Gundam / Plastic Model / Tokusatsu Toys',
-  },
-  {
-    href: '/goods',
-    icon: <Backpack size={20} />,
-    label: 'Balo / Character Goods',
-  },
-];
 
 export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
+  const { user, logout } = useAuth();
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [submenuTimeout, setSubmenuTimeout] = useState<NodeJS.Timeout | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoadingCategories(true);
+      try {
+        const res = await fetch('/api/categories');
+        if (res.ok) {
+          const data = await res.json();
+          setCategories(data.data || data || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    if (categories.length === 0) {
+      fetchCategories();
+    }
+  }, [categories.length]);
+
+  const handleMouseEnter = (itemKey: string) => {
+    if (submenuTimeout) {
+      clearTimeout(submenuTimeout);
+      setSubmenuTimeout(null);
+    }
+    setHoveredItem(itemKey);
+  };
+
+  const handleMouseLeave = () => {
+    const timeout = setTimeout(() => {
+      setHoveredItem(null);
+      setSubmenuTimeout(null);
+    }, 300);
+    setSubmenuTimeout(timeout);
+  };
+
+  const handleLogout = () => {
+    logout();
+    onClose?.();
+  };
 
   return (
     <>
@@ -107,105 +97,226 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
         <div className="p-4">
           <nav>
             <ul className="space-y-1">
-              {menuItems.map((item, index) => (
-                <li
-                  key={index}
-                  className="relative"
-                  onMouseEnter={() => {
-                    if (item.hasSubmenu) {
-                      // Clear any existing timeout
-                      if (submenuTimeout) {
-                        clearTimeout(submenuTimeout);
-                        setSubmenuTimeout(null);
-                      }
-                      setHoveredItem(item.href);
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    if (item.hasSubmenu) {
-                      // Set timeout to hide submenu after 300ms
-                      const timeout = setTimeout(() => {
-                        setHoveredItem(null);
-                        setSubmenuTimeout(null);
-                      }, 300);
-                      setSubmenuTimeout(timeout);
-                    }
-                  }}
+              {/* NEW RELEASES */}
+              <li>
+                <Link
+                  href="/new-releases"
+                  className="sidebar-link group"
+                  onClick={onClose}
                 >
-                  <Link
-                    href={item.href}
-                    className="sidebar-link group"
-                    onClick={onClose}
-                  >
-                    {item.icon}
-                    <span className="flex-1 text-sm font-medium">{item.label}</span>
-                    {item.badge === 'hot' && (
-                      <span className="badge badge-hot text-xs">HOT</span>
-                    )}
-                    {item.hasSubmenu && (
-                      <ChevronRight
-                        size={16}
-                        className="text-gray-400 group-hover:text-primary transition-transform group-hover:translate-x-1"
-                      />
-                    )}
-                  </Link>
+                  <Gift size={20} className="text-accent-red" />
+                  <span className="flex-1 text-sm font-medium">NEW RELEASES !!!</span>
+                  <span className="badge badge-hot text-xs">HOT</span>
+                </Link>
+              </li>
 
-                  {/* Submenu - Shows on Hover */}
-                  {item.hasSubmenu && hoveredItem === item.href && submenuData[item.href] && (
-                    <div
-                      className="absolute left-full top-0 ml-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-[60] hidden lg:block"
-                      onMouseEnter={() => {
-                        // Clear timeout when entering submenu
-                        if (submenuTimeout) {
-                          clearTimeout(submenuTimeout);
-                          setSubmenuTimeout(null);
-                        }
-                      }}
-                      onMouseLeave={() => {
-                        // Set timeout to hide submenu when leaving submenu
-                        const timeout = setTimeout(() => {
-                          setHoveredItem(null);
-                          setSubmenuTimeout(null);
-                        }, 300);
-                        setSubmenuTimeout(timeout);
-                      }}
-                    >
-                      <div className="mb-2 px-2 py-1 border-b border-gray-200">
-                        <span className="font-bold text-gray-900 text-sm">{item.label}</span>
-                      </div>
-                      <ul className="space-y-1">
-                        {submenuData[item.href].map((subItem, subIndex) => (
-                          <li key={subIndex}>
+              {/* NOW In Stock */}
+              <li>
+                <Link
+                  href="/in-stock"
+                  className="sidebar-link group"
+                  onClick={onClose}
+                >
+                  <Package size={20} className="text-green-600" />
+                  <span className="flex-1 text-sm font-medium">NOW In Stock!</span>
+                </Link>
+              </li>
+
+              {/* ALL PRODUCTS */}
+              <li>
+                <Link
+                  href="/products"
+                  className="sidebar-link group"
+                  onClick={onClose}
+                >
+                  <ShoppingBag size={20} className="text-blue-600" />
+                  <span className="flex-1 text-sm font-medium">ALL PRODUCTS</span>
+                </Link>
+              </li>
+
+              {/* Đang giảm giá (On Sale) */}
+              <li>
+                <Link
+                  href="/products?onSale=true"
+                  className="sidebar-link group"
+                  onClick={onClose}
+                >
+                  <Percent size={20} className="text-orange-500" />
+                  <span className="flex-1 text-sm font-medium">Đang giảm giá</span>
+                  <span className="bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full font-bold">SALE</span>
+                </Link>
+              </li>
+
+              {/* Danh mục (Categories) */}
+              <li
+                className="relative"
+                onMouseEnter={() => handleMouseEnter('categories')}
+                onMouseLeave={handleMouseLeave}
+              >
+                <div className="sidebar-link group cursor-pointer">
+                  <FolderOpen size={20} className="text-purple-600" />
+                  <span className="flex-1 text-sm font-medium">Danh mục</span>
+                  <ChevronRight
+                    size={16}
+                    className="text-gray-400 group-hover:text-primary transition-transform group-hover:translate-x-1"
+                  />
+                </div>
+
+                {/* Categories Submenu */}
+                {hoveredItem === 'categories' && (
+                  <div
+                    className="absolute left-full top-0 ml-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-[60] hidden lg:block"
+                    onMouseEnter={() => handleMouseEnter('categories')}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    <div className="mb-2 px-2 py-1 border-b border-gray-200">
+                      <span className="font-bold text-gray-900 text-sm">Danh mục sản phẩm</span>
+                    </div>
+                    <ul className="space-y-1 max-h-80 overflow-y-auto">
+                      {loadingCategories ? (
+                        <li className="px-2 py-2 text-sm text-gray-500">Đang tải...</li>
+                      ) : categories.length === 0 ? (
+                        <li className="px-2 py-2 text-sm text-gray-500">Chưa có danh mục</li>
+                      ) : (
+                        categories.map((category) => (
+                          <li key={category.id}>
                             <Link
-                              href={subItem.href}
+                              href={`/products?category=${category.slug}`}
                               className="flex items-center justify-between px-2 py-2 rounded hover:bg-gray-50 transition-colors group/sub"
                               onClick={onClose}
                             >
                               <span className="text-sm text-gray-700 group-hover/sub:text-accent-red transition-colors">
-                                {subItem.label}
+                                {category.name}
                               </span>
-                              {subItem.count && (
+                              {category._count?.products !== undefined && (
                                 <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                                  {subItem.count}
+                                  {category._count.products}
                                 </span>
                               )}
                             </Link>
                           </li>
-                        ))}
-                      </ul>
-                      <div className="mt-2 pt-2 border-t border-gray-200">
+                        ))
+                      )}
+                    </ul>
+                    <div className="mt-2 pt-2 border-t border-gray-200">
+                      <Link
+                        href="/products"
+                        className="block text-center text-sm text-accent-red font-semibold hover:underline"
+                        onClick={onClose}
+                      >
+                        Xem tất cả →
+                      </Link>
+                    </div>
+                  </div>
+                )}
+              </li>
+
+              {/* Trang cá nhân (Profile) */}
+              <li
+                className="relative"
+                onMouseEnter={() => handleMouseEnter('profile')}
+                onMouseLeave={handleMouseLeave}
+              >
+                <div className="sidebar-link group cursor-pointer">
+                  <User size={20} className="text-blue-500" />
+                  <span className="flex-1 text-sm font-medium">Trang cá nhân</span>
+                  <ChevronRight
+                    size={16}
+                    className="text-gray-400 group-hover:text-primary transition-transform group-hover:translate-x-1"
+                  />
+                </div>
+
+                {/* Profile Submenu */}
+                {hoveredItem === 'profile' && (
+                  <div
+                    className="absolute left-full top-0 ml-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 p-4 z-[60] hidden lg:block"
+                    onMouseEnter={() => handleMouseEnter('profile')}
+                    onMouseLeave={handleMouseLeave}
+                  >
+                    {user ? (
+                      <>
+                        {/* User Info */}
+                        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-200">
+                          <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {user.fullName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-800">{user.fullName || 'Người dùng'}</p>
+                            <p className="text-xs text-gray-500">{user.email}</p>
+                          </div>
+                        </div>
+
+                        {/* Profile Links */}
+                        <ul className="space-y-1">
+                          <li>
+                            <Link
+                              href="/account"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                              onClick={onClose}
+                            >
+                              <User size={18} className="text-accent-red" />
+                              <span className="text-sm">Thông tin cá nhân</span>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/account/orders"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                              onClick={onClose}
+                            >
+                              <Package size={18} />
+                              <span className="text-sm">Đơn hàng của tôi</span>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/account/wishlist"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                              onClick={onClose}
+                            >
+                              <Heart size={18} className="text-pink-500" />
+                              <span className="text-sm">Sản phẩm yêu thích</span>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/account/addresses"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                              onClick={onClose}
+                            >
+                              <MapPin size={18} className="text-green-600" />
+                              <span className="text-sm">Địa chỉ giao hàng</span>
+                            </Link>
+                          </li>
+                          <li>
+                            <button
+                              onClick={handleLogout}
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors text-red-600"
+                            >
+                              <LogOut size={18} />
+                              <span className="text-sm">Đăng xuất</span>
+                            </button>
+                          </li>
+                        </ul>
+                      </>
+                    ) : (
+                      /* Not Logged In */
+                      <div className="text-center py-4">
+                        <User size={40} className="mx-auto text-gray-400 mb-3" />
+                        <p className="text-sm text-gray-600 mb-4">Đăng nhập để xem thông tin cá nhân</p>
                         <Link
-                          href={item.href}
-                          className="block text-center text-sm text-accent-red font-semibold hover:underline"
+                          href="/auth/login"
+                          className="inline-flex items-center gap-2 bg-accent-red text-white px-6 py-2 rounded-lg font-medium hover:bg-red-600 transition-colors"
                           onClick={onClose}
                         >
-                          Xem tất cả →
+                          <LogIn size={18} />
+                          Đăng nhập
                         </Link>
                       </div>
-                    </div>
-                  )}
-                </li>
-              ))}
+                    )}
+                  </div>
+                )}
+              </li>
             </ul>
           </nav>
         </div>
