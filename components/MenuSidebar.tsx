@@ -2,67 +2,63 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { X, ChevronRight, Gift, Package, ShoppingBag, Box, Boxes, Backpack } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import {
+  X,
+  ChevronRight,
+  Gift,
+  Package,
+  ShoppingBag,
+  Percent,
+  FolderOpen,
+  User,
+  Heart,
+  MapPin,
+  LogOut,
+  LogIn
+} from 'lucide-react';
 
 interface MenuSidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface MenuItem {
-  href: string;
-  icon: React.ReactNode;
-  label: string;
-  badge?: string;
-  hasSubmenu?: boolean;
+interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  _count?: {
+    products: number;
+  };
 }
-
-interface SubMenuItem {
-  label: string;
-  href: string;
-  count?: number;
-}
-
-const menuItems: MenuItem[] = [
-  { href: '/new-releases', icon: <Gift size={20} className="text-accent-red" />, label: 'NEW RELEASES !!!', badge: 'hot' },
-  { href: '/in-stock', icon: <Package size={20} className="text-green-600" />, label: 'NOW In Stock!' },
-  { href: '/products', icon: <ShoppingBag size={20} className="text-blue-600" />, label: 'ALL PRODUCTS' },
-  { href: '/pvc-figure', icon: <Box size={20} />, label: 'PVC Figure', hasSubmenu: true },
-  { href: '/resin-figure', icon: <Box size={20} />, label: 'RESIN Figure', hasSubmenu: true },
-  { href: '/blindbox', icon: <Boxes size={20} />, label: 'Blindbox Arttoy' },
-  { href: '/gundam', icon: <Boxes size={20} />, label: 'Gundam / Plastic Model / Tokusatsu Toys' },
-  { href: '/goods', icon: <Backpack size={20} />, label: 'Balo / Character Goods' },
-];
-
-const submenuData: Record<string, SubMenuItem[]> = {
-  '/pvc-figure': [
-    { label: 'Nendoroid', href: '/pvc-figure/nendoroid', count: 150 },
-    { label: 'figma', href: '/pvc-figure/figma', count: 85 },
-    { label: 'Pop Up Parade', href: '/pvc-figure/pop-up-parade', count: 42 },
-    { label: 'Scale Figure 1/7', href: '/pvc-figure/scale-1-7', count: 120 },
-    { label: 'Scale Figure 1/8', href: '/pvc-figure/scale-1-8', count: 95 },
-    { label: 'Prize Figure', href: '/pvc-figure/prize', count: 68 },
-  ],
-  '/resin-figure': [
-    { label: 'GK Model Kit', href: '/resin-figure/gk-model', count: 45 },
-    { label: 'Statue', href: '/resin-figure/statue', count: 32 },
-    { label: 'Diorama', href: '/resin-figure/diorama', count: 28 },
-    { label: 'Bust', href: '/resin-figure/bust', count: 15 },
-    { label: 'Custom Figure', href: '/resin-figure/custom', count: 22 },
-  ],
-};
-
-const priceRanges = [
-  { label: 'Dưới 500,000đ', value: '0-500000' },
-  { label: '500,000đ - 2,000,000đ', value: '500000-2000000' },
-  { label: '2,000,000đ - 5,000,000đ', value: '2000000-5000000' },
-  { label: '5,000,000đ - 10,000,000đ', value: '5000000-10000000' },
-];
-
-const brands = ['Doki Kouyou', 'AmiAmi', 'Good Smile Company', 'Bandai', 'Kotobukiya'];
 
 export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
+  const { user, logout } = useAuth();
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+
+  // Fetch categories from API
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoadingCategories(true);
+      try {
+        const res = await fetch('/api/categories');
+        if (res.ok) {
+          const data = await res.json();
+          setCategories(data.data || data || []);
+        }
+      } catch (error) {
+        console.error('Failed to fetch categories:', error);
+      } finally {
+        setLoadingCategories(false);
+      }
+    };
+
+    if (isOpen && categories.length === 0) {
+      fetchCategories();
+    }
+  }, [isOpen, categories.length]);
 
   // Close on ESC key
   useEffect(() => {
@@ -78,6 +74,11 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
       document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
+
+  const handleLogout = () => {
+    logout();
+    onClose();
+  };
 
   if (!isOpen) return null;
 
@@ -108,92 +109,212 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
         {/* Menu Items */}
         <nav className="p-4">
           <ul className="space-y-1">
-            {menuItems.map((item, index) => (
-              <li key={index}>
-                <div>
-                  <Link
-                    href={item.href}
-                    className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700 group"
-                    onClick={() => {
-                      if (!item.hasSubmenu) onClose();
-                      else setExpandedItem(expandedItem === item.href ? null : item.href);
-                    }}
-                  >
-                    {item.icon}
-                    <span className="flex-1 font-medium text-sm">{item.label}</span>
-                    {item.badge === 'hot' && (
-                      <span className="bg-accent-red text-white text-xs px-2 py-1 rounded-full font-bold">HOT</span>
-                    )}
-                    {item.hasSubmenu && (
-                      <ChevronRight
-                        size={16}
-                        className={`text-gray-400 transition-transform ${
-                          expandedItem === item.href ? 'rotate-90' : ''
-                        }`}
-                      />
-                    )}
-                  </Link>
+            {/* NEW RELEASES */}
+            <li>
+              <Link
+                href="/new-releases"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                onClick={onClose}
+              >
+                <Gift size={20} className="text-accent-red" />
+                <span className="flex-1 font-medium text-sm">NEW RELEASES !!!</span>
+                <span className="bg-accent-red text-white text-xs px-2 py-1 rounded-full font-bold">HOT</span>
+              </Link>
+            </li>
 
-                  {/* Submenu */}
-                  {item.hasSubmenu && expandedItem === item.href && submenuData[item.href] && (
-                    <ul className="ml-10 mt-2 space-y-1">
-                      {submenuData[item.href].map((subItem, subIndex) => (
-                        <li key={subIndex}>
+            {/* NOW In Stock */}
+            <li>
+              <Link
+                href="/in-stock"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                onClick={onClose}
+              >
+                <Package size={20} className="text-green-600" />
+                <span className="flex-1 font-medium text-sm">NOW In Stock!</span>
+              </Link>
+            </li>
+
+            {/* ALL PRODUCTS */}
+            <li>
+              <Link
+                href="/products"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                onClick={onClose}
+              >
+                <ShoppingBag size={20} className="text-blue-600" />
+                <span className="flex-1 font-medium text-sm">ALL PRODUCTS</span>
+              </Link>
+            </li>
+
+            {/* Đang giảm giá (On Sale) */}
+            <li>
+              <Link
+                href="/products?onSale=true"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                onClick={onClose}
+              >
+                <Percent size={20} className="text-orange-500" />
+                <span className="flex-1 font-medium text-sm">Đang giảm giá</span>
+                <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold">SALE</span>
+              </Link>
+            </li>
+
+            {/* Danh mục (Categories) */}
+            <li>
+              <div>
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                  onClick={() => setExpandedItem(expandedItem === 'categories' ? null : 'categories')}
+                >
+                  <FolderOpen size={20} className="text-purple-600" />
+                  <span className="flex-1 font-medium text-sm text-left">Danh mục</span>
+                  <ChevronRight
+                    size={16}
+                    className={`text-gray-400 transition-transform ${
+                      expandedItem === 'categories' ? 'rotate-90' : ''
+                    }`}
+                  />
+                </button>
+
+                {/* Categories Submenu */}
+                {expandedItem === 'categories' && (
+                  <ul className="ml-10 mt-2 space-y-1">
+                    {loadingCategories ? (
+                      <li className="px-3 py-2 text-sm text-gray-500">Đang tải...</li>
+                    ) : categories.length === 0 ? (
+                      <li className="px-3 py-2 text-sm text-gray-500">Chưa có danh mục</li>
+                    ) : (
+                      categories.map((category) => (
+                        <li key={category.id}>
                           <Link
-                            href={subItem.href}
+                            href={`/products?category=${category.slug}`}
                             className="flex items-center justify-between px-3 py-2 rounded hover:bg-gray-50 transition-colors group/sub"
                             onClick={onClose}
                           >
                             <span className="text-sm text-gray-700 group-hover/sub:text-accent-red transition-colors">
-                              {subItem.label}
+                              {category.name}
                             </span>
-                            {subItem.count && (
+                            {category._count?.products !== undefined && (
                               <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
-                                {subItem.count}
+                                {category._count.products}
                               </span>
                             )}
                           </Link>
                         </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              </li>
-            ))}
+                      ))
+                    )}
+                  </ul>
+                )}
+              </div>
+            </li>
+
+            {/* Trang cá nhân (Profile) */}
+            <li>
+              <div>
+                <button
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                  onClick={() => setExpandedItem(expandedItem === 'profile' ? null : 'profile')}
+                >
+                  <User size={20} className="text-blue-500" />
+                  <span className="flex-1 font-medium text-sm text-left">Trang cá nhân</span>
+                  <ChevronRight
+                    size={16}
+                    className={`text-gray-400 transition-transform ${
+                      expandedItem === 'profile' ? 'rotate-90' : ''
+                    }`}
+                  />
+                </button>
+
+                {/* Profile Submenu */}
+                {expandedItem === 'profile' && (
+                  <div className="ml-4 mt-2 bg-blue-50 rounded-lg p-4">
+                    {user ? (
+                      <>
+                        {/* User Info */}
+                        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-blue-200">
+                          <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {user.fullName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                          <div>
+                            <p className="font-semibold text-gray-800">{user.fullName || 'Người dùng'}</p>
+                            <p className="text-xs text-gray-500">{user.email}</p>
+                          </div>
+                        </div>
+
+                        {/* Profile Links */}
+                        <ul className="space-y-1">
+                          <li>
+                            <Link
+                              href="/account"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
+                              onClick={onClose}
+                            >
+                              <User size={18} className="text-accent-red" />
+                              <span className="text-sm">Thông tin cá nhân</span>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/account/orders"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
+                              onClick={onClose}
+                            >
+                              <Package size={18} />
+                              <span className="text-sm">Đơn hàng của tôi</span>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/account/wishlist"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
+                              onClick={onClose}
+                            >
+                              <Heart size={18} className="text-pink-500" />
+                              <span className="text-sm">Sản phẩm yêu thích</span>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link
+                              href="/account/addresses"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
+                              onClick={onClose}
+                            >
+                              <MapPin size={18} className="text-green-600" />
+                              <span className="text-sm">Địa chỉ giao hàng</span>
+                            </Link>
+                          </li>
+                          <li>
+                            <button
+                              onClick={handleLogout}
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-100 transition-colors text-red-600"
+                            >
+                              <LogOut size={18} />
+                              <span className="text-sm">Đăng xuất</span>
+                            </button>
+                          </li>
+                        </ul>
+                      </>
+                    ) : (
+                      /* Not Logged In */
+                      <div className="text-center py-4">
+                        <User size={40} className="mx-auto text-gray-400 mb-3" />
+                        <p className="text-sm text-gray-600 mb-4">Đăng nhập để xem thông tin cá nhân</p>
+                        <Link
+                          href="/auth/login"
+                          className="inline-flex items-center gap-2 bg-accent-red text-white px-6 py-2 rounded-lg font-medium hover:bg-red-600 transition-colors"
+                          onClick={onClose}
+                        >
+                          <LogIn size={18} />
+                          Đăng nhập
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </li>
           </ul>
         </nav>
-
-        {/* Divider */}
-        <div className="border-t border-gray-200 my-4" />
-
-        {/* Filters Section */}
-        <div className="px-4 pb-6">
-          {/* Brands */}
-          <div className="mb-6">
-            <h3 className="font-bold text-sm mb-3">Thương hiệu</h3>
-            <div className="space-y-2">
-              {brands.map((brand, idx) => (
-                <label key={idx} className="flex items-center gap-2 cursor-pointer text-sm">
-                  <input type="checkbox" className="rounded" />
-                  <span className="text-gray-700">{brand}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* Price Range */}
-          <div>
-            <h3 className="font-bold text-sm mb-3">Lọc Giá</h3>
-            <div className="space-y-2">
-              {priceRanges.map((range, idx) => (
-                <label key={idx} className="flex items-center gap-2 cursor-pointer text-sm">
-                  <input type="checkbox" className="rounded" />
-                  <span className="text-gray-700">{range.label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-        </div>
       </aside>
     </>
   );
