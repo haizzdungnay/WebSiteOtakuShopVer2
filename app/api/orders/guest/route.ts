@@ -1,56 +1,39 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
-import { z } from 'zod'
-import { generateOrderNumber } from '@/lib/order-helpers'
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
+import { z } from 'zod';
+import {
+    generateOrderNumber,
+    validateStock,
+    calculateShippingFee
+} from '@/lib/order-helpers';
 
-// Validation schema cho guest checkout
+// Validation schema for guest orders
 const guestOrderSchema = z.object({
-    // Thông tin khách hàng
-    customerName: z.string().min(2, 'Tên phải có ít nhất 2 ký tự'),
-    customerPhone: z.string().min(10, 'Số điện thoại không hợp lệ'),
-    customerEmail: z.string().email('Email không hợp lệ').optional().or(z.literal('')),
-
-    // Địa chỉ giao hàng
-    shippingAddress: z.string().min(5, 'Địa chỉ phải có ít nhất 5 ký tự'),
+    customerName: z.string().min(1, 'Customer name is required'),
+    customerPhone: z.string().min(1, 'Customer phone is required'),
+    customerEmail: z.string().email().optional(),
+    shippingAddress: z.string().min(1, 'Shipping address is required'),
     shippingWard: z.string().optional(),
-    shippingDistrict: z.string().min(1, 'Vui lòng nhập quận/huyện'),
-    shippingCity: z.string().min(1, 'Vui lòng nhập thành phố'),
-
-    // Items
+    shippingDistrict: z.string().min(1, 'Shipping district is required'),
+    shippingCity: z.string().min(1, 'Shipping city is required'),
     items: z.array(z.object({
-        productId: z.string().min(1),
+        productId: z.string(),
         quantity: z.number().min(1)
-    })).min(1, 'Giỏ hàng không được trống'),
-
-    // Phương thức thanh toán
-    paymentMethod: z.enum(['COD', 'BANK_TRANSFER']).default('COD'),
-
-    // Ghi chú
+    })),
+    paymentMethod: z.enum(['COD', 'BANK_TRANSFER', 'MOMO', 'VNPAY', 'ZALOPAY', 'CREDIT_CARD'], {
+        message: 'Invalid payment method'
+    }),
     note: z.string().max(500).optional()
-})
+});
 
-// POST /api/orders/guest - Tạo đơn hàng cho khách (không cần đăng nhập)
 export async function POST(request: NextRequest) {
     try {
-        // 1. Validate input
-        const body = await request.json()
-        const validationResult = guestOrderSchema.safeParse(body)
+        // Validate input
+        const body = await request.json();
+        const validatedData = guestOrderSchema.parse(body);
 
-        if (!validationResult.success) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: 'Dữ liệu không hợp lệ',
-                    details: validationResult.error.flatten().fieldErrors
-                },
-                { status: 400 }
-            )
-        }
-
-        const data = validationResult.data
-
-        // 2. Lấy thông tin sản phẩm và validate
-        const productIds = data.items.map(item => item.productId)
+        // Fetch product details for cart items
+        const productIds = validatedData.items.map(item => item.productId);
         const products = await prisma.product.findMany({
             where: {
                 id: { in: productIds },
@@ -59,152 +42,196 @@ export async function POST(request: NextRequest) {
             select: {
                 id: true,
                 name: true,
+                slug: true,
                 price: true,
-                stockQuantity: true
+                stockQuantity: true,
+                isActive: true,
+                images: true
             }
-        })
+        });
 
-        // 3. Kiểm tra sản phẩm có tồn tại không
-        if (products.length !== productIds.length) {
+        // Validate that all products exist and match cart items
+        const cartItems = validatedData.items.map(cartItem => {
+            const product = products.find(p => p.id === cartItem.productId);
+            if (!product) {
+                throw new Error(`Product ${cartItem.productId} not found`);
+            }
+            return {
+                productId: cartItem.productId,
+                quantity: cartItem.quantity,
+                product: product
+            };
+        });
+
+        // Validate stock
+        const stockValidation = await validateStock(
+            cartItems.map(item => ({
+                productId: item.productId,
+                quantity: item.quantity
+            }))
+        );
+
+        if (!stockValidation.isValid) {
             return NextResponse.json(
                 {
                     success: false,
-                    error: 'Một số sản phẩm không tồn tại hoặc đã ngừng bán'
+                    error: 'Một số sản phẩm đã hết hàng',
+                    details: stockValidation.errors
                 },
                 { status: 400 }
-            )
+            );
         }
 
-        // 4. Kiểm tra tồn kho
-        const stockErrors: string[] = []
-        for (const item of data.items) {
-            const product = products.find(p => p.id === item.productId)
-            if (product && product.stockQuantity < item.quantity) {
-                stockErrors.push(`Sản phẩm "${product.name}" chỉ còn ${product.stockQuantity} sản phẩm`)
-            }
-        }
+        // Calculate shipping fee
+        const shippingFee = calculateShippingFee(
+            validatedData.shippingCity,
+            validatedData.shippingDistrict
+        );
 
-        if (stockErrors.length > 0) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: 'Không đủ hàng tồn kho',
-                    details: stockErrors
-                },
-                { status: 400 }
-            )
-        }
+        // Calculate total
+        const subtotal = cartItems.reduce((sum, item) => {
+            return sum + (Number(item.product.price) * item.quantity);
+        }, 0);
 
-        // 5. Tính tổng tiền
-        let subtotal = 0
-        for (const item of data.items) {
-            const product = products.find(p => p.id === item.productId)
-            if (product) {
-                subtotal += Number(product.price) * item.quantity
-            }
-        }
+        const total = subtotal + shippingFee;
 
-        // 6. Tính phí ship (đơn giản)
-        const shippingFee = subtotal >= 500000 ? 0 : 30000 // Free ship đơn >= 500k
-        const totalAmount = subtotal + shippingFee
+        // Generate order number
+        const orderNumber = await generateOrderNumber();
 
-        // 7. Tạo mã đơn hàng
-        const orderNumber = await generateOrderNumber()
-
-        // 8. Transaction để tạo đơn hàng
-        const order = await prisma.$transaction(async (tx) => {
-            // Tạo đơn hàng
-            const newOrder = await tx.order.create({
+        // Create order in transaction
+        const result = await prisma.$transaction(async (tx) => {
+            // Create order
+            const order = await tx.order.create({
                 data: {
-                    orderNumber,
+                    orderNumber: orderNumber,
                     userId: null, // Guest order
 
-                    customerName: data.customerName,
-                    customerEmail: data.customerEmail || null,
-                    customerPhone: data.customerPhone,
+                    // Customer info
+                    customerName: validatedData.customerName,
+                    customerEmail: validatedData.customerEmail || null,
+                    customerPhone: validatedData.customerPhone,
 
-                    shippingFullName: data.customerName,
-                    shippingPhone: data.customerPhone,
-                    shippingAddress: data.shippingAddress,
-                    shippingWard: data.shippingWard || null,
-                    shippingDistrict: data.shippingDistrict,
-                    shippingCity: data.shippingCity,
+                    // Shipping info
+                    shippingFullName: validatedData.customerName,
+                    shippingPhone: validatedData.customerPhone,
+                    shippingAddress: validatedData.shippingAddress,
+                    shippingWard: validatedData.shippingWard || null,
+                    shippingDistrict: validatedData.shippingDistrict,
+                    shippingCity: validatedData.shippingCity,
 
-                    totalAmount: totalAmount,
+                    // Order details
+                    totalAmount: total,
                     status: 'PENDING',
-                    note: data.note || null,
-                },
-                include: {
-                    orderItems: true
+                    note: validatedData.note || null,
+                    addressId: null
                 }
-            })
+            });
 
-            // Tạo order items
-            for (const item of data.items) {
-                const product = products.find(p => p.id === item.productId)!
-                await tx.orderItem.create({
-                    data: {
-                        orderId: newOrder.id,
-                        productId: item.productId,
-                        quantity: item.quantity,
-                        price: Number(product.price)
-                    }
+            // Create order items
+            const orderItems = await Promise.all(
+                cartItems.map(item => {
+                    return tx.orderItem.create({
+                        data: {
+                            orderId: order.id,
+                            productId: item.productId,
+                            quantity: item.quantity,
+                            price: Number(item.product.price)
+                        }
+                    });
                 })
-            }
+            );
 
-            // Giảm tồn kho
-            for (const item of data.items) {
-                await tx.product.update({
-                    where: { id: item.productId },
-                    data: {
-                        stockQuantity: { decrement: item.quantity }
-                    }
-                })
-            }
+            // Update stock
+            await Promise.all(
+                cartItems.map(item =>
+                    tx.product.update({
+                        where: { id: item.productId },
+                        data: {
+                            stockQuantity: { decrement: item.quantity }
+                        }
+                    })
+                )
+            );
 
-            // Tạo payment record
-            await tx.payment.create({
+            // Create payment record
+            const payment = await tx.payment.create({
                 data: {
-                    orderId: newOrder.id,
-                    method: data.paymentMethod,
-                    amount: totalAmount,
+                    orderId: order.id,
+                    method: validatedData.paymentMethod,
+                    amount: total,
                     status: 'PENDING'
                 }
-            })
+            });
 
-            // Tạo shipping record
-            await tx.shipping.create({
+            // Create shipping record
+            const shipping = await tx.shipping.create({
                 data: {
-                    orderId: newOrder.id,
+                    orderId: order.id,
                     carrier: 'GHN',
                     fee: shippingFee,
                     status: 'PREPARING'
                 }
-            })
+            });
 
-            return newOrder
-        })
+            return {
+                order,
+                orderItems,
+                payment,
+                shipping
+            };
+        });
 
-        // 9. Trả về kết quả
-        return NextResponse.json({
-            success: true,
-            data: {
-                orderId: order.id,
-                orderNumber: order.orderNumber,
-                totalAmount: order.totalAmount,
-                status: order.status,
-                message: 'Đặt hàng thành công!'
+        // Fetch full order details
+        const fullOrder = await prisma.order.findUnique({
+            where: { id: result.order.id },
+            include: {
+                orderItems: {
+                    include: {
+                        product: {
+                            select: {
+                                id: true,
+                                name: true,
+                                slug: true,
+                                images: true
+                            }
+                        }
+                    }
+                },
+                payment: true,
+                shipping: true
             }
-        }, { status: 201 })
+        });
+
+        return NextResponse.json(
+            {
+                success: true,
+                message: 'Đặt hàng thành công',
+                data: {
+                    order: fullOrder,
+                    orderNumber: result.order.orderNumber
+                }
+            },
+            { status: 201 }
+        );
 
     } catch (error) {
-        console.error('[Guest Order] Error:', error)
+        if (error instanceof z.ZodError) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: error.issues[0].message
+                },
+                { status: 400 }
+            );
+        }
+
+        console.error('Guest order creation error:', error);
         return NextResponse.json(
             {
                 success: false,
-                error: 'Không thể tạo đơn hàng. Vui lòng thử lại sau.'
+                error: 'Không thể tạo đơn hàng. Vui lòng thử lại.'
             },
             { status: 500 }
-        )
+        );
     }
 }
