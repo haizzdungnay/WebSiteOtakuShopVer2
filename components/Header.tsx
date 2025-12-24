@@ -170,7 +170,7 @@ export default function Header() {
                           <span className="font-medium">Xem chi tiết</span>
                         </Link>
                         <Link
-                          href="/orders"
+                          href="/profile/orders"
                           className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors text-gray-700"
                           onClick={() => setShowUserDropdown(false)}
                         >

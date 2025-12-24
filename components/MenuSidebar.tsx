@@ -245,7 +245,7 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
                         <ul className="space-y-1">
                           <li>
                             <Link
-                              href="/account"
+                              href="/profile"
                               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
                               onClick={onClose}
                             >
@@ -255,7 +255,7 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
                           </li>
                           <li>
                             <Link
-                              href="/account/orders"
+                              href="/profile/orders"
                               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
                               onClick={onClose}
                             >
@@ -265,7 +265,7 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
                           </li>
                           <li>
                             <Link
-                              href="/account/wishlist"
+                              href="/profile/wishlist"
                               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
                               onClick={onClose}
                             >
@@ -275,7 +275,7 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
                           </li>
                           <li>
                             <Link
-                              href="/account/addresses"
+                              href="/profile/addresses"
                               className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
                               onClick={onClose}
                             >
@@ -300,7 +300,7 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
                         <User size={40} className="mx-auto text-gray-400 mb-3" />
                         <p className="text-sm text-gray-600 mb-4">Đăng nhập để xem thông tin cá nhân</p>
                         <Link
-                          href="/auth/login"
+                          href="/login"
                           className="inline-flex items-center gap-2 bg-accent-red text-white px-6 py-2 rounded-lg font-medium hover:bg-red-600 transition-colors"
                           onClick={onClose}
                         >
