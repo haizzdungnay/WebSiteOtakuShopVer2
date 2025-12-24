@@ -4,13 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import {
   User,
   Mail,
   Phone,
-  Calendar,
   Shield,
   Edit2,
   Package,
@@ -110,9 +107,7 @@ export default function ProfilePage() {
   ];
 
   return (
-    <div className="min-h-screen bg-background-light">
-      <Header />
-
+    <div className="bg-background-light">
       {/* Breadcrumb */}
       <div className="bg-white border-b">
         <div className="container-custom py-3">
@@ -393,8 +388,6 @@ export default function ProfilePage() {
           </main>
         </div>
       </div>
-
-      <Footer />
     </div>
   );
 }
