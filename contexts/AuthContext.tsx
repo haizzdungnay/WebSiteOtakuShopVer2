@@ -76,16 +76,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
+      // Only try to refresh if we get 401 (unauthorized)
       if (response.status === 401) {
         const refreshed = await refreshSession()
         if (refreshed) {
           return
         }
+        // Only logout if refresh explicitly failed with 401
+        // This means the session is truly expired
+        setUser(null)
+        return
       }
 
-      setUser(null)
+      // For other errors (500, network issues, etc.), keep the current user state
+      // Don't logout on temporary server errors
+      console.warn('Auth check returned status:', response.status)
     } catch (error) {
-      console.error('Auth check failed:', error)
+      // Network error - don't logout, keep current state
+      console.error('Auth check failed (network error):', error)
+      // Keep the existing user state on network errors
     } finally {
       setLoading(false)
     }
@@ -95,7 +104,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await checkAuth()
   }
 
-  const refreshSession = async () => {
+  const refreshSession = async (): Promise<boolean> => {
     try {
       const refreshResponse = await fetch('/api/auth/refresh', {
         method: 'POST',
@@ -103,6 +112,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (!refreshResponse.ok) {
+        // Refresh token is invalid or expired
         return false
       }
 
@@ -121,12 +131,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
         return true
       }
+      return false
     } catch (error) {
-      console.error('Refresh session failed:', error)
+      // Network error during refresh - don't logout
+      console.error('Refresh session failed (network error):', error)
+      return false
     }
-
-    setUser(null)
-    return false
   }
 
   const login = async (email: string, password: string): Promise<LoginResult> => {
