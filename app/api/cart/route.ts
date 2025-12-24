@@ -12,12 +12,28 @@ const addToCartSchema = z.object({
 export async function POST(request: NextRequest) {
     try {
         // Check authentication
-        const user = await getUserFromRequest(request)
-        if (!user) {
+        const userPayload = await getUserFromRequest(request)
+        if (!userPayload) {
             return NextResponse.json(
                 {
                     success: false,
                     error: 'Vui lòng đăng nhập',
+                },
+                { status: 401 }
+            )
+        }
+
+        // Verify user exists in database
+        const user = await prisma.user.findUnique({
+            where: { id: userPayload.userId },
+            select: { id: true }
+        })
+
+        if (!user) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: 'Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.',
                 },
                 { status: 401 }
             )
@@ -77,7 +93,7 @@ export async function POST(request: NextRequest) {
         const existingCartItem = await prisma.cartItem.findUnique({
             where: {
                 userId_productId: {
-                    userId: user.userId,
+                    userId: userPayload.userId,
                     productId: productId
                 }
             }
@@ -125,7 +141,7 @@ export async function POST(request: NextRequest) {
             // tạo moi cart item
             cartItem = await prisma.cartItem.create({
                 data: {
-                    userId: user.userId,
+                    userId: userPayload.userId,
                     productId: productId,
                     quantity: quantity
                 },
@@ -181,8 +197,8 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
     try {
         // 1 Check authentication
-        const user = await getUserFromRequest(request)
-        if (!user) {
+        const userPayload = await getUserFromRequest(request)
+        if (!userPayload) {
             return NextResponse.json(
                 {
                     success: false,
@@ -195,7 +211,7 @@ export async function GET(request: NextRequest) {
         // 2 Get cart items
         const cartItems = await prisma.cartItem.findMany({
             where: {
-                userId: user.userId
+                userId: userPayload.userId
             },
             include: {
                 product: {
@@ -256,8 +272,8 @@ export async function GET(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
     try {
         // 1 Check authentication
-        const user = await getUserFromRequest(request)
-        if (!user) {
+        const userPayload = await getUserFromRequest(request)
+        if (!userPayload) {
             return NextResponse.json(
                 {
                     success: false,
@@ -270,7 +286,7 @@ export async function DELETE(request: NextRequest) {
         // 2 Delete all cart items
         const result = await prisma.cartItem.deleteMany({
             where: {
-                userId: user.userId
+                userId: userPayload.userId
             }
         })
 
