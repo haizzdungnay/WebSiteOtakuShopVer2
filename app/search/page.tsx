@@ -1,10 +1,11 @@
 'use client';
 
-import { useState, useEffect, Suspense, useCallback } from 'react';
+import { useState, useEffect, Suspense, useCallback, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronRight, Search as SearchIcon } from 'lucide-react';
+import { ChevronRight, Search as SearchIcon, Loader2 } from 'lucide-react';
 import ProductCard from '@/components/ProductCard';
+import SearchSuggestions from '@/components/SearchSuggestions';
 
 interface Category {
   id: string;
@@ -35,6 +36,8 @@ function SearchContent() {
   const [totalResults, setTotalResults] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Fetch categories for filter
   useEffect(() => {
@@ -175,23 +178,37 @@ function SearchContent() {
             </p>
 
             {/* Large Search Box */}
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto">
-              <div className="flex gap-4">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm kiếm sản phẩm..."
-                  className="flex-1 px-6 py-4 text-lg border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-red focus:border-transparent outline-none"
+            <div ref={searchRef} className="max-w-2xl mx-auto relative">
+              <form onSubmit={handleSearch}>
+                <div className="flex gap-4">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSearchSuggestions(true);
+                    }}
+                    placeholder="Tìm kiếm sản phẩm..."
+                    className="flex-1 px-6 py-4 text-lg border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-red focus:border-transparent outline-none"
+                  />
+                  <button
+                    type="submit"
+                    className="px-8 py-4 bg-black text-white font-bold text-lg rounded-lg hover:bg-gray-800 transition-colors"
+                  >
+                    Tìm kiếm
+                  </button>
+                </div>
+              </form>
+
+              {/* Search Suggestions */}
+              {showSearchSuggestions && (
+                <SearchSuggestions
+                  query={searchQuery}
+                  onClose={() => setShowSearchSuggestions(false)}
+                  className="mt-2"
                 />
-                <button
-                  type="submit"
-                  className="px-8 py-4 bg-black text-white font-bold text-lg rounded-lg hover:bg-gray-800 transition-colors"
-                >
-                  Tìm kiếm
-                </button>
-              </div>
-            </form>
+              )}
+            </div>
           </div>
         ) : (
           /* Search Results */

@@ -21,16 +21,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import CartDropdown from './CartDropdown';
 import MenuSidebar from './MenuSidebar';
+import SearchSuggestions from './SearchSuggestions';
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [showCartDropdown, setShowCartDropdown] = useState(false);
   const [showMenuSidebar, setShowMenuSidebar] = useState(false);
+  const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const { user, logout } = useAuth();
   const { getTotalItems } = useCart();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const cartDropdownRef = useRef<HTMLDivElement>(null);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -41,16 +44,19 @@ export default function Header() {
       if (cartDropdownRef.current && !cartDropdownRef.current.contains(event.target as Node)) {
         setShowCartDropdown(false);
       }
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchSuggestions(false);
+      }
     };
 
-    if (showUserDropdown || showCartDropdown) {
+    if (showUserDropdown || showCartDropdown || showSearchSuggestions) {
       document.addEventListener('mousedown', handleClickOutside);
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showUserDropdown, showCartDropdown]);
+  }, [showUserDropdown, showCartDropdown, showSearchSuggestions]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,28 +80,40 @@ export default function Header() {
             </Link>
 
             {/* Search Bar */}
-            <form
-              onSubmit={handleSearch}
-              className="flex-1 max-w-xl order-3 lg:order-2 w-full"
-            >
-              <div className="flex bg-white rounded-lg overflow-hidden border-2 border-white">
-                <input
-                  type="text"
-                  placeholder="Bạn đang tìm gì..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="flex-1 px-4 py-2.5 outline-none text-sm text-gray-700"
+            <div ref={searchRef} className="flex-1 max-w-xl order-3 lg:order-2 w-full relative">
+              <form onSubmit={handleSearch}>
+                <div className="flex bg-white rounded-lg overflow-hidden border-2 border-white">
+                  <input
+                    type="text"
+                    placeholder="Bạn đang tìm gì..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setShowSearchSuggestions(true);
+                    }}
+                    onFocus={() => setShowSearchSuggestions(true)}
+                    className="flex-1 px-4 py-2.5 outline-none text-sm text-gray-700"
+                  />
+                  <button
+                    type="submit"
+                    title="Tìm kiếm"
+                    aria-label="Tìm kiếm"
+                    className="bg-primary-light px-6 hover:bg-primary-dark transition-colors"
+                  >
+                    <Search size={20} className="text-white" />
+                  </button>
+                </div>
+              </form>
+
+              {/* Search Suggestions */}
+              {showSearchSuggestions && (
+                <SearchSuggestions
+                  query={searchQuery}
+                  onClose={() => setShowSearchSuggestions(false)}
+                  className="mt-1"
                 />
-                <button
-                  type="submit"
-                  title="Tìm kiếm"
-                  aria-label="Tìm kiếm"
-                  className="bg-primary-light px-6 hover:bg-primary-dark transition-colors"
-                >
-                  <Search size={20} className="text-white" />
-                </button>
-              </div>
-            </form>
+              )}
+            </div>
 
             {/* Right Section */}
             <div className="flex items-center gap-4 order-2 lg:order-3 flex-wrap lg:flex-nowrap">
