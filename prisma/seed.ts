@@ -18,6 +18,7 @@ async function main() {
   await prisma.shipping.deleteMany()
   await prisma.coupon.deleteMany()
   await prisma.address.deleteMany()
+  await prisma.announcement.deleteMany()
   await prisma.product.deleteMany()
   await prisma.category.deleteMany()
   await prisma.user.deleteMany()
@@ -408,6 +409,216 @@ async function main() {
   }
   console.log('✅ Created 8 sample reviews\n')
 
+  // ===== 8. ANNOUNCEMENTS/NEWS =====
+  console.log('📰 Creating announcements/news...')
+  const announcementsData = [
+    {
+      title: 'Top 10 Figure Anime Hot Nhất Tháng 12/2024',
+      summary: 'Khám phá những mẫu figure anime được săn đón nhiều nhất trong tháng này với những thiết kế độc đáo và chất lượng tuyệt vời từ các thương hiệu hàng đầu.',
+      content: `
+        <h2>Những mẫu figure nổi bật tháng 12</h2>
+        <p>Tháng 12 này, cộng đồng otaku Việt Nam đang "phát cuồng" với các mẫu figure mới ra mắt. Hãy cùng điểm qua top 10 figure hot nhất hiện nay!</p>
+
+        <h3>1. Nendoroid Hatsune Miku - Snow White Ver.</h3>
+        <p>Mẫu figure phiên bản giới hạn của Vocaloid nổi tiếng, với thiết kế trang phục mùa đông tinh tế và chi tiết.</p>
+
+        <h3>2. SPM Figure - Demon Slayer Special Edition</h3>
+        <p>Bộ sưu tập figure đặc biệt từ thương hiệu SPM, tái hiện các nhân vật chính trong Demon Slayer với tỷ lệ 1/8.</p>
+
+        <h3>3. Good Smile Company - Spy x Family Collection</h3>
+        <p>Lineup figure hoàn chỉnh cho bộ anime Spy x Family đang cực kỳ hot, bao gồm Anya, Yor và Loid.</p>
+
+        <p>Các mẫu figure này không chỉ có thiết kế đẹp mắt mà còn có chất lượng hoàn thiện cao, phù hợp cho cả người mới chơi lẫn collector lâu năm.</p>
+      `,
+      isActive: true
+    },
+    {
+      title: 'Hướng Dẫn Bảo Quản Figure Để Giữ Được Lâu',
+      summary: 'Những mẹo và cách bảo quản figure đúng cách để sản phẩm của bạn luôn như mới và tránh bị hư hỏng theo thời gian.',
+      content: `
+        <h2>Mẹo bảo quản figure hiệu quả</h2>
+        <p>Figure là món đồ sưu tầm đắt đỏ, việc bảo quản đúng cách sẽ giúp chúng luôn giữ được vẻ đẹp ban đầu.</p>
+
+        <h3>1. Tránh ánh nắng trực tiếp</h3>
+        <p>Đặt figure ở nơi tránh ánh nắng mặt trời để màu sắc không bị phai nhạt theo thời gian.</p>
+
+        <h3>2. Lau chùi định kỳ</h3>
+        <p>Sử dụng khăn microfiber ẩm để lau bụi, tránh dùng nước hoặc chất tẩy rửa mạnh.</p>
+
+        <h3>3. Sử dụng hộp đựng</h3>
+        <p>Đầu tư hộp acrylic hoặc box chuyên dụng để bảo vệ figure khỏi bụi và va đập.</p>
+
+        <h3>4. Kiểm tra định kỳ</h3>
+        <p>Thường xuyên kiểm tra các khớp nối và bề mặt để phát hiện sớm dấu hiệu hư hỏng.</p>
+
+        <p>Áp dụng những mẹo này sẽ giúp bộ sưu tập figure của bạn bền đẹp theo năm tháng!</p>
+      `,
+      isActive: true
+    },
+    {
+      title: 'Sự Kiện Pre-Order Figure Mới Từ Good Smile Company',
+      summary: 'Đừng bỏ lỡ cơ hội đặt trước những mẫu figure độc quyền từ Good Smile Company với giá ưu đãi đặc biệt.',
+      content: `
+        <h2>Pre-order Figure GSC 2025</h2>
+        <p>Good Smile Company chính thức mở pre-order cho các mẫu figure mới năm 2025 với ưu đãi hấp dẫn.</p>
+
+        <h3>Ưu đãi đặc biệt:</h3>
+        <ul>
+          <li>Giảm 10% cho đơn pre-order từ 2 figure trở lên</li>
+          <li>Tặng kèm face plate thay thế</li>
+          <li>Miễn phí ship nội địa</li>
+          <li>Đặt cọc chỉ 30% giá trị</li>
+        </ul>
+
+        <h3>Các mẫu figure nổi bật:</h3>
+        <p>- Nendoroid: Attack on Titan Levi Ackerman</p>
+        <p>- Moderoid: My Hero Academia All Might</p>
+        <p>- Scale Figure: Sword Art Online Asuna</p>
+
+        <p>Thời hạn pre-order đến hết tháng 1/2025. Đừng bỏ lỡ cơ hội sở hữu những mẫu figure chất lượng từ GSC!</p>
+      `,
+      isActive: true
+    },
+    {
+      title: 'Review Chi Tiết Nendoroid Hatsune Miku Snow Ver.',
+      summary: 'Đánh giá chi tiết về chất lượng, phụ kiện và độ hoàn thiện của bộ Nendoroid Hatsune Miku phiên bản Snow 2024.',
+      content: `
+        <h2>Review Nendoroid Hatsune Miku - Snow White Version</h2>
+        <p>Sau thời gian chờ đợi, cuối cùng mình cũng nhận được mẫu figure Hatsune Miku phiên bản Snow White. Hãy cùng review chi tiết nhé!</p>
+
+        <h3>Thiết kế và chất lượng</h3>
+        <p>Mẫu figure này có thiết kế trang phục mùa đông rất tinh tế, với màu trắng chủ đạo kết hợp xanh dương tạo nên vẻ đẹp thuần khiết. Chất lượng in ấn sắc nét, không có lỗi màu.</p>
+
+        <h3>Phụ kiện đi kèm</h3>
+        <ul>
+          <li>3 mặt thay thế (mặt cười, mặt giận, mặt buồn)</li>
+          <li>2 tư thế tay cầm micro</li>
+          <li>Base đế tuyết với hiệu ứng ánh sáng</li>
+          <li>Phụ kiện guitar mini</li>
+        </ul>
+
+        <h3>Độ hoàn thiện</h3>
+        <p>GSC đã làm rất tốt phần chi tiết, từ mái tóc dài uốn lượn đến trang phục phức tạp. Khớp nối chắc chắn, có thể tạo nhiều pose khác nhau.</p>
+
+        <h3>Giá cả</h3>
+        <p>Giá bán lẻ khoảng 480.000đ, khá hợp lý cho một mẫu Nendoroid chất lượng cao từ GSC.</p>
+
+        <p>Tổng thể: 9/10. Rất đáng để mua nếu bạn là fan của Vocaloid!</p>
+      `,
+      isActive: true
+    },
+    {
+      title: 'Phân Biệt Figure Chính Hãng Và Hàng Fake',
+      summary: 'Những dấu hiệu nhận biết để phân biệt figure chính hãng và hàng nhái giúp bạn tránh mua phải sản phẩm giả.',
+      content: `
+        <h2>Cách phân biệt figure chính hãng</h2>
+        <p>Thị trường figure Việt Nam đang có nhiều hàng nhái kém chất lượng. Hãy học cách phân biệt để tránh "tiền mất tật mang"!</p>
+
+        <h3>Dấu hiệu figure chính hãng:</h3>
+        <ul>
+          <li><strong>Hộp đóng gói:</strong> In ấn sắc nét, logo thương hiệu rõ ràng, có tem bảo hành</li>
+          <li><strong>Serial number:</strong> Dán ở đáy figure, có thể tra cứu trên website nhà sản xuất</li>
+          <li><strong>Chất liệu:</strong> Nhựa PVC cao cấp, không mùi, bề mặt nhẵn mịn</li>
+          <li><strong>Chi tiết:</strong> Sắc nét, không lem màu, decal thẳng hàng</li>
+        </ul>
+
+        <h3>Dấu hiệu hàng fake:</h3>
+        <ul>
+          <li>Hộp in mờ, sai chính tả</li>
+          <li>Không có serial number hoặc không thể tra cứu</li>
+          <li>Mùi nhựa hóa chất mạnh</li>
+          <li>Chi tiết thô, màu sắc không chuẩn</li>
+        </ul>
+
+        <h3>Lời khuyên</h3>
+        <p>Luôn mua ở cửa hàng uy tín, kiểm tra kỹ trước khi thanh toán. Nếu nghi ngờ, hãy hỏi ý kiến cộng đồng figure Việt Nam.</p>
+      `,
+      isActive: true
+    },
+    {
+      title: 'Những Bộ Figure Limited Edition Đáng Sưu Tầm 2024',
+      summary: 'Tổng hợp những bộ figure phiên bản giới hạn được các collector đánh giá cao nhất năm 2024.',
+      content: `
+        <h2>Top Figure Limited Edition 2024</h2>
+        <p>Năm 2024 có rất nhiều mẫu figure limited edition đáng chú ý. Dưới đây là những bộ được cộng đồng đánh giá cao nhất:</p>
+
+        <h3>1. SPM Demon Slayer - Tamayo</h3>
+        <p>Phiên bản giới hạn chỉ 500 bộ toàn cầu. Thiết kế Tamayo với trang phục dạ hội cực kỳ ấn tượng.</p>
+
+        <h3>2. Kotobukiya - Fate/stay night Sakura</h3>
+        <p>Bộ figure tỷ lệ 1/7 với chi tiết cực kỳ tinh xảo, trang phục phức tạp và ánh sáng LED.</p>
+
+        <h3>3. Good Smile Company - Nendoroid Hunter x Hunter</h3>
+        <p>Lineup hoàn chỉnh các nhân vật chính từ Hunter x Hunter, bao gồm Gon, Killua, Kurapika.</p>
+
+        <h3>4. Aniplex - Sword Art Online Alice</h3>
+        <p>Mẫu figure tái hiện Alice trong Sword Art Online với trang phục Integrity Knight.</p>
+
+        <h3>5. Bandai - One Piece Special Collection</h3>
+        <p>Bộ sưu tập đặc biệt mừng 25 năm One Piece với các nhân vật được thiết kế lại.</p>
+
+        <p>Những mẫu limited edition này thường có giá cao và khó tìm, nhưng chúng xứng đáng là món đồ sưu tầm quý giá trong bộ collection của bạn!</p>
+      `,
+      isActive: true
+    },
+    {
+      title: 'Khuyến Mãi Giáng Sinh - Giảm Giá Tới 50%',
+      summary: 'Nhân dịp Giáng Sinh, Otaku Shop dành tặng khách hàng ưu đãi giảm giá lên tới 50% cho các sản phẩm figure và manga.',
+      content: `
+        <h2>🎄 KHUYẾN MÃI GIÁNG SINH 2024 🎄</h2>
+        <p>Merry Christmas! Otaku Shop dành tặng quý khách hàng chương trình khuyến mãi đặc biệt nhân dịp Giáng Sinh.</p>
+
+        <h3>🎁 Ưu đãi hấp dẫn:</h3>
+        <ul>
+          <li>Giảm 50% cho tất cả figure từ Good Smile Company</li>
+          <li>Giảm 30% cho manga box set</li>
+          <li>Miễn phí ship cho đơn hàng từ 1 triệu đồng</li>
+          <li>Tặng kèm poster Giáng Sinh cho mỗi đơn hàng</li>
+        </ul>
+
+        <h3>⏰ Thời gian áp dụng:</h3>
+        <p>Từ 20/12/2024 đến 31/12/2024</p>
+
+        <h3>📍 Cách nhận ưu đãi:</h3>
+        <p>Sử dụng mã <strong>XMAS2024</strong> khi thanh toán online hoặc liên hệ hotline để được tư vấn.</p>
+
+        <p>Đừng bỏ lỡ cơ hội sở hữu những món đồ yêu thích với giá ưu đãi đặc biệt này nhé! 🎅</p>
+      `,
+      isActive: true
+    },
+    {
+      title: 'Hướng Dẫn Mua Hàng Online An Toàn',
+      summary: 'Những lưu ý quan trọng khi mua hàng figure và manga online để tránh rủi ro và đảm bảo quyền lợi người tiêu dùng.',
+      content: `
+        <h2>Mua hàng online an toàn</h2>
+        <p>Mua sắm online ngày càng phổ biến, nhưng cũng tiềm ẩn nhiều rủi ro. Hãy áp dụng những lưu ý sau để mua hàng an toàn:</p>
+
+        <h3>1. Chọn website uy tín</h3>
+        <p>Kiểm tra tuổi website, đánh giá khách hàng, chính sách đổi trả. Ưu tiên các shop có tên tuổi trong cộng đồng otaku.</p>
+
+        <h3>2. Kiểm tra sản phẩm kỹ</h3>
+        <p>Xem hình ảnh chi tiết, mô tả sản phẩm. Hỏi shop về nguồn gốc, xuất xứ. Với figure, luôn hỏi về seal và box condition.</p>
+
+        <h3>3. Thanh toán an toàn</h3>
+        <p>Sử dụng thẻ tín dụng hoặc ví điện tử có bảo hiểm. Tránh chuyển khoản trực tiếp cho người lạ.</p>
+
+        <h3>4. Chính sách đổi trả</h3>
+        <p>Đọc kỹ chính sách đổi trả trước khi mua. Giữ nguyên seal và hóa đơn để có thể đổi trả khi cần.</p>
+
+        <h3>5. Bảo vệ quyền lợi</h3>
+        <p>Giữ lại tất cả tin nhắn, hóa đơn. Nếu có vấn đề, liên hệ ngay với shop hoặc cơ quan chức năng.</p>
+
+        <p>Áp dụng những lưu ý này sẽ giúp bạn mua sắm an tâm và tránh được những rủi ro không đáng có!</p>
+      `,
+      isActive: true
+    }
+  ]
+
+  for (const announcement of announcementsData) {
+    await prisma.announcement.create({ data: announcement })
+  }
+  console.log('✅ Created 8 sample announcements\n')
+
   console.log('🎉 Seed completed!\n')
   console.log('📊 Summary:')
   console.log(`  - Admin: ${adminEmail} / ${adminRawPassword}`)
@@ -417,6 +628,7 @@ async function main() {
   console.log('  - Addresses: 2')
   console.log('  - Coupons: 3')
   console.log('  - Reviews: 8')
+  console.log('  - Announcements/News: 8')
   console.log('')
   console.log('🔐 Login Credentials:')
   console.log(`  Admin: ${adminEmail} / ${adminRawPassword}`)
