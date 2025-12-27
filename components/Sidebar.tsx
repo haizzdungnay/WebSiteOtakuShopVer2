@@ -153,7 +153,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
                 onMouseEnter={() => handleMouseEnter('categories')}
                 onMouseLeave={handleMouseLeave}
               >
-                <div className="sidebar-link group cursor-pointer">
+                <div suppressHydrationWarning className="sidebar-link group cursor-pointer">
                   <FolderOpen size={20} className="text-purple-600" />
                   <span className="flex-1 text-sm font-medium">Danh mục</span>
                   <ChevronRight
@@ -165,6 +165,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
                 {/* Categories Submenu */}
                 {hoveredItem === 'categories' && (
                   <div
+                    suppressHydrationWarning
                     className="absolute left-full top-0 ml-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-[60] hidden lg:block"
                     onMouseEnter={() => handleMouseEnter('categories')}
                     onMouseLeave={handleMouseLeave}
