@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getUserFromRequest } from '@/lib/auth';
 import { z } from 'zod';
 import {
     generateOrderNumber,
@@ -28,6 +29,26 @@ const guestOrderSchema = z.object({
 
 export async function POST(request: NextRequest) {
     try {
+        // Check if user is logged in (optional)
+        const user = await getUserFromRequest(request);
+        let userId: string | null = null;
+
+        console.log('Guest order - user from token:', user ? user.userId : 'null');
+
+        if (user) {
+            // Verify user exists in DB to avoid foreign key constraint errors
+            const dbUser = await prisma.user.findUnique({
+                where: { id: user.userId },
+                select: { id: true }
+            });
+            console.log('Guest order - dbUser found:', dbUser ? dbUser.id : 'null');
+            if (dbUser) {
+                userId = dbUser.id;
+            }
+        }
+
+        console.log('Guest order - final userId:', userId);
+
         // Validate input
         const body = await request.json();
         const validatedData = guestOrderSchema.parse(body);
@@ -104,7 +125,7 @@ export async function POST(request: NextRequest) {
             const order = await tx.order.create({
                 data: {
                     orderNumber: orderNumber,
-                    userId: null, // Guest order
+                    userId: userId, // Link to user if logged in
 
                     // Customer info
                     customerName: validatedData.customerName,

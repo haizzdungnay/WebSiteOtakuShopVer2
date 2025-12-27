@@ -20,7 +20,7 @@ export default function ShippingPolicyPage() {
             Chính sách giao hàng & bảo hành
           </h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Tất cả thông tin về chính sách giao hàng, đổi trả và bảo hành sản phẩm tại JH Figure
+            Tất cả thông tin về chính sách giao hàng, đổi trả và bảo hành sản phẩm tại DN Figure
           </p>
         </div>
 
@@ -40,7 +40,7 @@ export default function ShippingPolicyPage() {
                   1. Phạm vi giao hàng
                 </h3>
                 <p className="mb-2">
-                  JH Figure giao hàng trên toàn quốc với các hình thức vận chuyển đa dạng:
+                  DN Figure giao hàng trên toàn quốc với các hình thức vận chuyển đa dạng:
                 </p>
                 <ul className="list-disc pl-6 space-y-1">
                   <li>Giao hàng tận nơi tại TP.HCM</li>
@@ -247,7 +247,7 @@ export default function ShippingPolicyPage() {
                   1. Chính sách bảo hành theo hãng
                 </h3>
                 <p className="mb-3">
-                  JH Figure cam kết 100% sản phẩm chính hãng và được bảo hành theo chính sách của từng hãng:
+                  DN Figure cam kết 100% sản phẩm chính hãng và được bảo hành theo chính sách của từng hãng:
                 </p>
                 <div className="bg-purple-50 rounded-lg p-4 space-y-3">
                   <div>
@@ -333,11 +333,11 @@ export default function ShippingPolicyPage() {
             </p>
             <div className="flex flex-wrap justify-center gap-4">
               <a
-                href="tel:0396686826"
+                href="tel:0389836514"
                 className="bg-accent-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors inline-flex items-center gap-2"
               >
                 <DollarSign size={20} />
-                Hotline: 0396 686 826
+                Hotline: 0389 836 514
               </a>
               <a
                 href="mailto:support@jhfigure.com"

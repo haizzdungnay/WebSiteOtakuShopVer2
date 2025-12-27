@@ -29,7 +29,7 @@ export default function FAQPage() {
       id: '1',
       category: 'ordering',
       question: 'Làm thế nào để đặt hàng trên website?',
-      answer: `Để đặt hàng trên website JH Figure, bạn làm theo các bước sau:
+      answer: `Để đặt hàng trên website DN Figure, bạn làm theo các bước sau:
 
 1. Tìm kiếm và chọn sản phẩm bạn muốn mua
 2. Nhấn nút "THÊM VÀO GIỎ"
@@ -49,7 +49,7 @@ How to order on the website? Follow these steps:
       category: 'ordering',
       question: 'Tôi có thể hủy hoặc thay đổi đơn hàng không?',
       answer: `Bạn có thể hủy hoặc thay đổi đơn hàng trong vòng 24 giờ sau khi đặt hàng bằng cách liên hệ với bộ phận chăm sóc khách hàng qua:
-- Hotline: 0396686826
+- Hotline: 0389836514
 - Email: support@jhfigure.com
 - Facebook Messenger
 
@@ -84,7 +84,7 @@ Pre-order allows you to reserve unreleased or limited products in advance by pay
       id: '4',
       category: 'payment',
       question: 'Các hình thức thanh toán nào được chấp nhận?',
-      answer: `JH Figure chấp nhận các hình thức thanh toán sau:
+      answer: `DN Figure chấp nhận các hình thức thanh toán sau:
 
 1. Thanh toán khi nhận hàng (COD)
    - Áp dụng cho đơn hàng dưới 10 triệu đồng
@@ -110,7 +110,7 @@ We accept COD (for orders under 10 million VND), bank transfer, e-wallets (MoMo,
       id: '5',
       category: 'payment',
       question: 'Tôi có được hóa đơn VAT không?',
-      answer: `Có, JH Figure cung cấp hóa đơn VAT theo yêu cầu.
+      answer: `Có, DN Figure cung cấp hóa đơn VAT theo yêu cầu.
 
 Để nhận hóa đơn VAT:
 1. Ghi chú yêu cầu xuất hóa đơn khi đặt hàng
@@ -203,7 +203,7 @@ Yes, you can change the delivery address if the order hasn't been shipped yet. C
       id: '9',
       category: 'warranty',
       question: 'Chính sách bảo hành như thế nào?',
-      answer: `JH Figure cam kết bảo hành cho tất cả sản phẩm chính hãng:
+      answer: `DN Figure cam kết bảo hành cho tất cả sản phẩm chính hãng:
 
 Điều kiện bảo hành:
 - Sản phẩm còn nguyên tem, hộp
@@ -233,7 +233,7 @@ We warranty all authentic products for manufacturer defects. 7-day return if def
       id: '10',
       category: 'warranty',
       question: 'Tôi có thể đổi/trả hàng không?',
-      answer: `Chính sách đổi/trả hàng của JH Figure:
+      answer: `Chính sách đổi/trả hàng của DN Figure:
 
 Điều kiện đổi/trả:
 - Trong vòng 7 ngày kể từ ngày nhận hàng
@@ -355,10 +355,10 @@ Yes, within 7 days of receipt if products are unused with original packaging. Fr
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <a
-              href="tel:0396686826"
+              href="tel:0389836514"
               className="bg-accent-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition-colors"
             >
-              Gọi: 0396 686 826
+              Gọi: 0389 836 514
             </a>
             <a
               href="mailto:support@jhfigure.com"

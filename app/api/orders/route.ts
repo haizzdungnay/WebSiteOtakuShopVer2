@@ -369,6 +369,19 @@ export async function GET(request: NextRequest) {
                                 }
                             }
                         }
+                    },
+                    payment: {
+                        select: {
+                            method: true,
+                            status: true
+                        }
+                    },
+                    shipping: {
+                        select: {
+                            carrier: true,
+                            trackingCode: true,
+                            status: true
+                        }
                     }
                 },
                 orderBy: { createdAt: 'desc' },

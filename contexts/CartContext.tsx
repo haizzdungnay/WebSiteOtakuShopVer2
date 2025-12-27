@@ -15,7 +15,7 @@ interface CartItem {
 
 interface CartContextType {
   items: CartItem[];
-  addToCart: (item: Omit<CartItem, 'quantity'>) => void;
+  addToCart: (item: Omit<CartItem, 'quantity'>, quantity?: number) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
@@ -75,11 +75,12 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   // Save cart to localStorage whenever it changes - CLIENT SIDE ONLY
+  // Now saves for ALL users as backup
   useEffect(() => {
-    if (typeof window !== 'undefined' && isLoaded && !user) {
+    if (typeof window !== 'undefined' && isLoaded) {
       persistLocalCart(items);
     }
-  }, [items, isLoaded, user]);
+  }, [items, isLoaded]);
 
   // Sync server cart when user changes
   useEffect(() => {
@@ -93,24 +94,44 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     const syncCart = async () => {
       const localItems = readLocalCart()
 
+      // Try to sync local items to server
       if (localItems.length > 0) {
         for (const item of localItems) {
-          await fetch('/api/cart', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ productId: item.id, quantity: item.quantity })
-          }).catch(error => console.error('Sync cart error:', error))
+          try {
+            const response = await fetch('/api/cart', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ productId: item.id, quantity: item.quantity })
+            })
+            // If we get 401, stop syncing - auth is invalid
+            if (response.status === 401) {
+              console.warn('Auth invalid during cart sync - keeping local cart')
+              setItems(localItems)
+              return
+            }
+          } catch (error) {
+            console.error('Sync cart error:', error)
+          }
         }
-
-        persistLocalCart([])
       }
 
       try {
         const response = await fetch('/api/cart', { credentials: 'include' })
+        
+        // If 401, keep local cart
+        if (response.status === 401) {
+          console.warn('Auth invalid - keeping local cart')
+          const local = readLocalCart()
+          if (local.length > 0) {
+            setItems(local)
+          }
+          return
+        }
+        
         if (response.ok) {
           const data = await response.json()
-          const normalizedItems: CartItem[] = (data.data?.items || []).map((item: any) => {
+          const serverItems: CartItem[] = (data.data?.items || []).map((item: any) => {
             const basePrice = Number(item.product.price)
             const comparePrice = item.product.comparePrice ? Number(item.product.comparePrice) : undefined
             const finalPrice = comparePrice && comparePrice < basePrice ? comparePrice : basePrice
@@ -125,29 +146,49 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
               slug: item.product.slug,
             }
           })
-          setItems(normalizedItems)
+          
+          // If server cart is empty but we have local items, keep local
+          if (serverItems.length === 0 && localItems.length > 0) {
+            setItems(localItems)
+          } else {
+            setItems(serverItems)
+            // Clear local cart after successful server sync
+            if (serverItems.length > 0) {
+              persistLocalCart([])
+            }
+          }
         }
       } catch (error) {
         console.error('Failed to load cart from server:', error)
+        // On error, keep local cart
+        const local = readLocalCart()
+        if (local.length > 0) {
+          setItems(local)
+        }
       }
     }
 
     syncCart()
   }, [user, isLoaded])
 
-  const addToCart = (item: Omit<CartItem, 'quantity'>) => {
+  const addToCart = (item: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
     const optimisticUpdate = (prevItems: CartItem[]) => {
       const existingItem = prevItems.find((i) => i.id === item.id)
       if (existingItem) {
         return prevItems.map((i) =>
-          i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i
+          i.id === item.id ? { ...i, quantity: i.quantity + quantity } : i
         )
       }
-      return [...prevItems, { ...item, quantity: 1 }]
+      return [...prevItems, { ...item, quantity }]
     }
 
-    const previousItems = items
-    setItems(optimisticUpdate)
+    // Apply optimistic update
+    setItems((prevItems) => {
+      const newItems = optimisticUpdate(prevItems)
+      // Always persist to localStorage as backup
+      persistLocalCart(newItems)
+      return newItems
+    })
 
     if (!user) {
       return
@@ -157,10 +198,41 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ productId: item.id, quantity: 1 })
+      body: JSON.stringify({ productId: item.id, quantity })
     }).then(async response => {
       if (!response.ok) {
-        setItems(previousItems)
+        // If 401 (unauthorized), the token is invalid - keep optimistic update in localStorage
+        // Don't reload from server as it will return empty cart
+        if (response.status === 401) {
+          console.warn('Cart API returned 401 - keeping local cart')
+          return
+        }
+        
+        // For other errors, try to reload from server
+        try {
+          const cartResponse = await fetch('/api/cart', { credentials: 'include' })
+          if (cartResponse.ok) {
+            const data = await cartResponse.json()
+            const normalizedItems: CartItem[] = (data.data?.items || []).map((cartItem: any) => {
+              const basePrice = Number(cartItem.product.price)
+              const comparePrice = cartItem.product.comparePrice ? Number(cartItem.product.comparePrice) : undefined
+              const finalPrice = comparePrice && comparePrice < basePrice ? comparePrice : basePrice
+
+              return {
+                id: cartItem.product.id,
+                name: cartItem.product.name,
+                price: finalPrice,
+                discountPrice: comparePrice && comparePrice < basePrice ? comparePrice : undefined,
+                image: cartItem.product.images?.[0] || '',
+                quantity: cartItem.quantity,
+                slug: cartItem.product.slug,
+              }
+            })
+            setItems(normalizedItems)
+          }
+        } catch (err) {
+          console.error('Failed to reload cart:', err)
+        }
         return
       }
 
@@ -183,13 +255,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
     }).catch(error => {
       console.error('Add to cart failed:', error)
-      setItems(previousItems)
+      // On network error, keep optimistic update (already saved to localStorage)
     })
   };
 
   const removeFromCart = (id: string) => {
     const previousItems = items
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id))
+    setItems((prevItems) => {
+      const newItems = prevItems.filter((item) => item.id !== id)
+      persistLocalCart(newItems)
+      return newItems
+    })
 
     if (!user) return
 
@@ -197,12 +273,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       method: 'DELETE',
       credentials: 'include'
     }).then(response => {
-      if (!response.ok) {
+      if (!response.ok && response.status !== 401) {
         setItems(previousItems)
+        persistLocalCart(previousItems)
       }
     }).catch(error => {
       console.error('Remove from cart failed:', error)
       setItems(previousItems)
+      persistLocalCart(previousItems)
     })
   };
 
@@ -213,9 +291,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     const previousItems = items
-    setItems((prevItems) =>
-      prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
-    )
+    setItems((prevItems) => {
+      const newItems = prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
+      persistLocalCart(newItems)
+      return newItems
+    })
 
     if (!user) return
 
@@ -225,17 +305,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       credentials: 'include',
       body: JSON.stringify({ quantity })
     }).then(response => {
-      if (!response.ok) {
+      if (!response.ok && response.status !== 401) {
         setItems(previousItems)
+        persistLocalCart(previousItems)
       }
     }).catch(error => {
       console.error('Update quantity failed:', error)
       setItems(previousItems)
+      persistLocalCart(previousItems)
     })
   };
 
   const clearCart = () => {
     setItems([])
+    persistLocalCart([])
 
     if (!user) return
 

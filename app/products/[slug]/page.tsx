@@ -6,7 +6,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Minus, Plus, ShoppingCart, Heart, Share2, Truck, RotateCcw, Shield, CreditCard } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
+import { useWishlist } from '@/contexts/WishlistContext';
 import ProductCard from '@/components/ProductCard';
+import ReviewSection from '@/components/ReviewSection';
 
 interface Product {
   id: string;
@@ -50,6 +52,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const slug = params.slug as string;
   const { addToCart } = useCart();
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -119,8 +122,24 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
-    for (let i = 0; i < quantity; i++) {
-      addToCart({
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: Number(product.price),
+      discountPrice: product.comparePrice ? Number(product.price) : undefined,
+      image: product.images?.[0] || '/images/placeholder.jpg',
+      slug: product.slug,
+    }, quantity);
+    alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
+  };
+
+  const handleToggleWishlist = () => {
+    if (!product) return;
+
+    if (isInWishlist(product.id)) {
+      removeFromWishlist(product.id);
+    } else {
+      addToWishlist({
         id: product.id,
         name: product.name,
         price: Number(product.price),
@@ -129,7 +148,15 @@ export default function ProductDetailPage() {
         slug: product.slug,
       });
     }
-    alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
+  };
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      alert('Đã sao chép liên kết sản phẩm vào bộ nhớ tạm!');
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
   };
 
   if (loading) {
@@ -410,11 +437,23 @@ export default function ProductDetailPage() {
                   THÊM VÀO GIỎ
                 </button>
                 <div className="grid grid-cols-2 gap-3">
-                  <button className="border-2 border-gray-300 py-2 rounded-lg font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
-                    <Heart size={18} />
-                    Yêu thích
+                  <button
+                    onClick={handleToggleWishlist}
+                    className={`border-2 py-2 rounded-lg font-semibold transition-colors flex items-center justify-center gap-2 ${isInWishlist(product.id)
+                        ? 'border-accent-red text-accent-red bg-red-50'
+                        : 'border-gray-300 hover:bg-gray-50'
+                      }`}
+                  >
+                    <Heart
+                      size={18}
+                      className={isInWishlist(product.id) ? 'fill-accent-red' : ''}
+                    />
+                    {isInWishlist(product.id) ? 'Đã yêu thích' : 'Yêu thích'}
                   </button>
-                  <button className="border-2 border-gray-300 py-2 rounded-lg font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
+                  <button
+                    onClick={handleShare}
+                    className="border-2 border-gray-300 py-2 rounded-lg font-semibold hover:bg-gray-50 transition-colors flex items-center justify-center gap-2"
+                  >
                     <Share2 size={18} />
                     Chia sẻ
                   </button>
@@ -474,6 +513,11 @@ export default function ProductDetailPage() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* Review Section */}
+        {product && (
+          <ReviewSection productId={product.id} productName={product.name} />
         )}
       </div>
     </div>

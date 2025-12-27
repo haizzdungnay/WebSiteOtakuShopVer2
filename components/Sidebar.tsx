@@ -153,7 +153,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
                 onMouseEnter={() => handleMouseEnter('categories')}
                 onMouseLeave={handleMouseLeave}
               >
-                <div className="sidebar-link group cursor-pointer">
+                <div suppressHydrationWarning className="sidebar-link group cursor-pointer">
                   <FolderOpen size={20} className="text-purple-600" />
                   <span className="flex-1 text-sm font-medium">Danh mục</span>
                   <ChevronRight
@@ -165,6 +165,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
                 {/* Categories Submenu */}
                 {hoveredItem === 'categories' && (
                   <div
+                    suppressHydrationWarning
                     className="absolute left-full top-0 ml-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 p-3 z-[60] hidden lg:block"
                     onMouseEnter={() => handleMouseEnter('categories')}
                     onMouseLeave={handleMouseLeave}
@@ -217,7 +218,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
                 onMouseEnter={() => handleMouseEnter('profile')}
                 onMouseLeave={handleMouseLeave}
               >
-                <div className="sidebar-link group cursor-pointer">
+                <div suppressHydrationWarning className="sidebar-link group cursor-pointer">
                   <User size={20} className="text-blue-500" />
                   <span className="flex-1 text-sm font-medium">Trang cá nhân</span>
                   <ChevronRight
@@ -237,9 +238,17 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
                       <>
                         {/* User Info */}
                         <div className="flex items-center gap-3 mb-4 pb-3 border-b border-gray-200">
-                          <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                            {user.fullName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
-                          </div>
+                          {user.avatar ? (
+                            <img 
+                              src={user.avatar} 
+                              alt={user.fullName || 'User'} 
+                              className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                              {user.fullName?.charAt(0).toUpperCase() || user.email?.charAt(0).toUpperCase() || 'U'}
+                            </div>
+                          )}
                           <div>
                             <p className="font-semibold text-gray-800">{user.fullName || 'Người dùng'}</p>
                             <p className="text-xs text-gray-500">{user.email}</p>

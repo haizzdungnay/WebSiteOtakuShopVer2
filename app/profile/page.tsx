@@ -18,7 +18,9 @@ import {
   Save,
   X,
   Camera,
-  Gift
+  Gift,
+  Link as LinkIcon,
+  Check
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -33,8 +35,13 @@ export default function ProfilePage() {
     fullName: '',
     phone: '',
     gender: '',
-    dateOfBirth: ''
+    dateOfBirth: '',
+    avatar: ''
   });
+  
+  const [showAvatarModal, setShowAvatarModal] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState('');
+  const [savingAvatar, setSavingAvatar] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -47,14 +54,61 @@ export default function ProfilePage() {
       setFormData({
         fullName: user.fullName || '',
         phone: user.phone || '',
-        gender: '',
-        dateOfBirth: ''
+        gender: user.gender || '',
+        dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth).toISOString().split('T')[0] : '',
+        avatar: user.avatar || ''
       });
     }
   }, [user]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleAvatarClick = () => {
+    setAvatarUrl(formData.avatar || '');
+    setShowAvatarModal(true);
+  };
+
+  const handleSaveAvatar = async () => {
+    if (!avatarUrl.trim()) {
+      setError('Vui lòng nhập link ảnh');
+      return;
+    }
+
+    // Basic URL validation
+    try {
+      new URL(avatarUrl);
+    } catch {
+      setError('Link ảnh không hợp lệ');
+      return;
+    }
+
+    setSavingAvatar(true);
+    try {
+      const response = await fetch('/api/auth/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ avatar: avatarUrl }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setFormData(prev => ({ ...prev, avatar: avatarUrl }));
+        setSuccess('Cập nhật ảnh đại diện thành công!');
+        setShowAvatarModal(false);
+        refreshUser();
+      } else {
+        setError(data.error || 'Cập nhật thất bại');
+      }
+    } catch (err) {
+      setError('Không thể kết nối đến máy chủ');
+    } finally {
+      setSavingAvatar(false);
+    }
+  };
+
+  const updateProfile = async (dataToUpdate: any) => {
     setSaving(true);
     setError('');
     setSuccess('');
@@ -66,7 +120,7 @@ export default function ProfilePage() {
           'Content-Type': 'application/json',
         },
         credentials: 'include',
-        body: JSON.stringify(formData),
+        body: JSON.stringify(dataToUpdate),
       });
 
       const data = await response.json();
@@ -83,6 +137,17 @@ export default function ProfilePage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const submitData = {
+      ...formData,
+      dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString() : undefined
+    };
+
+    await updateProfile(submitData);
   };
 
   if (loading) {
@@ -130,18 +195,25 @@ export default function ProfilePage() {
               <div className="bg-gradient-to-r from-primary to-accent-red p-4 text-white">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-primary font-bold text-2xl">
-                      {user.avatar ? (
+                    <div 
+                      onClick={handleAvatarClick}
+                      className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-primary font-bold text-2xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                      title="Click để thay đổi ảnh đại diện"
+                    >
+                      {formData.avatar ? (
                         <img
-                          src={user.avatar}
-                          alt={user.fullName || 'Avatar'}
+                          src={formData.avatar}
+                          alt={formData.fullName || 'Avatar'}
                           className="w-full h-full rounded-full object-cover"
                         />
                       ) : (
                         user.fullName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'
                       )}
                     </div>
-                    <button className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100">
+                    <button 
+                      onClick={handleAvatarClick}
+                      className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
+                    >
                       <Camera size={12} className="text-gray-600" />
                     </button>
                   </div>
@@ -224,6 +296,19 @@ export default function ProfilePage() {
                           onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
                           className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                           placeholder="Nhập họ và tên"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Avatar URL (hoặc tải ảnh lên)
+                        </label>
+                        <input
+                          type="text"
+                          value={formData.avatar}
+                          onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                          placeholder="https://example.com/avatar.jpg"
                         />
                       </div>
 
@@ -388,6 +473,90 @@ export default function ProfilePage() {
           </main>
         </div>
       </div>
+
+      {/* Avatar URL Modal */}
+      {showAvatarModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <LinkIcon size={20} className="text-primary" />
+                  Thay đổi ảnh đại diện
+                </h3>
+                <button
+                  onClick={() => setShowAvatarModal(false)}
+                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X size={20} className="text-gray-500" />
+                </button>
+              </div>
+
+              {/* Preview */}
+              <div className="flex justify-center mb-4">
+                <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border-4 border-primary/20">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <User size={40} className="text-gray-400" />
+                  )}
+                </div>
+              </div>
+
+              {/* Input */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Dán link ảnh vào đây
+                </label>
+                <input
+                  type="text"
+                  value={avatarUrl}
+                  onChange={(e) => setAvatarUrl(e.target.value)}
+                  placeholder="https://example.com/avatar.jpg"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
+                />
+                <p className="mt-2 text-xs text-gray-500">
+                  Bạn có thể sử dụng link ảnh từ Google, Imgur, hoặc bất kỳ nguồn nào khác.
+                </p>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowAvatarModal(false)}
+                  className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleSaveAvatar}
+                  disabled={savingAvatar || !avatarUrl.trim()}
+                  className="flex-1 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {savingAvatar ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Đang lưu...
+                    </>
+                  ) : (
+                    <>
+                      <Check size={18} />
+                      Lưu ảnh
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

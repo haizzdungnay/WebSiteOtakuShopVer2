@@ -128,6 +128,7 @@ export default function CheckoutPage() {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
           customerName: shippingInfo.fullName,
           customerPhone: shippingInfo.phone,
@@ -281,7 +282,7 @@ export default function CheckoutPage() {
                       value={shippingInfo.phone}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, phone: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-red focus:border-transparent outline-none"
-                      placeholder="0396686826"
+                      placeholder="0389836514"
                     />
                   </div>
                   <div className="md:col-span-2">

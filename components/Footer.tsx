@@ -9,12 +9,12 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8" suppressHydrationWarning>
           {/* About */}
           <div suppressHydrationWarning>
-            <h3 className="text-white font-bold text-lg mb-4">JH FIGURE</h3>
+            <h3 className="text-white font-bold text-lg mb-4">DN FIGURE</h3>
             <p className="text-sm mb-4 text-gray-400">
               Chuyên cung cấp các loại figure chính hãng, mô hình anime, manga và
               các sản phẩm collectibles chất lượng cao.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-3" suppressHydrationWarning>
               <a
                 href="https://facebook.com"
                 target="_blank"
@@ -43,7 +43,7 @@ export default function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div>
+          <div suppressHydrationWarning>
             <h3 className="text-white font-bold text-lg mb-4">Liên kết nhanh</h3>
             <ul className="space-y-2 text-sm">
               <li>
@@ -116,8 +116,8 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={18} className="text-primary flex-shrink-0" />
-                <a href="tel:0396686826" className="hover:text-primary transition-colors">
-                  0396 686 826
+                <a href="tel:0389836514" className="hover:text-primary transition-colors">
+                  0389 836 514
                 </a>
               </li>
               <li className="flex items-center gap-2">
@@ -134,25 +134,25 @@ export default function Footer() {
         </div>
 
         {/* Payment Methods */}
-        <div className="border-t border-gray-800 pt-6 mb-6" suppressHydrationWarning>
-          <div className="text-center" suppressHydrationWarning>
+        <div className="border-t border-gray-800 pt-6 mb-6">
+          <div className="text-center">
             <h4 className="text-white font-semibold mb-3 text-sm">
               Phương thức thanh toán
             </h4>
-            <div className="flex justify-center gap-4 flex-wrap" suppressHydrationWarning>
-              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800" suppressHydrationWarning>
+            <div className="flex justify-center gap-4 flex-wrap">
+              <div suppressHydrationWarning className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800">
                 VISA
               </div>
-              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800" suppressHydrationWarning>
+              <div suppressHydrationWarning className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800">
                 MASTERCARD
               </div>
-              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800" suppressHydrationWarning>
+              <div suppressHydrationWarning className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800">
                 MOMO
               </div>
-              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800" suppressHydrationWarning>
+              <div suppressHydrationWarning className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800">
                 ZALOPAY
               </div>
-              <div className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800" suppressHydrationWarning>
+              <div suppressHydrationWarning className="bg-white rounded px-3 py-2 text-xs font-semibold text-gray-800">
                 COD
               </div>
             </div>
@@ -162,7 +162,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
           <p>
-            © 2025 JH Figure Store. All rights reserved. | Made with ❤️ by Team Dương
+            © 2025 DN Figure Store. All rights reserved. | Made with ❤️ by Team Dương
             - Nguyên - Lâm
           </p>
         </div>

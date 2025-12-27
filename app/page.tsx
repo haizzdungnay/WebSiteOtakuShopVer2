@@ -32,10 +32,15 @@ export default function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
+        console.log('Fetching products...');
         const response = await fetch('/api/products?limit=50');
+        console.log('Response status:', response.status);
         if (response.ok) {
           const data = await response.json();
+          console.log('Products data:', data);
           setProducts(data.data || []);
+        } else {
+            console.error('Fetch failed:', response.statusText);
         }
       } catch (error) {
         console.error('Error fetching products:', error);
@@ -49,9 +54,12 @@ export default function Home() {
 
   // Transform product for ProductCard component
   const transformProduct = (product: Product) => {
-    const hasDiscount = product.comparePrice && product.comparePrice > product.price;
+    const price = Number(product.price);
+    const comparePrice = product.comparePrice ? Number(product.comparePrice) : 0;
+    const hasDiscount = comparePrice > price;
+    
     const salePercentage = hasDiscount
-      ? Math.round(((Number(product.comparePrice) - Number(product.price)) / Number(product.comparePrice)) * 100)
+      ? Math.round(((comparePrice - price) / comparePrice) * 100)
       : 0;
 
     // Determine badge based on product attributes

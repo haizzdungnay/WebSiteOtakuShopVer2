@@ -55,22 +55,34 @@ export async function GET(
                 customerPhone: order.customerPhone,
                 totalAmount: Number(order.totalAmount),
                 status: order.status,
+                note: order.note,
+                shippingFullName: order.shippingFullName,
+                shippingPhone: order.shippingPhone,
                 shippingAddress: order.shippingAddress,
                 shippingWard: order.shippingWard,
                 shippingDistrict: order.shippingDistrict,
                 shippingCity: order.shippingCity,
-                paymentMethod: order.payment?.method || 'COD',
-                paymentStatus: order.payment?.status || 'PENDING',
                 createdAt: order.createdAt.toISOString(),
                 orderItems: order.orderItems.map(item => ({
-                    productId: item.productId,
-                    productName: item.product.name,
-                    productSlug: item.product.slug,
-                    productImage: item.product.images[0] || null,
+                    id: item.id,
                     quantity: item.quantity,
                     price: Number(item.price),
-                    total: Number(item.price) * item.quantity
-                }))
+                    product: {
+                        id: item.product.id,
+                        name: item.product.name,
+                        slug: item.product.slug,
+                        images: item.product.images
+                    }
+                })),
+                payment: order.payment ? {
+                    method: order.payment.method,
+                    status: order.payment.status
+                } : undefined,
+                shipping: order.shipping ? {
+                    carrier: order.shipping.carrier,
+                    trackingCode: order.shipping.trackingCode,
+                    status: order.shipping.status
+                } : undefined
             }
         });
     } catch (error) {

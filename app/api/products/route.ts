@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
     try {
         // lấy query param từ url
@@ -138,6 +140,8 @@ export async function GET(request: NextRequest) {
             prisma.product.count({ where })
         ])
 
+        console.log(`API /api/products: Found ${products.length} products. Total: ${total}`);
+
         // Return với pagination info
         return NextResponse.json({
             success: true,
@@ -155,7 +159,8 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(
             {
                 success: false,
-                error: 'Không thể lấy danh sách sản phẩm'
+                error: 'Không thể lấy danh sách sản phẩm',
+                details: error instanceof Error ? error.message : String(error)
             },
             { status: 500 }
         )

@@ -68,13 +68,14 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 shadow-md" suppressHydrationWarning>
       {/* Top Pink Header */}
-      <div className="bg-primary py-3 px-4" suppressHydrationWarning>
+      {/* Use only container padding to keep alignment consistent with nav */}
+      <div className="bg-primary py-3" suppressHydrationWarning>
         <div className="container-custom" suppressHydrationWarning>
           <div className="flex items-center justify-between gap-4 flex-wrap lg:flex-nowrap" suppressHydrationWarning>
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               <div className="flex items-center gap-1">
-                <span className="text-3xl font-bold text-accent-red">JH</span>
+                <span className="text-3xl font-bold text-accent-red">DN</span>
                 <span className="text-2xl font-bold text-gray-800">FIGURE</span>
               </div>
             </Link>
@@ -122,7 +123,7 @@ export default function Header() {
                 <Phone size={20} className="text-accent-red" />
                 <div>
                   <div className="text-xs text-gray-600">Hotline</div>
-                  <div className="text-sm font-semibold">0396686826</div>
+                  <div className="text-sm font-semibold">0389836514</div>
                 </div>
               </div>
 
@@ -145,9 +146,17 @@ export default function Header() {
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
                     className="flex items-center gap-2 text-gray-800 hover:text-accent-red transition-colors"
                   >
-                    <div className="w-8 h-8 bg-accent-red rounded-full flex items-center justify-center text-white font-semibold">
-                      {user.username?.[0]?.toUpperCase() || 'U'}
-                    </div>
+                    {user.avatar ? (
+                      <img 
+                        src={user.avatar} 
+                        alt={user.username || 'User'} 
+                        className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 bg-accent-red rounded-full flex items-center justify-center text-white font-semibold">
+                        {user.username?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                    )}
                     <div className="hidden lg:block">
                       <div className="text-xs text-gray-600">Xin chào</div>
                       <div className="text-sm font-semibold">{user.username}</div>
@@ -159,9 +168,17 @@ export default function Header() {
                     <div className="absolute right-0 top-full mt-2 w-72 bg-white rounded-lg shadow-xl border border-gray-200 z-50">
                       <div className="p-4 border-b border-gray-200">
                         <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-accent-red rounded-full flex items-center justify-center text-white font-bold text-lg">
-                            {user.username?.[0]?.toUpperCase() || 'U'}
-                          </div>
+                          {user.avatar ? (
+                            <img 
+                              src={user.avatar} 
+                              alt={user.username || 'User'} 
+                              className="w-12 h-12 rounded-full object-cover border border-gray-200"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-accent-red rounded-full flex items-center justify-center text-white font-bold text-lg">
+                              {user.username?.[0]?.toUpperCase() || 'U'}
+                            </div>
+                          )}
                           <div className="flex-1">
                             <div className="font-semibold text-gray-900">{user.username}</div>
                             <div className="text-sm text-gray-600">{user.email}</div>
@@ -256,8 +273,8 @@ export default function Header() {
       <nav className="bg-black text-white relative">
         <div className="container-custom">
           <div className="flex items-center">
-            {/* CỘT TRÁI: Menu Button (rộng cố định = w-64) */}
-            <div className="w-64 flex-shrink-0">
+            {/* CỘT TRÁI: Menu Button (khớp chiều rộng sidebar = 280px) */}
+            <div className="w-[280px] flex-shrink-0">
               <button
                 onClick={() => setShowMenuSidebar(true)}
                 className="flex w-full items-center justify-center gap-2 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
@@ -267,9 +284,10 @@ export default function Header() {
               </button>
             </div>
 
-            {/* CỘT GIỮA: Navigation Items */}
-            <div className="flex-1">
-              <div className="grid grid-flow-col auto-cols-max justify-center gap-10 md:gap-16 lg:gap-20">
+            {/* CỘT GIỮA: Navigation Items (thêm px-6 để khớp khoảng cách `gap-6` của trang chủ) */}
+            <div className="flex-1 px-0">
+              {/* Giảm khoảng cách theo responsive để tránh tràn ra ngoài */}
+              <div className="grid grid-flow-col auto-cols-max justify-center gap-8 md:gap-10 lg:gap-12 xl:gap-14">
                 <NavLink href="/in-stock" icon={<Package size={18} />}>
                   Hàng sẵn có
                 </NavLink>
@@ -291,8 +309,8 @@ export default function Header() {
               </div>
             </div>
 
-            {/* CỘT PHẢI: spacer để cân đối với cột MENU */}
-            <div className="w-64 flex-shrink-0" />
+            {/* CỘT PHẢI: spacer để cân đối với cột MENU (320px) */}
+            <div className="w-[320px] flex-shrink-0" />
           </div>
         </div>
       </nav>

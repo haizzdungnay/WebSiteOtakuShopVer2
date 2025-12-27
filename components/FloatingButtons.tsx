@@ -4,7 +4,7 @@ import { Phone, MessageCircle } from 'lucide-react';
 
 export default function FloatingButtons() {
   const handlePhoneClick = () => {
-    window.location.href = 'tel:0396686826';
+    window.location.href = 'tel:0389836514';
   };
 
   const handleMessengerClick = () => {
