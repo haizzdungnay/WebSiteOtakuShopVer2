@@ -6,9 +6,10 @@ import { getUserFromRequest } from '@/lib/auth'
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { productId: string } }
+    { params }: { params: Promise<{ productId: string }> }
 ) {
     try {
+        const { productId } = await params;
         // 1 Check authentication
         const user = await getUserFromRequest(request)
         if (!user) {
@@ -26,7 +27,7 @@ export async function DELETE(
             where: {
                 userId_productId: {
                     userId: user.userId,
-                    productId: params.productId
+                    productId: productId
                 }
             }
         })
@@ -46,7 +47,7 @@ export async function DELETE(
             where: {
                 userId_productId: {
                     userId: user.userId,
-                    productId: params.productId
+                    productId: productId
                 }
             }
         })

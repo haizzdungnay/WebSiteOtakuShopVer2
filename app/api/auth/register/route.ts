@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
+import { sendEmail, generateVerificationToken, getVerificationEmailTemplate } from '@/lib/email'
 
 // Định nghĩa schema để validate với zod
 const registerSchema = z.object({
@@ -20,7 +21,7 @@ const registerSchema = z.object({
         .min(2, 'Họ tên phải có ít nhất 2 ký tự')
         .max(100, 'Họ tên quá dài')
         .trim(), // loại bỏ khoảng trắng thừa
-        
+
     phone: z
         .string()
         .regex(/^(03[2-9]|05[2|6|8|9]|07[0|6|7|8|9]|08[1-9]|09[0-9])\d{7}$/, 'Số điện thoại không hợp lệ') // giới hạn các đầu số của nhà mạng Việt Nam
@@ -54,6 +55,10 @@ export async function POST(request: Request) {
         // Hash password
         const passwordHash = await bcrypt.hash(validatedData.password, 10) // 10 rounds for 2^10 = 1024 rounds
 
+        // Generate verification token
+        const verificationToken = generateVerificationToken()
+        const verificationExpires = new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+
         // Tạo user mới
         const user = await prisma.user.create({
             data: {
@@ -61,7 +66,10 @@ export async function POST(request: Request) {
                 passwordHash: passwordHash,
                 fullName: validatedData.fullName,
                 phone: validatedData.phone || null,
-                role: 'CUSTOMER'
+                role: 'CUSTOMER',
+                emailVerified: false,
+                verificationToken: verificationToken,
+                verificationExpires: verificationExpires
             },
             select: {
                 id: true,
@@ -69,16 +77,30 @@ export async function POST(request: Request) {
                 fullName: true,
                 phone: true,
                 role: true,
+                emailVerified: true,
                 createdAt: true
                 // Không trả về passwordHash, trả về là toang đấy :)))))
             }
         })
 
+        // Send verification email
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+        const verificationUrl = `${baseUrl}/verify-email?token=${verificationToken}`
+
+        const emailSent = await sendEmail({
+            to: user.email,
+            subject: 'Xác nhận email - OtakuShop',
+            html: getVerificationEmailTemplate(user.fullName, verificationUrl)
+        })
+
         return NextResponse.json(
             {
                 success: true,
-                message: 'Đăng ký tài khoản thành công',
-                data: user
+                message: emailSent
+                    ? 'Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.'
+                    : 'Đăng ký thành công! Tuy nhiên không thể gửi email xác nhận. Vui lòng thử gửi lại sau.',
+                data: user,
+                emailSent: emailSent
             },
             { status: 201 } // Created
         )

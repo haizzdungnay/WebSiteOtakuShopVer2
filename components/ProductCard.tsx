@@ -2,6 +2,8 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { Heart } from 'lucide-react';
+import { useWishlist } from '@/contexts/WishlistContext';
 
 interface ProductCardProps {
   id: string;
@@ -15,7 +17,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({
-  id: _id,
+  id,
   name,
   price,
   discountPrice,
@@ -24,11 +26,31 @@ export default function ProductCard({
   salePercentage,
   slug,
 }: ProductCardProps) {
+  const { addToWishlist, removeFromWishlist, isInWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(id);
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', {
       style: 'currency',
       currency: 'VND',
     }).format(price);
+  };
+
+  const handleWishlistClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (isWishlisted) {
+      removeFromWishlist(id);
+    } else {
+      addToWishlist({
+        id,
+        name,
+        price,
+        discountPrice,
+        image,
+        slug
+      });
+    }
   };
 
   const calculatedSalePercentage =
@@ -37,7 +59,19 @@ export default function ProductCard({
 
   return (
     <Link href={`/products/${slug}`} className="block">
-      <div className="product-card group">
+      <div className="product-card group relative">
+        {/* Wishlist Button */}
+        <button
+          onClick={handleWishlistClick}
+          className="absolute top-2 right-2 z-20 p-2 rounded-full bg-white/80 hover:bg-white shadow-sm transition-all duration-200 hover:scale-110"
+          title={isWishlisted ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
+        >
+          <Heart
+            size={18}
+            className={`transition-colors ${isWishlisted ? 'fill-accent-red text-accent-red' : 'text-gray-600 hover:text-accent-red'}`}
+          />
+        </button>
+
         {/* Badge */}
         <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
           {badge === 'hot' && (
