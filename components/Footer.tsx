@@ -3,18 +3,18 @@ import { Facebook, Instagram, Youtube, Mail, MapPin, Phone } from 'lucide-react'
 
 export default function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-300 pt-12 pb-6">
-      <div className="container-custom">
+    <footer className="bg-gray-900 text-gray-300 pt-12 pb-6" suppressHydrationWarning>
+      <div className="container-custom" suppressHydrationWarning>
         {/* Main Footer Content */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8" suppressHydrationWarning>
           {/* About */}
-          <div>
-            <h3 className="text-white font-bold text-lg mb-4">JH FIGURE</h3>
+          <div suppressHydrationWarning>
+            <h3 className="text-white font-bold text-lg mb-4">DN FIGURE</h3>
             <p className="text-sm mb-4 text-gray-400">
               Chuyên cung cấp các loại figure chính hãng, mô hình anime, manga và
               các sản phẩm collectibles chất lượng cao.
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-3" suppressHydrationWarning>
               <a
                 href="https://facebook.com"
                 target="_blank"
@@ -116,8 +116,8 @@ export default function Footer() {
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={18} className="text-primary flex-shrink-0" />
-                <a href="tel:0396686826" className="hover:text-primary transition-colors">
-                  0396 686 826
+                <a href="tel:0389836514" className="hover:text-primary transition-colors">
+                  0389 836 514
                 </a>
               </li>
               <li className="flex items-center gap-2">
@@ -162,7 +162,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-6 text-center text-sm text-gray-500">
           <p>
-            © 2025 JH Figure Store. All rights reserved. | Made with ❤️ by Team Dương
+            © 2025 DN Figure Store. All rights reserved. | Made with ❤️ by Team Dương
             - Nguyên - Lâm
           </p>
         </div>

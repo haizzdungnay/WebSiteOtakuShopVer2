@@ -75,7 +75,7 @@ export default function Header() {
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               <div className="flex items-center gap-1">
-                <span className="text-3xl font-bold text-accent-red">JH</span>
+                <span className="text-3xl font-bold text-accent-red">DN</span>
                 <span className="text-2xl font-bold text-gray-800">FIGURE</span>
               </div>
             </Link>
@@ -123,7 +123,7 @@ export default function Header() {
                 <Phone size={20} className="text-accent-red" />
                 <div>
                   <div className="text-xs text-gray-600">Hotline</div>
-                  <div className="text-sm font-semibold">0396686826</div>
+                  <div className="text-sm font-semibold">0389836514</div>
                 </div>
               </div>
 

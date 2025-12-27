@@ -273,10 +273,10 @@ export default function ShippingCalculatorPage() {
               </p>
               <div className="flex flex-col gap-2">
                 <a
-                  href="tel:0396686826"
+                  href="tel:0389836514"
                   className="bg-accent-red text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition-colors"
                 >
-                  Hotline: 0396 686 826
+                  Hotline: 0389 836 514
                 </a>
                 <a
                   href="mailto:support@jhfigure.com"

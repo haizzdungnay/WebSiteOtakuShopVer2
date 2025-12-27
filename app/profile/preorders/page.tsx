@@ -205,7 +205,7 @@ export default function PreOrdersPage() {
           <div className="flex items-center justify-between py-4">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2">
-              <div className="text-2xl font-bold text-accent-red">JH FIGURE</div>
+              <div className="text-2xl font-bold text-accent-red">DN FIGURE</div>
             </Link>
 
             {/* Search Bar */}
@@ -575,7 +575,7 @@ export default function PreOrdersPage() {
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             {/* Company Info */}
             <div>
-              <h3 className="text-xl font-bold text-primary mb-4">JH FIGURE</h3>
+              <h3 className="text-xl font-bold text-primary mb-4">DN FIGURE</h3>
               <p className="text-gray-400 text-sm mb-4">
                 Chuyên cung cấp các sản phẩm Figure & Anime chính hãng, uy tín hàng đầu Việt Nam.
               </p>
@@ -636,7 +636,7 @@ export default function PreOrdersPage() {
 
           {/* Bottom Bar */}
           <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>© 2024 JH Figure. All rights reserved. Made with ❤️ in Vietnam</p>
+            <p>© 2024 DN Figure. All rights reserved. Made with ❤️ in Vietnam</p>
           </div>
         </div>
       </footer>
