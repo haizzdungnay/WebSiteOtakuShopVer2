@@ -107,20 +107,22 @@ enum ReleaseCountry {
 // USER
 // ==========================================
 model User {
-  id                  String    @id @default(cuid())
-  email               String    @unique
-  passwordHash        String
-  fullName            String
-  phone               String?
-  gender              Gender?   @default(OTHER)
-  dateOfBirth         DateTime?
-  avatar              String?
-  role                Role      @default(CUSTOMER)
-  emailVerified       Boolean   @default(false)
-  verificationToken   String?
-  verificationExpires DateTime?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  passwordHash          String
+  fullName              String
+  phone                 String?
+  gender                Gender?   @default(OTHER)
+  dateOfBirth           DateTime?
+  avatar                String?
+  role                  Role      @default(CUSTOMER)
+  emailVerified         Boolean   @default(false)
+  verificationToken     String?
+  verificationExpires   DateTime?
+  resetPasswordToken    String?
+  resetPasswordExpires  DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
 
   cartItems   CartItem[]
   orders      Order[]
@@ -131,6 +133,7 @@ model User {
 
   @@index([email])
   @@index([verificationToken])
+  @@index([resetPasswordToken])
   @@map("users")
 }
 
