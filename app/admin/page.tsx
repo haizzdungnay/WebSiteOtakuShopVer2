@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, FormEvent } from 'react';
+import { useState, useEffect, useMemo, FormEvent, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Cookies from 'js-cookie';
 import {
@@ -8,8 +8,9 @@ import {
   Coins,
   Edit,
   FilePlus,
+  FileText,
   FolderPlus,
-  Image as ImageIcon,
+  Image,
   ListChecks,
   Loader2,
   MessageSquare,
@@ -19,8 +20,10 @@ import {
   Trash2,
   Users,
   X,
+  Newspaper,
 } from 'lucide-react';
 import Link from 'next/link';
+import ArticleEditor from '@/components/ArticleEditor';
 
 // Types
 interface Product {
@@ -64,14 +67,7 @@ interface Order {
   customerPhone: string;
   totalAmount: number;
   status: string;
-  note?: string;
   createdAt: string;
-  shippingFullName?: string;
-  shippingPhone?: string;
-  shippingAddress?: string;
-  shippingWard?: string;
-  shippingDistrict?: string;
-  shippingCity?: string;
   orderItems: Array<{
     id: string;
     quantity: number;
@@ -89,6 +85,16 @@ interface Review {
   createdAt: string;
   user: { fullName: string; email: string };
   product: { name: string };
+}
+
+interface Announcement {
+  id: string;
+  title: string;
+  summary: string;
+  content?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface DashboardStats {
@@ -154,7 +160,7 @@ export default function AdminPage() {
   const isAdmin = user?.role === 'admin';
 
   // States
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'reviews'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'reviews' | 'articles'>('dashboard');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -164,6 +170,7 @@ export default function AdminPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   // Form states
   const [productForm, setProductForm] = useState<ProductFormState>(initialProductForm);
@@ -201,6 +208,14 @@ export default function AdminPage() {
   const [showOrderModal, setShowOrderModal] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [orderAdminNote, setOrderAdminNote] = useState('');
+
+  // Articles states
+  const [showArticleModal, setShowArticleModal] = useState(false);
+  const [editingArticle, setEditingArticle] = useState<Announcement | null>(null);
+  const [articleForm, setArticleForm] = useState({ title: '', summary: '', content: '', isActive: true });
+  const [articlePage, setArticlePage] = useState(1);
+  const [articleTotalPages, setArticleTotalPages] = useState(1);
+  const [articleTotal, setArticleTotal] = useState(0);
 
   // API Headers
   const getHeaders = () => ({
@@ -326,6 +341,31 @@ export default function AdminPage() {
     }
   };
 
+  // Fetch Announcements/Articles
+  const fetchAnnouncements = async () => {
+    try {
+      const params = new URLSearchParams();
+      params.set('page', String(articlePage));
+      params.set('limit', '10');
+
+      const response = await fetch(`/api/admin/announcements?${params.toString()}`, {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setAnnouncements(data.data?.announcements || data.announcements || data.data || []);
+        const pagination = data.data?.pagination || data.pagination;
+        if (pagination) {
+          setArticleTotal(pagination.total || 0);
+          setArticleTotalPages(pagination.totalPages || 1);
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching announcements:', err);
+    }
+  };
+
   // Initial load
   useEffect(() => {
     const loadData = async () => {
@@ -336,6 +376,7 @@ export default function AdminPage() {
         fetchProducts(),
         fetchOrders(),
         fetchReviews(),
+        fetchAnnouncements(),
       ]);
       setLoading(false);
     };
@@ -344,6 +385,14 @@ export default function AdminPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
+
+  // Refetch announcements when pagination changes
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAnnouncements();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, articlePage]);
 
   // Refetch when filters/pagination change
   useEffect(() => {
@@ -366,6 +415,13 @@ export default function AdminPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, reviewPage, reviewFilters]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAnnouncements();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, articlePage]);
 
   // Generate slug from name
   const generateSlug = (name: string) => {
@@ -580,6 +636,63 @@ export default function AdminPage() {
     }
   };
 
+  // Handle Toggle Article Status
+  const handleToggleArticleStatus = async (article: Announcement) => {
+    try {
+      const response = await fetch(`/api/admin/announcements/${article.id}`, {
+        method: 'PATCH',
+        headers: getHeaders(),
+        body: JSON.stringify({ isActive: !article.isActive }),
+      });
+
+      if (response.ok) {
+        await fetchAnnouncements();
+        showToast(`Đã ${!article.isActive ? 'xuất bản' : 'ẩn'} tin tức`, 'success');
+      } else {
+        const data = await response.json();
+        showToast(data.error || 'Có lỗi xảy ra', 'error');
+      }
+    } catch (err) {
+      console.error('Error toggling article status:', err);
+      showToast('Có lỗi xảy ra khi cập nhật trạng thái', 'error');
+    }
+  };
+
+  // Handle Delete Article
+  const handleDeleteArticle = async (id: string) => {
+    if (!confirm('Bạn có chắc muốn xóa tin tức này?')) return;
+
+    try {
+      const response = await fetch(`/api/admin/announcements/${id}`, {
+        method: 'DELETE',
+        headers: getHeaders(),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        showToast('Đã xóa tin tức', 'success');
+        await fetchAnnouncements();
+      } else {
+        showToast(data.error || 'Có lỗi xảy ra', 'error');
+      }
+    } catch (err) {
+      console.error('Error deleting article:', err);
+      showToast('Không thể kết nối đến server', 'error');
+    }
+  };
+
+  // Handle Edit Article
+  const handleEditArticle = async (article: Announcement) => {
+    setEditingArticle(article);
+    setArticleForm({ 
+      title: article.title, 
+      summary: article.summary, 
+      content: article.content || '', 
+      isActive: article.isActive 
+    });
+    setShowArticleModal(true);
+  };
+
   // Add image to product
   const handleAddImage = () => {
     if (imageUrl.trim()) {
@@ -597,6 +710,56 @@ export default function AdminPage() {
       ...productForm,
       images: productForm.images.filter((_, i) => i !== index),
     });
+  };
+
+  // Handle Article Submit (Create/Update)
+  const handleArticleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setError(null);
+
+    if (!articleForm.title.trim()) {
+      setError('Tiêu đề không được để trống');
+      return;
+    }
+    if (!articleForm.summary.trim()) {
+      setError('Tóm tắt không được để trống');
+      return;
+    }
+    if (!articleForm.content || articleForm.content.trim() === '<p><br></p>') {
+      setError('Nội dung không được để trống');
+      return;
+    }
+
+    try {
+      const url = editingArticle
+        ? `/api/admin/announcements/${editingArticle.id}`
+        : '/api/admin/announcements';
+      const method = editingArticle ? 'PATCH' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: getHeaders(),
+        body: JSON.stringify(articleForm),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Lỗi khi lưu tin tức');
+      }
+
+      await fetchAnnouncements();
+      setShowArticleModal(false);
+      setArticleForm({ title: '', summary: '', content: '', isActive: true });
+      setEditingArticle(null);
+      setToast({
+        type: 'success',
+        message: editingArticle ? 'Cập nhật tin tức thành công' : 'Thêm tin tức thành công',
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+      setError(message);
+      setToast({ type: 'error', message });
+    }
   };
 
   // Calculate pending orders
@@ -727,6 +890,7 @@ export default function AdminPage() {
           {[
             { id: 'dashboard', label: 'Tổng quan', icon: BarChart3 },
             { id: 'products', label: 'Sản phẩm', icon: FolderPlus },
+            { id: 'articles', label: 'Tin tức', icon: FileText },
             { id: 'orders', label: 'Đơn hàng', icon: PackageCheck },
             { id: 'reviews', label: 'Đánh giá', icon: MessageSquare },
           ].map((tab) => (
@@ -1165,7 +1329,7 @@ export default function AdminPage() {
                             />
                           ) : (
                             <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                              <ImageIcon size={20} className="text-slate-400" />
+                              <Image size={20} className="text-slate-400" />
                             </div>
                           )}
                         </td>
@@ -1484,6 +1648,138 @@ export default function AdminPage() {
               )}
             </div>
           </div>
+        )}
+
+        {/* Articles/News Tab */}
+        {activeTab === 'articles' && (
+          <>
+            {/* Header và action button */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+              <div>
+                <h2 className="text-3xl font-bold text-slate-900">Quản lý tin tức</h2>
+                <p className="text-slate-600 mt-1">Tổng cộng: <span className="font-semibold">{articleTotal}</span> tin tức</p>
+              </div>
+              <button
+                onClick={() => {
+                  setEditingArticle(null);
+                  setArticleForm({ title: '', summary: '', content: '', isActive: true });
+                  setShowArticleModal(true);
+                }}
+                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg"
+              >
+                <FilePlus size={20} />
+                Thêm tin tức mới
+              </button>
+            </div>
+
+            {announcements.length === 0 ? (
+              <div className="text-center py-16 bg-white rounded-2xl border-2 border-dashed border-slate-200">
+                <FileText size={48} className="mx-auto text-slate-300 mb-4" />
+                <p className="text-slate-500 text-lg font-medium">Chưa có tin tức nào</p>
+                <p className="text-slate-400 text-sm mt-1">Hãy thêm tin tức đầu tiên để bắt đầu</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-lg border border-slate-100 overflow-hidden">
+                {/* Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100">
+                        <th className="px-6 py-4 text-left font-semibold text-slate-700">Tiêu đề</th>
+                        <th className="px-6 py-4 text-left font-semibold text-slate-700">Tóm tắt</th>
+                        <th className="px-6 py-4 text-left font-semibold text-slate-700">Ngày tạo</th>
+                        <th className="px-6 py-4 text-left font-semibold text-slate-700">Cập nhật</th>
+                        <th className="px-6 py-4 text-center font-semibold text-slate-700">Trạng thái</th>
+                        <th className="px-6 py-4 text-center font-semibold text-slate-700">Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {announcements.map((article) => (
+                        <tr key={article.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-6 py-4 font-semibold text-slate-900 max-w-xs">
+                            <div className="line-clamp-1">{article.title}</div>
+                          </td>
+                          <td className="px-6 py-4 text-slate-600 max-w-xs">
+                            <div className="line-clamp-2 text-sm">{article.summary}</div>
+                          </td>
+                          <td className="px-6 py-4 text-slate-600 text-sm whitespace-nowrap">
+                            {new Date(article.createdAt).toLocaleDateString('vi-VN', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            })}
+                          </td>
+                          <td className="px-6 py-4 text-slate-600 text-sm whitespace-nowrap">
+                            {new Date(article.updatedAt).toLocaleDateString('vi-VN', {
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric'
+                            })}
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
+                              article.isActive
+                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                : 'bg-slate-100 text-slate-700 border border-slate-200'
+                            }`}>
+                              <span className={`w-2 h-2 rounded-full ${article.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                              {article.isActive ? 'Công khai' : 'Ẩn'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => handleEditArticle(article)}
+                                className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold text-xs transition-colors"
+                                title="Chỉnh sửa"
+                              >
+                                <Edit size={16} />
+                                Sửa
+                              </button>
+                              <button
+                                onClick={() => handleDeleteArticle(article.id)}
+                                className="inline-flex items-center gap-1 px-3 py-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 font-semibold text-xs transition-colors"
+                                title="Xóa"
+                              >
+                                <Trash2 size={16} />
+                                Xóa
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                {articleTotalPages > 1 && (
+                  <div className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                    <p className="text-sm text-slate-600 font-medium">
+                      Trang <span className="font-bold text-slate-900">{articlePage}</span> / <span className="font-bold text-slate-900">{articleTotalPages}</span>
+                      <span className="text-slate-500 ml-2">(Tổng: {articleTotal} tin)</span>
+                    </p>
+                    <div className="space-x-2">
+                      <button
+                        onClick={() => setArticlePage((p) => Math.max(1, p - 1))}
+                        disabled={articlePage === 1}
+                        className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        ← Trước
+                      </button>
+                      <button
+                        onClick={() => setArticlePage((p) => Math.min(articleTotalPages, p + 1))}
+                        disabled={articlePage === articleTotalPages}
+                        className="px-4 py-2 rounded-lg border border-slate-300 text-slate-700 font-semibold hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Sau →
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </>
         )}
 
         {/* Product Modal */}
@@ -1893,34 +2189,15 @@ export default function AdminPage() {
                   <p className="text-sm text-slate-600 mt-1">Ngày đặt: {formatDate(selectedOrder.createdAt)}</p>
                 </div>
                 <div className="p-4 rounded-xl bg-slate-50">
-                  <p className="text-sm font-semibold text-slate-700 mb-2">Địa chỉ giao hàng</p>
-                  <p className="text-sm text-slate-600">{selectedOrder.shippingFullName || selectedOrder.customerName}</p>
-                  <p className="text-sm text-slate-600">{selectedOrder.shippingPhone || selectedOrder.customerPhone}</p>
-                  <p className="text-sm text-slate-600">
-                    {selectedOrder.shippingAddress}
-                    {selectedOrder.shippingWard && `, ${selectedOrder.shippingWard}`}
-                    {selectedOrder.shippingDistrict && `, ${selectedOrder.shippingDistrict}`}
-                    {selectedOrder.shippingCity && `, ${selectedOrder.shippingCity}`}
-                  </p>
+                  <p className="text-sm font-semibold text-slate-700 mb-2">Ghi chú admin</p>
+                  <textarea
+                    value={orderAdminNote}
+                    onChange={(e) => setOrderAdminNote(e.target.value)}
+                    className="w-full rounded-xl border border-slate-200 px-3 py-2 focus:ring-2 focus:ring-slate-400"
+                    rows={3}
+                    placeholder="Thêm ghi chú khi cập nhật trạng thái"
+                  />
                 </div>
-              </div>
-
-              {selectedOrder.note && (
-                <div className="mt-4 p-4 rounded-xl bg-yellow-50 border border-yellow-200">
-                  <p className="text-sm font-semibold text-yellow-800 mb-1">📝 Ghi chú của khách hàng</p>
-                  <p className="text-sm text-yellow-700">{selectedOrder.note}</p>
-                </div>
-              )}
-
-              <div className="mt-4 p-4 rounded-xl bg-slate-50">
-                <p className="text-sm font-semibold text-slate-700 mb-2">Ghi chú admin</p>
-                <textarea
-                  value={orderAdminNote}
-                  onChange={(e) => setOrderAdminNote(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2 focus:ring-2 focus:ring-slate-400"
-                  rows={3}
-                  placeholder="Thêm ghi chú khi cập nhật trạng thái"
-                />
               </div>
 
               <div className="mt-4 p-4 rounded-xl bg-white border border-slate-100">
@@ -2027,6 +2304,139 @@ export default function AdminPage() {
                   Xác nhận giao hàng
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Article Modal - Thêm/Sửa tin tức */}
+        {showArticleModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+              {/* Header */}
+              <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-200">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">
+                    {editingArticle ? '✏️ Chỉnh sửa tin tức' : '📰 Thêm tin tức mới'}
+                  </h2>
+                  <p className="text-sm text-slate-500 mt-1">
+                    {editingArticle ? 'Cập nhật thông tin tin tức' : 'Tạo một bài viết tin tức mới'}
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowArticleModal(false);
+                    setEditingArticle(null);
+                    setArticleForm({ title: '', summary: '', content: '', isActive: true });
+                  }}
+                  className="p-2 rounded-full hover:bg-slate-100 transition-colors"
+                  title="Đóng"
+                >
+                  <X size={24} className="text-slate-600" />
+                </button>
+              </div>
+
+              {error && (
+                <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-sm flex items-start gap-3">
+                  <span className="text-lg">⚠️</span>
+                  <div>
+                    <p className="font-semibold">Lỗi</p>
+                    <p>{error}</p>
+                  </div>
+                </div>
+              )}
+
+              <form onSubmit={handleArticleSubmit} className="space-y-6">
+                {/* Tiêu đề */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Tiêu đề <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    value={articleForm.title}
+                    onChange={(e) => setArticleForm({ ...articleForm, title: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                    placeholder="Ví dụ: Cập nhật sản phẩm mới tháng 12..."
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Tiêu đề sẽ hiển thị trên trang tin tức</p>
+                </div>
+
+                {/* Tóm tắt */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Tóm tắt <span className="text-rose-500">*</span>
+                  </label>
+                  <textarea
+                    required
+                    value={articleForm.summary}
+                    onChange={(e) => setArticleForm({ ...articleForm, summary: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all resize-none"
+                    placeholder="Nhập tóm tắt ngắn gọn (hiển thị trên danh sách tin)..."
+                    rows={3}
+                    maxLength={300}
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    {articleForm.summary.length}/300 ký tự
+                  </p>
+                </div>
+
+                {/* Nội dung */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Nội dung <span className="text-rose-500">*</span>
+                  </label>
+                  <ArticleEditor
+                    value={articleForm.content}
+                    onChange={(content) => setArticleForm({ ...articleForm, content })}
+                    placeholder="Nhập nội dung chi tiết của tin tức..."
+                    minHeight="300px"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Hỗ trợ: định dạng chữ, danh sách, liên kết, hình ảnh...</p>
+                </div>
+
+                {/* Trạng thái */}
+                <div className="bg-slate-50 p-4 rounded-xl">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <div className="relative">
+                      <input
+                        type="checkbox"
+                        checked={articleForm.isActive}
+                        onChange={(e) => setArticleForm({ ...articleForm, isActive: e.target.checked })}
+                        className="w-5 h-5 rounded border-slate-300 cursor-pointer accent-indigo-600"
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">Công khai bài viết</p>
+                      <p className="text-xs text-slate-600">
+                        {articleForm.isActive ? '✅ Bài viết sẽ hiển thị trên trang tin tức' : '🔒 Bài viết ẩn, chỉ admin thấy'}
+                      </p>
+                    </div>
+                  </label>
+                </div>
+
+                {/* Buttons */}
+                <div className="flex gap-3 pt-4 border-t border-slate-200">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowArticleModal(false);
+                      setEditingArticle(null);
+                      setArticleForm({ title: '', summary: '', content: '', isActive: true });
+                    }}
+                    className="flex-1 py-3 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg"
+                  >
+                    <FilePlus size={18} />
+                    {editingArticle ? '💾 Cập nhật' : '➕ Thêm'} tin tức
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}
