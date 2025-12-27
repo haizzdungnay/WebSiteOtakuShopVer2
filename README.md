@@ -13,6 +13,7 @@ Cửa hàng figure anime chính hãng - Next.js E-commerce Platform với Prisma
 ### Frontend
 - **Authentication** - Đăng ký, đăng nhập với xác nhận email
 - **Email Verification** - Xác nhận email qua link gửi tới hộp thư
+- **Forgot Password** - Quên mật khẩu với email reset link
 - **Shopping Cart** - Giỏ hàng với quản lý số lượng real-time
 - **Product Catalog** - Danh sách, chi tiết, tìm kiếm, filter sản phẩm
 - **Search Suggestions** - Gợi ý tìm kiếm real-time khi nhập
@@ -57,6 +58,8 @@ WebSiteOtakuShopVer2/
 │   │   │   ├── register/         # User registration
 │   │   │   ├── verify-email/     # Email verification
 │   │   │   ├── resend-verification/ # Resend verification email
+│   │   │   ├── forgot-password/  # Request password reset
+│   │   │   ├── reset-password/   # Reset password with token
 │   │   │   ├── me/               # Get current user
 │   │   │   ├── profile/          # Update profile
 │   │   │   └── change-password/  # Change password
@@ -84,6 +87,8 @@ WebSiteOtakuShopVer2/
 │   ├── login/                    # Login page
 │   ├── register/                 # Registration page
 │   ├── verify-email/             # Email verification page
+│   ├── forgot-password/          # Forgot password page
+│   ├── reset-password/           # Reset password page
 │   ├── products/                 # Product pages
 │   ├── cart/                     # Cart page
 │   ├── checkout/                 # Checkout pages
@@ -244,6 +249,8 @@ npm run docker:down      # Stop PostgreSQL
 | POST | `/api/auth/register` | User registration (sends verification email) |
 | GET | `/api/auth/verify-email?token=xxx` | Verify email address |
 | POST | `/api/auth/resend-verification` | Resend verification email |
+| POST | `/api/auth/forgot-password` | Request password reset email |
+| POST | `/api/auth/reset-password` | Reset password with token |
 | GET | `/api/auth/me` | Get current user |
 | POST | `/api/auth/profile` | Update profile |
 | POST | `/api/auth/change-password` | Change password |
