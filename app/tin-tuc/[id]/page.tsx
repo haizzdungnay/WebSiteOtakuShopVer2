@@ -1,11 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+<<<<<<< Updated upstream
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { Calendar, ArrowLeft, Loader2 } from 'lucide-react';
 
 interface NewsArticle {
+=======
+import { useParams, useRouter } from 'next/navigation';
+import Image from 'next/image';
+import Link from 'next/link';
+import { Calendar, ArrowLeft, Share2, Loader2 } from 'lucide-react';
+
+interface Announcement {
+>>>>>>> Stashed changes
   id: string;
   title: string;
   summary: string;
@@ -15,6 +24,7 @@ interface NewsArticle {
   updatedAt: string;
 }
 
+<<<<<<< Updated upstream
 interface ApiResponse {
   success: boolean;
   data: NewsArticle;
@@ -25,6 +35,14 @@ export default function NewsDetailPage() {
   const id = params.id as string;
 
   const [article, setArticle] = useState<NewsArticle | null>(null);
+=======
+export default function NewsDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const id = params.id as string;
+
+  const [article, setArticle] = useState<Announcement | null>(null);
+>>>>>>> Stashed changes
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +51,7 @@ export default function NewsDetailPage() {
       try {
         setLoading(true);
         const response = await fetch(`/api/announcements/${id}`);
+<<<<<<< Updated upstream
         if (response.ok) {
           const data: ApiResponse = await response.json();
           if (data.success) {
@@ -46,6 +65,22 @@ export default function NewsDetailPage() {
       } catch (err) {
         console.error('Error fetching article:', err);
         setError('Có lỗi xảy ra khi tải tin tức');
+=======
+        
+        if (!response.ok) {
+          throw new Error('Không tìm thấy tin tức');
+        }
+
+        const data = await response.json();
+        if (data.success && data.data) {
+          setArticle(data.data);
+        } else {
+          throw new Error(data.error || 'Lỗi khi lấy tin tức');
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Lỗi không xác định';
+        setError(message);
+>>>>>>> Stashed changes
       } finally {
         setLoading(false);
       }
@@ -58,6 +93,7 @@ export default function NewsDetailPage() {
 
   if (loading) {
     return (
+<<<<<<< Updated upstream
       <div className="bg-gray-50 py-8">
         <div className="container-custom">
           <div className="flex items-center justify-center py-16">
@@ -65,12 +101,17 @@ export default function NewsDetailPage() {
             <span className="ml-2 text-gray-600">Đang tải tin tức...</span>
           </div>
         </div>
+=======
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin text-indigo-600" size={40} />
+>>>>>>> Stashed changes
       </div>
     );
   }
 
   if (error || !article) {
     return (
+<<<<<<< Updated upstream
       <div className="bg-gray-50 py-8">
         <div className="container-custom">
           <div className="text-center py-16">
@@ -83,11 +124,24 @@ export default function NewsDetailPage() {
               Quay lại trang tin tức
             </Link>
           </div>
+=======
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 text-lg mb-4">{error || 'Không tìm thấy tin tức'}</p>
+          <Link
+            href="/tin-tuc"
+            className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-2xl font-semibold hover:bg-indigo-700 transition-all"
+          >
+            <ArrowLeft size={18} />
+            Quay lại tin tức
+          </Link>
+>>>>>>> Stashed changes
         </div>
       </div>
     );
   }
 
+<<<<<<< Updated upstream
   return (
     <div className="bg-gray-50 py-8">
       <div className="container-custom">
@@ -144,12 +198,114 @@ export default function NewsDetailPage() {
             className="inline-flex items-center gap-2 px-6 py-3 bg-accent-red text-white rounded-lg hover:bg-red-600 transition-colors"
           >
             Xem thêm tin tức khác
+=======
+  const formattedDate = new Date(article.createdAt).toLocaleDateString('vi-VN', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+
+  return (
+    <div className="min-h-screen bg-slate-50">
+      {/* Header Navigation */}
+      <div className="sticky top-0 z-40 bg-white border-b border-slate-200">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <Link
+            href="/tin-tuc"
+            className="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-semibold"
+          >
+            <ArrowLeft size={18} />
+            Quay lại tin tức
+          </Link>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <article className="max-w-4xl mx-auto px-4 py-12">
+        {/* Article Header */}
+        <div className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4 leading-tight">
+            {article.title}
+          </h1>
+          
+          <div className="flex items-center gap-4 text-slate-600 mb-6">
+            <div className="flex items-center gap-2">
+              <Calendar size={18} />
+              <time dateTime={article.createdAt}>
+                {formattedDate}
+              </time>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                const shareUrl = `${window.location.origin}/tin-tuc/${id}`;
+                const text = `${article.title} - 1Otaku`;
+                
+                if (navigator.share) {
+                  navigator.share({
+                    title: article.title,
+                    text: article.summary,
+                    url: shareUrl,
+                  });
+                } else {
+                  // Fallback: copy to clipboard
+                  navigator.clipboard.writeText(shareUrl);
+                  alert('Đã sao chép liên kết vào clipboard');
+                }
+              }}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 font-semibold text-sm transition-all"
+            >
+              <Share2 size={16} />
+              Chia sẻ
+            </button>
+          </div>
+        </div>
+
+        {/* Article Summary */}
+        <div className="bg-indigo-50 border-l-4 border-indigo-500 p-6 rounded-lg mb-8">
+          <p className="text-lg text-slate-700 italic">{article.summary}</p>
+        </div>
+
+        {/* Article Content */}
+        <div className="bg-white rounded-2xl p-8 shadow-sm mb-12">
+          {article.content ? (
+            <div 
+              className="prose prose-lg max-w-none text-slate-700 leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: article.content }}
+            />
+          ) : (
+            <p className="text-slate-600">Không có nội dung chi tiết.</p>
+          )}
+        </div>
+
+        {/* Article Footer */}
+        <div className="border-t border-slate-200 pt-8">
+          <div className="text-sm text-slate-600">
+            <p>Cập nhật lần cuối: {new Date(article.updatedAt).toLocaleDateString('vi-VN')}</p>
+          </div>
+        </div>
+      </article>
+
+      {/* Related Articles Section */}
+      <div className="bg-white mt-12 py-12 border-t border-slate-200">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">Tin tức khác</h2>
+          <Link
+            href="/tin-tuc"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-all"
+          >
+            <ArrowLeft size={18} />
+            Xem tất cả tin tức
+>>>>>>> Stashed changes
           </Link>
         </div>
       </div>
     </div>
   );
 }
+<<<<<<< Updated upstream
 
 'use client'
 
@@ -349,3 +505,5 @@ export default function AnnouncementDetail() {
         </div>
     )
 }
+=======
+>>>>>>> Stashed changes
