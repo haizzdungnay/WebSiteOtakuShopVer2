@@ -298,9 +298,17 @@ export default function PreOrdersPage() {
               {user && (
                 <div className="bg-gradient-to-r from-primary to-accent-red p-4 text-white">
                   <div className="flex items-center gap-3 mb-3">
-                    <div className="w-12 h-12 bg-background-white rounded-full flex items-center justify-center text-primary font-bold text-xl">
-                      {user.username?.[0]?.toUpperCase() || 'U'}
-                    </div>
+                    {user.avatar ? (
+                      <img 
+                        src={user.avatar} 
+                        alt={user.username || 'User'} 
+                        className="w-12 h-12 rounded-full object-cover border-2 border-white"
+                      />
+                    ) : (
+                      <div className="w-12 h-12 bg-background-white rounded-full flex items-center justify-center text-primary font-bold text-xl">
+                        {user.username?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <h3 className="font-bold text-sm truncate">{user.username}</h3>
                       <p className="text-xs opacity-90 truncate">{user.email}</p>

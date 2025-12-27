@@ -111,9 +111,17 @@ export default function OrderTrackingPage() {
               {user && (
                 <div className="p-6 bg-gradient-to-br from-primary to-primary-light border-b border-gray-200">
                   <div className="flex items-center gap-3">
-                    <div className="w-16 h-16 bg-accent-red rounded-full flex items-center justify-center text-white font-bold text-2xl">
-                      {user.username?.[0]?.toUpperCase() || 'U'}
-                    </div>
+                    {user.avatar ? (
+                      <img 
+                        src={user.avatar} 
+                        alt={user.username || 'User'} 
+                        className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 bg-accent-red rounded-full flex items-center justify-center text-white font-bold text-2xl">
+                        {user.username?.[0]?.toUpperCase() || 'U'}
+                      </div>
+                    )}
                     <div>
                       <h3 className="font-bold text-gray-900">{user.username}</h3>
                       <p className="text-sm text-gray-700">{user.email}</p>
