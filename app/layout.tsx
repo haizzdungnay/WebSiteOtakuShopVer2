@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import FloatingButtons from '@/components/FloatingButtons';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
+import { WishlistProvider } from '@/contexts/WishlistContext';
 
 export const metadata: Metadata = {
   title: 'Otaku Shop - Cửa hàng Figure Anime',
@@ -17,10 +18,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         <AuthProvider>
           <CartProvider>
-            <Header />
-            <main className="min-h-screen">{children}</main>
-            <Footer />
-            <FloatingButtons />
+            <WishlistProvider>
+              <Header />
+              <main className="min-h-screen">{children}</main>
+              <Footer />
+              <FloatingButtons />
+            </WishlistProvider>
           </CartProvider>
         </AuthProvider>
       </body>

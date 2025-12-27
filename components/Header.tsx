@@ -68,7 +68,8 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 shadow-md" suppressHydrationWarning>
       {/* Top Pink Header */}
-      <div className="bg-primary py-3 px-4" suppressHydrationWarning>
+      {/* Use only container padding to keep alignment consistent with nav */}
+      <div className="bg-primary py-3" suppressHydrationWarning>
         <div className="container-custom" suppressHydrationWarning>
           <div className="flex items-center justify-between gap-4 flex-wrap lg:flex-nowrap" suppressHydrationWarning>
             {/* Logo */}
@@ -256,8 +257,8 @@ export default function Header() {
       <nav className="bg-black text-white relative">
         <div className="container-custom">
           <div className="flex items-center">
-            {/* CỘT TRÁI: Menu Button (rộng cố định = w-64) */}
-            <div className="w-64 flex-shrink-0">
+            {/* CỘT TRÁI: Menu Button (khớp chiều rộng sidebar = 280px) */}
+            <div className="w-[280px] flex-shrink-0">
               <button
                 onClick={() => setShowMenuSidebar(true)}
                 className="flex w-full items-center justify-center gap-2 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
@@ -267,9 +268,10 @@ export default function Header() {
               </button>
             </div>
 
-            {/* CỘT GIỮA: Navigation Items */}
-            <div className="flex-1">
-              <div className="grid grid-flow-col auto-cols-max justify-center gap-10 md:gap-16 lg:gap-20">
+            {/* CỘT GIỮA: Navigation Items (thêm px-6 để khớp khoảng cách `gap-6` của trang chủ) */}
+            <div className="flex-1 px-0">
+              {/* Giảm khoảng cách theo responsive để tránh tràn ra ngoài */}
+              <div className="grid grid-flow-col auto-cols-max justify-center gap-8 md:gap-10 lg:gap-12 xl:gap-14">
                 <NavLink href="/in-stock" icon={<Package size={18} />}>
                   Hàng sẵn có
                 </NavLink>
@@ -291,8 +293,8 @@ export default function Header() {
               </div>
             </div>
 
-            {/* CỘT PHẢI: spacer để cân đối với cột MENU */}
-            <div className="w-64 flex-shrink-0" />
+            {/* CỘT PHẢI: spacer để cân đối với cột MENU (320px) */}
+            <div className="w-[320px] flex-shrink-0" />
           </div>
         </div>
       </nav>

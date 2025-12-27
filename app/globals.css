@@ -13,7 +13,8 @@
 @layer components {
   /* Container */
   .container-custom {
-    @apply w-full max-w-7xl mx-auto px-4;
+    /* Mở rộng container để tránh tràn navbar ở 100% zoom */
+    @apply w-full max-w-[1440px] mx-auto px-4;
   }
 
   /* Buttons */

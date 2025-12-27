@@ -22,6 +22,20 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Verify user exists in DB (in case of deleted account with valid token)
+        const dbUser = await prisma.user.findUnique({
+            where: { id: user.userId }
+        })
+
+        if (!dbUser) {
+            return NextResponse.json({
+                success: false,
+                error: 'Tài khoản không tồn tại hoặc đã bị xóa'
+            },
+                { status: 401 }
+            )
+        }
+
         // 2 Validate input
         const body = await request.json()
         const  { productId } = addToWishlistSchema.parse(body)
@@ -78,7 +92,7 @@ export async function POST(request: NextRequest) {
         }
 
         // 5 thêm sản phẩm vào wishlist
-        const _wishlistItem = await prisma.wishlist.create({
+        const wishlistItem = await prisma.wishlist.create({
             data: {
                 userId: user.userId,
                 productId: productId
@@ -102,7 +116,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
             {
                 success: true,
-                message: 'Đã thêm vào danh sách yêu thích'
+                message: 'Đã thêm vào danh sách yêu thích',
+                data: wishlistItem
             },
             { status: 201 }
         )

@@ -159,6 +159,18 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
               </Link>
             </li>
 
+            {/* Wishlist */}
+            <li>
+              <Link
+                href="/profile/wishlist"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                onClick={onClose}
+              >
+                <Heart size={20} className="text-pink-500" />
+                <span className="flex-1 font-medium text-sm">Sản phẩm yêu thích</span>
+              </Link>
+            </li>
+
             {/* Danh mục (Categories) */}
             <li>
               <div>
