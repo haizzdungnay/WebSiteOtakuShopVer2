@@ -41,6 +41,14 @@ export async function GET(request: NextRequest) {
       where.role = role
     }
 
+    // Filter by email verification status
+    const verified = searchParams.get('verified')
+    if (verified === 'true') {
+      where.emailVerified = true
+    } else if (verified === 'false') {
+      where.emailVerified = false
+    }
+
     // 4. Query users with pagination
     const [users, total] = await Promise.all([
       prisma.user.findMany({
@@ -54,6 +62,9 @@ export async function GET(request: NextRequest) {
           dateOfBirth: true,
           avatar: true,
           role: true,
+          emailVerified: true,
+          otpCode: true,
+          otpExpires: true,
           createdAt: true,
           updatedAt: true,
           _count: {

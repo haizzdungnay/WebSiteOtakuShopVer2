@@ -742,6 +742,13 @@ export default function AdminPage() {
               {tab.label}
             </button>
           ))}
+          <Link
+            href="/admin/users"
+            className="flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all bg-white text-slate-600 hover:bg-slate-100"
+          >
+            <Users size={18} />
+            Tài khoản
+          </Link>
         </div>
 
         {/* Dashboard Tab */}

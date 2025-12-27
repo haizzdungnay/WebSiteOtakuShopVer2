@@ -13,6 +13,7 @@ interface User {
   avatar?: string | null
   gender?: 'MALE' | 'FEMALE' | 'OTHER' | null
   dateOfBirth?: string | null
+  emailVerified?: boolean
 }
 
 interface LoginResult {
@@ -75,7 +76,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: userData.role,
           avatar: userData.avatar,
           gender: userData.gender,
-          dateOfBirth: userData.dateOfBirth
+          dateOfBirth: userData.dateOfBirth,
+          emailVerified: userData.emailVerified
         })
         return
       }
@@ -133,7 +135,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: userData.role,
           avatar: userData.avatar,
           gender: userData.gender,
-          dateOfBirth: userData.dateOfBirth
+          dateOfBirth: userData.dateOfBirth,
+          emailVerified: userData.emailVerified
         })
         return true
       }

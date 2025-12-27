@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
         avatar: true,
         gender: true,
         dateOfBirth: true,
+        emailVerified: true,
         createdAt: true
       }
     })
@@ -48,6 +49,7 @@ export async function GET(request: NextRequest) {
         avatar: user.avatar,
         gender: user.gender,
         dateOfBirth: user.dateOfBirth,
+        emailVerified: user.emailVerified,
         createdAt: user.createdAt
       },
     })

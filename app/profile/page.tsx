@@ -20,7 +20,10 @@ import {
   Camera,
   Gift,
   Link as LinkIcon,
-  Check
+  Check,
+  AlertCircle,
+  Loader2,
+  CheckCircle
 } from 'lucide-react';
 
 export default function ProfilePage() {
@@ -43,6 +46,15 @@ export default function ProfilePage() {
   const [avatarUrl, setAvatarUrl] = useState('');
   const [savingAvatar, setSavingAvatar] = useState(false);
 
+  // Email verification states
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [verifyError, setVerifyError] = useState('');
+  const [verifySuccess, setVerifySuccess] = useState('');
+
   useEffect(() => {
     if (!loading && !user) {
       router.push('/login?redirect=/profile');
@@ -60,6 +72,67 @@ export default function ProfilePage() {
       });
     }
   }, [user]);
+
+  // Send OTP for email verification
+  const handleSendOtp = async () => {
+    setSendingOtp(true);
+    setVerifyError('');
+    setVerifySuccess('');
+
+    try {
+      const response = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setOtpSent(true);
+        setVerifySuccess(data.message || 'Mã OTP đã được gửi đến email của bạn');
+      } else {
+        setVerifyError(data.error || 'Không thể gửi mã OTP');
+      }
+    } catch (err) {
+      setVerifyError('Không thể kết nối đến máy chủ');
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  // Verify OTP
+  const handleVerifyOtp = async () => {
+    if (!otpCode.trim()) {
+      setVerifyError('Vui lòng nhập mã OTP');
+      return;
+    }
+
+    setVerifyingOtp(true);
+    setVerifyError('');
+
+    try {
+      const response = await fetch('/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ otpCode: otpCode.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setVerifySuccess('Xác minh tài khoản thành công!');
+        setShowVerifyModal(false);
+        refreshUser();
+      } else {
+        setVerifyError(data.error || 'Mã OTP không chính xác');
+      }
+    } catch (err) {
+      setVerifyError('Không thể kết nối đến máy chủ');
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
 
   const handleAvatarClick = () => {
     setAvatarUrl(formData.avatar || '');
@@ -432,6 +505,46 @@ export default function ProfilePage() {
                       </div>
                     </div>
 
+                    {/* Email Verification Banner */}
+                    {!user.emailVerified && (
+                      <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                        <div className="flex items-start gap-3">
+                          <AlertCircle className="text-amber-600 flex-shrink-0 mt-0.5" size={20} />
+                          <div className="flex-1">
+                            <h4 className="font-semibold text-amber-800">Tài khoản chưa được xác minh</h4>
+                            <p className="text-sm text-amber-700 mt-1">
+                              Xác minh email để bảo mật tài khoản và nhận được đầy đủ quyền lợi khách hàng.
+                            </p>
+                            <button
+                              onClick={() => {
+                                setShowVerifyModal(true);
+                                setOtpSent(false);
+                                setOtpCode('');
+                                setVerifyError('');
+                                setVerifySuccess('');
+                              }}
+                              className="mt-3 px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors flex items-center gap-2 text-sm font-medium"
+                            >
+                              <Mail size={16} />
+                              Xác minh ngay
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {user.emailVerified && (
+                      <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <CheckCircle className="text-green-600" size={20} />
+                          <div>
+                            <h4 className="font-semibold text-green-800">Tài khoản đã xác minh</h4>
+                            <p className="text-sm text-green-700">Email của bạn đã được xác minh thành công.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Quick Links */}
                     <div className="pt-6 border-t">
                       <h3 className="text-lg font-semibold text-gray-900 mb-4">Truy cập nhanh</h3>
@@ -553,6 +666,113 @@ export default function ProfilePage() {
                   )}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Email Verification Modal */}
+      {showVerifyModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                  <Mail size={20} className="text-primary" />
+                  Xác minh Email
+                </h3>
+                <button
+                  onClick={() => setShowVerifyModal(false)}
+                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X size={20} className="text-gray-500" />
+                </button>
+              </div>
+
+              {verifyError && (
+                <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg flex items-center gap-2 text-sm">
+                  <AlertCircle size={16} />
+                  {verifyError}
+                </div>
+              )}
+
+              {verifySuccess && (
+                <div className="mb-4 p-3 bg-green-50 text-green-600 rounded-lg flex items-center gap-2 text-sm">
+                  <CheckCircle size={16} />
+                  {verifySuccess}
+                </div>
+              )}
+
+              {!otpSent ? (
+                <div>
+                  <p className="text-gray-600 mb-4">
+                    Chúng tôi sẽ gửi mã OTP gồm 6 chữ số đến email <strong>{user?.email}</strong> của bạn.
+                  </p>
+                  <button
+                    onClick={handleSendOtp}
+                    disabled={sendingOtp}
+                    className="w-full px-4 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+                  >
+                    {sendingOtp ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        Đang gửi...
+                      </>
+                    ) : (
+                      <>
+                        <Mail size={18} />
+                        Gửi mã OTP
+                      </>
+                    )}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-gray-600 mb-4">
+                    Nhập mã OTP đã được gửi đến email của bạn. Mã có hiệu lực trong 10 phút.
+                  </p>
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mã OTP
+                    </label>
+                    <input
+                      type="text"
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="Nhập 6 chữ số"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent text-center text-2xl font-mono tracking-widest"
+                      maxLength={6}
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleSendOtp}
+                      disabled={sendingOtp}
+                      className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {sendingOtp ? <Loader2 size={16} className="animate-spin" /> : null}
+                      Gửi lại
+                    </button>
+                    <button
+                      onClick={handleVerifyOtp}
+                      disabled={verifyingOtp || otpCode.length !== 6}
+                      className="flex-1 px-4 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors font-medium flex items-center justify-center gap-2 disabled:opacity-50"
+                    >
+                      {verifyingOtp ? (
+                        <>
+                          <Loader2 size={16} className="animate-spin" />
+                          Xác minh...
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle size={16} />
+                          Xác minh
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
