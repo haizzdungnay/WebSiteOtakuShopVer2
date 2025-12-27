@@ -261,7 +261,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const removeFromCart = (id: string) => {
     const previousItems = items
-    setItems((prevItems) => prevItems.filter((item) => item.id !== id))
+    setItems((prevItems) => {
+      const newItems = prevItems.filter((item) => item.id !== id)
+      persistLocalCart(newItems)
+      return newItems
+    })
 
     if (!user) return
 
@@ -269,12 +273,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       method: 'DELETE',
       credentials: 'include'
     }).then(response => {
-      if (!response.ok) {
+      if (!response.ok && response.status !== 401) {
         setItems(previousItems)
+        persistLocalCart(previousItems)
       }
     }).catch(error => {
       console.error('Remove from cart failed:', error)
       setItems(previousItems)
+      persistLocalCart(previousItems)
     })
   };
 
@@ -285,9 +291,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
 
     const previousItems = items
-    setItems((prevItems) =>
-      prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
-    )
+    setItems((prevItems) => {
+      const newItems = prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
+      persistLocalCart(newItems)
+      return newItems
+    })
 
     if (!user) return
 
@@ -297,17 +305,20 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       credentials: 'include',
       body: JSON.stringify({ quantity })
     }).then(response => {
-      if (!response.ok) {
+      if (!response.ok && response.status !== 401) {
         setItems(previousItems)
+        persistLocalCart(previousItems)
       }
     }).catch(error => {
       console.error('Update quantity failed:', error)
       setItems(previousItems)
+      persistLocalCart(previousItems)
     })
   };
 
   const clearCart = () => {
     setItems([])
+    persistLocalCart([])
 
     if (!user) return
 

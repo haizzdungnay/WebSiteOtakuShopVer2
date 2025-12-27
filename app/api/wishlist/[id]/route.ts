@@ -6,9 +6,10 @@ import { getUserFromRequest } from "@/lib/auth"
 // id ở đây là productId
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params
         const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
@@ -20,7 +21,7 @@ export async function DELETE(
             )
         }
 
-        const productId = params.id
+        const productId = id
 
         // Xóa dựa trên userId và productId
         const deleted = await prisma.wishlist.deleteMany({

@@ -15,11 +15,12 @@ const updateReviewSchema = z.object({
 // GET /api/reviews/[id] - Lấy thông tin đánh giá
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params
         const review = await prisma.review.findUnique({
-            where: { id: params.id },
+            where: { id: id },
             include: {
                 user: {
                     select: {
@@ -63,9 +64,10 @@ export async function GET(
 // PUT /api/reviews/[id] - Cập nhật đánh giá
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params
         // 1 Check authentication
         const user = await getUserFromRequest(request)
         if (!user) {
@@ -81,7 +83,7 @@ export async function PUT(
         // 2 Lấy đánh giá
         const review = await prisma.review.findUnique({
             where: {
-                id: params.id
+                id: id
             },
             select: {
                 userId: true,
@@ -118,7 +120,7 @@ export async function PUT(
         const result = await prisma.$transaction(async (tx) => {
             // Update review
             const updatedReview = await tx.review.update({
-                where: { id: params.id },
+                where: { id: id },
                 data: validatedData,
                 include: {
                     user: {
@@ -175,9 +177,10 @@ export async function PUT(
 // DELETE /api/reviews/[id] - Xóa đánh giá
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params
         // 1. Check authentication
         const user = await getUserFromRequest(request)
         if (!user) {
@@ -189,7 +192,7 @@ export async function DELETE(
 
         // 2. Lấy đánh giá
         const review = await prisma.review.findUnique({
-            where: { id: params.id },
+            where: { id: id },
             select: {
                 userId: true,
                 productId: true
@@ -215,7 +218,7 @@ export async function DELETE(
         await prisma.$transaction(async (tx) => {
             // Xóa đánh giá
             await tx.review.delete({
-                where: { id: params.id }
+                where: { id: id }
             })
 
             // Tính lại rating của sản phẩm

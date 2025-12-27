@@ -8,11 +8,13 @@ const updateQuantitySchema = z.object({
 })
 
 // PATCH /api/cart/[id] - Update cart item quantity
+// id can be either cart item id or product id
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params
         // 1 Check authentication
         const user = await getUserFromRequest(request)
         if (!user) {
@@ -29,10 +31,13 @@ export async function PATCH(
         const body = await request.json()
         const { quantity } = updateQuantitySchema.parse(body)
 
-        // 3 Find cart item
-        const cartItem = await prisma.cartItem.findUnique({
+        // 3 Find cart item - try by productId first (for frontend), then by cart item id
+        let cartItem = await prisma.cartItem.findUnique({
             where: {
-                id: params.id
+                userId_productId: {
+                    userId: user.userId,
+                    productId: id
+                }
             },
             include: {
                 product: {
@@ -46,6 +51,25 @@ export async function PATCH(
             }
         })
 
+        // If not found by productId, try by cart item id
+        if (!cartItem) {
+            cartItem = await prisma.cartItem.findUnique({
+                where: {
+                    id: id
+                },
+                include: {
+                    product: {
+                        select: {
+                            id: true,
+                            name: true,
+                            stockQuantity: true,
+                            isActive: true
+                        }
+                    }
+                }
+            })
+        }
+
         if (!cartItem) {
             return NextResponse.json(
                 {
@@ -53,6 +77,17 @@ export async function PATCH(
                     error: 'Không tìm thấy sản phẩm trong giỏ hàng'
                 },
                 { status: 404 }
+            )
+        }
+
+        // 4 Check ownership
+        if (cartItem.userId !== user.userId) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: 'Không có quyền thực hiện'
+                },
+                { status: 403 }
             )
         }
 
@@ -81,7 +116,7 @@ export async function PATCH(
         // 7 Update cart item quantity
         const updatedCartItem = await prisma.cartItem.update({
             where: {
-                id: params.id
+                id: cartItem.id
             },
             data: {
                 quantity
@@ -129,11 +164,13 @@ export async function PATCH(
 }
 
 // DELETE /api/cart/[id] - Remove item
+// id can be either cart item id or product id
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params
         // 1 Check authentication
         const user = await getUserFromRequest(request)
         if (!user) {
@@ -146,12 +183,24 @@ export async function DELETE(
             )
         }
 
-        // 2 Find cart item
-        const cartItem = await prisma.cartItem.findUnique({
+        // 2 Find cart item - try by productId first (for frontend), then by cart item id
+        let cartItem = await prisma.cartItem.findUnique({
             where: {
-                id: params.id
+                userId_productId: {
+                    userId: user.userId,
+                    productId: id
+                }
             }
         })
+
+        // If not found by productId, try by cart item id
+        if (!cartItem) {
+            cartItem = await prisma.cartItem.findUnique({
+                where: {
+                    id: id
+                }
+            })
+        }
 
         if (!cartItem) {
             return NextResponse.json(
@@ -176,7 +225,7 @@ export async function DELETE(
 
         // 4 Delete item
         await prisma.cartItem.delete({
-            where: { id: params.id }
+            where: { id: cartItem.id }
         })
 
         return NextResponse.json(

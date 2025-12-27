@@ -8,9 +8,10 @@ import { prisma } from '@/lib/prisma'
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { slug: string } }
+    { params }: { params: Promise<{ slug: string }> }
 ) {
     try {
+        const { slug } = await params
         // 1. Get query parameters
         const { searchParams } = new URL(request.url)
         const rating = searchParams.get('rating')
@@ -21,7 +22,7 @@ export async function GET(
 
         // 2. Find product
         const product = await prisma.product.findUnique({
-            where: { slug: params.slug },
+            where: { slug: slug },
             select: { 
                 id: true, 
                 name: true, 
