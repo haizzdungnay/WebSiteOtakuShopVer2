@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
     const user = await getUserFromRequest(request);
-    
+
     if (!user) {
       return NextResponse.json({ canReview: false, hasReviewed: false });
     }
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
     // Check if user has already reviewed this product
     const existingReview = await prisma.review.findFirst({
       where: {
-        userId: user.id,
+        userId: user.userId,
         productId
       }
     });
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       where: {
         productId,
         order: {
-          userId: user.id,
+          userId: user.userId,
           status: {
             in: ['COMPLETED', 'DELIVERED']
           }

@@ -188,18 +188,18 @@ export async function PATCH(
       }
 
       // Update payment status if order is cancelled
-      if (status === 'CANCELLED' && order.payment && order.payment.status !== 'PAID') {
+      if (status === 'CANCELLED' && order.payment && order.payment.status !== 'COMPLETED') {
         await tx.payment.update({
           where: { id: order.payment.id },
           data: { status: 'CANCELLED' }
         })
       }
 
-      // Mark payment as paid when delivered (for COD)
+      // Mark payment as completed when delivered (for COD)
       if (status === 'DELIVERED' && order.payment && order.payment.method === 'COD') {
         await tx.payment.update({
           where: { id: order.payment.id },
-          data: { status: 'PAID' }
+          data: { status: 'COMPLETED' }
         })
       }
 

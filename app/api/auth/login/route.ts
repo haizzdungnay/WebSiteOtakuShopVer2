@@ -56,7 +56,20 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Case 3: Password đúng -> tạo JWT
+        // Case 3: Check if email is verified
+        if (!user.emailVerified) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: 'Vui lòng xác nhận email trước khi đăng nhập',
+                    needVerification: true,
+                    email: user.email
+                },
+                { status: 403 }
+            )
+        }
+
+        // Case 4: Password đúng -> tạo JWT
         const tokenPayload = {
             userId: user.id,
             email: user.email,

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/auth';
 
 export async function POST(
@@ -40,7 +40,7 @@ export async function POST(
     }
 
     // Cannot vote on own review
-    if (review.userId === user.id) {
+    if (review.userId === user.userId) {
       return NextResponse.json(
         { error: 'Không thể vote cho đánh giá của chính mình' },
         { status: 400 }
@@ -50,9 +50,9 @@ export async function POST(
     // Check if user already voted
     const existingVote = await prisma.reviewVote.findUnique({
       where: {
-        reviewId_visitorId: {
+        reviewId_userId: {
           reviewId,
-          visitorId: user.id
+          userId: user.userId
         }
       }
     });
@@ -64,20 +64,20 @@ export async function POST(
         await prisma.$transaction([
           prisma.reviewVote.delete({
             where: {
-              reviewId_visitorId: {
+              reviewId_userId: {
                 reviewId,
-                visitorId: user.id
+                userId: user.userId
               }
             }
           }),
           prisma.review.update({
             where: { id: reviewId },
             data: {
-              helpfulCount: isHelpful 
-                ? { decrement: 1 } 
+              helpfulCount: isHelpful
+                ? { decrement: 1 }
                 : undefined,
-              unhelpfulCount: !isHelpful 
-                ? { decrement: 1 } 
+              unhelpfulCount: !isHelpful
+                ? { decrement: 1 }
                 : undefined
             }
           })
@@ -92,9 +92,9 @@ export async function POST(
         await prisma.$transaction([
           prisma.reviewVote.update({
             where: {
-              reviewId_visitorId: {
+              reviewId_userId: {
                 reviewId,
-                visitorId: user.id
+                userId: user.userId
               }
             },
             data: { isHelpful }
@@ -102,11 +102,11 @@ export async function POST(
           prisma.review.update({
             where: { id: reviewId },
             data: {
-              helpfulCount: isHelpful 
-                ? { increment: 1 } 
+              helpfulCount: isHelpful
+                ? { increment: 1 }
                 : { decrement: 1 },
-              unhelpfulCount: !isHelpful 
-                ? { increment: 1 } 
+              unhelpfulCount: !isHelpful
+                ? { increment: 1 }
                 : { decrement: 1 }
             }
           })
@@ -123,18 +123,18 @@ export async function POST(
         prisma.reviewVote.create({
           data: {
             reviewId,
-            visitorId: user.id,
+            userId: user.userId,
             isHelpful
           }
         }),
         prisma.review.update({
           where: { id: reviewId },
           data: {
-            helpfulCount: isHelpful 
-              ? { increment: 1 } 
+            helpfulCount: isHelpful
+              ? { increment: 1 }
               : undefined,
-            unhelpfulCount: !isHelpful 
-              ? { increment: 1 } 
+            unhelpfulCount: !isHelpful
+              ? { increment: 1 }
               : undefined
           }
         })
