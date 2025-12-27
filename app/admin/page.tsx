@@ -64,7 +64,14 @@ interface Order {
   customerPhone: string;
   totalAmount: number;
   status: string;
+  note?: string;
   createdAt: string;
+  shippingFullName?: string;
+  shippingPhone?: string;
+  shippingAddress?: string;
+  shippingWard?: string;
+  shippingDistrict?: string;
+  shippingCity?: string;
   orderItems: Array<{
     id: string;
     quantity: number;
@@ -1879,15 +1886,34 @@ export default function AdminPage() {
                   <p className="text-sm text-slate-600 mt-1">Ngày đặt: {formatDate(selectedOrder.createdAt)}</p>
                 </div>
                 <div className="p-4 rounded-xl bg-slate-50">
-                  <p className="text-sm font-semibold text-slate-700 mb-2">Ghi chú admin</p>
-                  <textarea
-                    value={orderAdminNote}
-                    onChange={(e) => setOrderAdminNote(e.target.value)}
-                    className="w-full rounded-xl border border-slate-200 px-3 py-2 focus:ring-2 focus:ring-slate-400"
-                    rows={3}
-                    placeholder="Thêm ghi chú khi cập nhật trạng thái"
-                  />
+                  <p className="text-sm font-semibold text-slate-700 mb-2">Địa chỉ giao hàng</p>
+                  <p className="text-sm text-slate-600">{selectedOrder.shippingFullName || selectedOrder.customerName}</p>
+                  <p className="text-sm text-slate-600">{selectedOrder.shippingPhone || selectedOrder.customerPhone}</p>
+                  <p className="text-sm text-slate-600">
+                    {selectedOrder.shippingAddress}
+                    {selectedOrder.shippingWard && `, ${selectedOrder.shippingWard}`}
+                    {selectedOrder.shippingDistrict && `, ${selectedOrder.shippingDistrict}`}
+                    {selectedOrder.shippingCity && `, ${selectedOrder.shippingCity}`}
+                  </p>
                 </div>
+              </div>
+
+              {selectedOrder.note && (
+                <div className="mt-4 p-4 rounded-xl bg-yellow-50 border border-yellow-200">
+                  <p className="text-sm font-semibold text-yellow-800 mb-1">📝 Ghi chú của khách hàng</p>
+                  <p className="text-sm text-yellow-700">{selectedOrder.note}</p>
+                </div>
+              )}
+
+              <div className="mt-4 p-4 rounded-xl bg-slate-50">
+                <p className="text-sm font-semibold text-slate-700 mb-2">Ghi chú admin</p>
+                <textarea
+                  value={orderAdminNote}
+                  onChange={(e) => setOrderAdminNote(e.target.value)}
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2 focus:ring-2 focus:ring-slate-400"
+                  rows={3}
+                  placeholder="Thêm ghi chú khi cập nhật trạng thái"
+                />
               </div>
 
               <div className="mt-4 p-4 rounded-xl bg-white border border-slate-100">

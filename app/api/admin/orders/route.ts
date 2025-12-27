@@ -70,6 +70,12 @@ export async function GET(request: NextRequest) {
           note: true,
           createdAt: true,
           updatedAt: true,
+          shippingFullName: true,
+          shippingPhone: true,
+          shippingAddress: true,
+          shippingWard: true,
+          shippingDistrict: true,
+          shippingCity: true,
           user: {
             select: {
               id: true,
@@ -97,15 +103,13 @@ export async function GET(request: NextRequest) {
           shipping: {
             select: {
               id: true,
-              recipientName: true,
-              phone: true,
-              address: true,
-              ward: true,
-              district: true,
-              province: true,
               carrier: true,
               trackingCode: true,
-              status: true
+              fee: true,
+              status: true,
+              estimatedDate: true,
+              shippedAt: true,
+              deliveredAt: true
             }
           },
           payment: {
