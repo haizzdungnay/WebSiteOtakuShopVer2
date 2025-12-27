@@ -11,18 +11,23 @@ Cửa hàng figure anime chính hãng - Next.js E-commerce Platform với Prisma
 ## Tính năng
 
 ### Frontend
-- **Authentication** - Đăng ký, đăng nhập user + Admin login
+- **Authentication** - Đăng ký, đăng nhập với xác nhận email
+- **Email Verification** - Xác nhận email qua link gửi tới hộp thư
 - **Shopping Cart** - Giỏ hàng với quản lý số lượng real-time
 - **Product Catalog** - Danh sách, chi tiết, tìm kiếm, filter sản phẩm
+- **Search Suggestions** - Gợi ý tìm kiếm real-time khi nhập
 - **User Profile** - Profile, lịch sử đơn hàng, wishlist
+- **Wishlist** - Danh sách yêu thích với sync server
 - **Responsive Design** - Mobile-first với Tailwind CSS
 
 ### Backend (Prisma ORM)
 - **Full API** - RESTful API với Prisma ORM
 - **Order Management** - Quản lý đơn hàng đầy đủ
+- **VNPay Payment** - Thanh toán online qua VNPay
 - **Cart & Wishlist** - Giỏ hàng và danh sách yêu thích
 - **Reviews System** - Đánh giá sản phẩm với vote helpful
 - **Admin Dashboard** - Quản lý products, orders, users, coupons
+- **Email Service** - Gửi email xác nhận qua Nodemailer/Gmail
 - **Location Services** - API địa chỉ Việt Nam
 - **File Upload** - Upload ảnh với UploadThing
 
@@ -39,6 +44,7 @@ Cửa hàng figure anime chính hãng - Next.js E-commerce Platform với Prisma
 | **Zod** | 4.1.12 | Schema validation |
 | **bcryptjs** | 3.0.2 | Password hashing |
 | **jsonwebtoken** | 9.0.2 | JWT authentication |
+| **nodemailer** | 6.x | Email sending (Gmail SMTP) |
 
 ## Cấu trúc Project
 
@@ -49,9 +55,13 @@ WebSiteOtakuShopVer2/
 │   │   ├── auth/                 # Authentication
 │   │   │   ├── login/            # User login
 │   │   │   ├── register/         # User registration
+│   │   │   ├── verify-email/     # Email verification
+│   │   │   ├── resend-verification/ # Resend verification email
 │   │   │   ├── me/               # Get current user
 │   │   │   ├── profile/          # Update profile
 │   │   │   └── change-password/  # Change password
+│   │   ├── payment/              # Payment APIs
+│   │   │   └── vnpay/            # VNPay integration
 │   │   ├── admin/                # Admin APIs
 │   │   │   ├── login/            # Admin login
 │   │   │   ├── dashboard/        # Dashboard stats
@@ -73,17 +83,25 @@ WebSiteOtakuShopVer2/
 │   ├── admin/                    # Admin Dashboard pages
 │   ├── login/                    # Login page
 │   ├── register/                 # Registration page
+│   ├── verify-email/             # Email verification page
 │   ├── products/                 # Product pages
-│   ├── checkout/                 # Checkout
+│   ├── cart/                     # Cart page
+│   ├── checkout/                 # Checkout pages
+│   │   └── success/              # Checkout success page
+│   ├── profile/                  # User profile pages
+│   │   ├── orders/               # Order history
+│   │   └── wishlist/             # Wishlist page
 │   └── ...                       # Other pages
 ├── components/                   # React Components
 ├── contexts/                     # React Contexts
 │   ├── AuthContext.tsx           # Auth state
-│   └── CartContext.tsx           # Cart state
+│   ├── CartContext.tsx           # Cart state
+│   └── WishlistContext.tsx       # Wishlist state
 ├── lib/                          # Utilities
 │   ├── prisma.ts                 # Prisma client
 │   ├── auth.ts                   # Auth helpers
 │   ├── admin-auth.ts             # Admin auth
+│   ├── email.ts                  # Email utilities (nodemailer)
 │   └── ...                       # Other utilities
 ├── prisma/
 │   ├── schema.prisma             # Database schema
@@ -114,7 +132,7 @@ npm install
 
 ### Bước 3: Cấu hình Environment
 
-Tạo file `.env` trong thư mục gốc:
+Tạo file `.env` trong thư mục gốc (tham khảo `.env.example`):
 
 ```env
 # Database - Prisma
@@ -131,6 +149,21 @@ ADMIN_DISPLAY_NAME=Quản trị viên
 # App
 NODE_ENV=development
 NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+# Email Configuration (Gmail SMTP)
+# Để gửi email, bạn cần:
+# 1. Bật 2-Factor Authentication cho Gmail
+# 2. Tạo App Password tại: https://myaccount.google.com/apppasswords
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASS=your-app-password
+
+# VNPay Configuration (Sandbox)
+VNP_TMN_CODE=your-vnpay-terminal-code
+VNP_HASH_SECRET=your-vnpay-hash-secret
+VNP_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+VNP_RETURN_URL=http://localhost:3000/api/payment/vnpay/return
+VNP_IPN_URL=http://localhost:3000/api/payment/vnpay/ipn
 ```
 
 ### Bước 4: Khởi động PostgreSQL
@@ -180,6 +213,8 @@ Truy cập: **http://localhost:3000**
 ### Test User
 Đăng ký tài khoản mới tại `/register`
 
+> **Lưu ý**: Sau khi đăng ký, bạn cần xác nhận email trước khi đăng nhập. Check email để nhấn link xác nhận.
+
 ## Scripts
 
 ```bash
@@ -205,8 +240,10 @@ npm run docker:down      # Stop PostgreSQL
 ### Authentication
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/auth/login` | User login |
-| POST | `/api/auth/register` | User registration |
+| POST | `/api/auth/login` | User login (requires verified email) |
+| POST | `/api/auth/register` | User registration (sends verification email) |
+| GET | `/api/auth/verify-email?token=xxx` | Verify email address |
+| POST | `/api/auth/resend-verification` | Resend verification email |
 | GET | `/api/auth/me` | Get current user |
 | POST | `/api/auth/profile` | Update profile |
 | POST | `/api/auth/change-password` | Change password |
@@ -246,6 +283,15 @@ npm run docker:down      # Stop PostgreSQL
 |--------|----------|-------------|
 | GET/POST | `/api/reviews` | Review operations |
 | GET | `/api/products/[slug]/reviews` | Product reviews |
+| GET | `/api/reviews/can-review?productId=xxx` | Check if user can review |
+| POST | `/api/reviews/[id]/vote` | Vote review helpful/unhelpful |
+
+### Payment
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/payment/vnpay/create` | Create VNPay payment URL |
+| GET | `/api/payment/vnpay/return` | VNPay return URL handler |
+| POST | `/api/payment/vnpay/ipn` | VNPay IPN callback |
 
 ## Hướng dẫn Quản lý Sản phẩm
 
@@ -466,6 +512,29 @@ Prisma Client could not be initialized
 ```bash
 npx prisma generate
 ```
+
+### Lỗi gửi email
+
+```
+Error sending email: Invalid login
+```
+
+**Giải pháp**:
+1. Đảm bảo đã bật 2-Factor Authentication cho Gmail
+2. Tạo App Password tại: https://myaccount.google.com/apppasswords
+3. Sử dụng App Password thay vì mật khẩu Gmail trong `EMAIL_PASS`
+4. Kiểm tra email và mật khẩu trong file `.env`
+
+### Lỗi VNPay
+
+```
+VNPay payment failed: Invalid checksum
+```
+
+**Giải pháp**:
+1. Kiểm tra `VNP_HASH_SECRET` đúng với tài khoản VNPay
+2. Đảm bảo `VNP_TMN_CODE` chính xác
+3. Với môi trường test, sử dụng Sandbox credentials
 
 ## Contributing
 
