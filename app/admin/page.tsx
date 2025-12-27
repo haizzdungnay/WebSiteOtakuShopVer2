@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, FormEvent } from 'react';
+import { useState, useEffect, useMemo, FormEvent, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Cookies from 'js-cookie';
 import {
@@ -20,6 +20,7 @@ import {
   Trash2,
   Users,
   X,
+  Newspaper,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -158,7 +159,11 @@ export default function AdminPage() {
   const isAdmin = user?.role === 'admin';
 
   // States
+<<<<<<< Updated upstream
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'reviews' | 'news'>('dashboard');
+=======
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'reviews' | 'announcements'>('dashboard');
+>>>>>>> Stashed changes
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -202,6 +207,7 @@ export default function AdminPage() {
   const [reviewTotalPages, setReviewTotalPages] = useState(1);
   const [reviewTotal, setReviewTotal] = useState(0);
 
+<<<<<<< Updated upstream
   // News filters & pagination
   const [newsFilters, setNewsFilters] = useState({ search: '', isActive: '' });
   const [newsPage, setNewsPage] = useState(1);
@@ -217,6 +223,16 @@ export default function AdminPage() {
     content: '',
     isActive: true
   });
+=======
+  // Announcements states
+  const [announcementFilters, setAnnouncementFilters] = useState({ isActive: '' });
+  const [announcementPage, setAnnouncementPage] = useState(1);
+  const [announcementTotalPages, setAnnouncementTotalPages] = useState(1);
+  const [announcementTotal, setAnnouncementTotal] = useState(0);
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
+  const [announcementForm, setAnnouncementForm] = useState({ title: '', summary: '', content: '', isActive: true });
+>>>>>>> Stashed changes
 
   // Order detail modal
   const [showOrderModal, setShowOrderModal] = useState(false);
@@ -351,10 +367,16 @@ export default function AdminPage() {
   const fetchAnnouncements = async () => {
     try {
       const params = new URLSearchParams();
+<<<<<<< Updated upstream
       params.set('page', String(newsPage));
       params.set('limit', '10');
       if (newsFilters.search) params.set('search', newsFilters.search);
       if (newsFilters.isActive) params.set('isActive', newsFilters.isActive);
+=======
+      params.set('page', String(announcementPage));
+      params.set('limit', '10');
+      if (announcementFilters.isActive) params.set('isActive', announcementFilters.isActive);
+>>>>>>> Stashed changes
 
       const response = await fetch(`/api/admin/announcements?${params.toString()}`, {
         headers: getHeaders(),
@@ -362,12 +384,20 @@ export default function AdminPage() {
       });
       if (response.ok) {
         const data = await response.json();
+<<<<<<< Updated upstream
         // API trả về data.data.announcements
         setAnnouncements(data.data?.announcements || data.announcements || data.data || []);
         const pagination = data.data?.pagination || data.pagination;
         if (pagination) {
           setNewsTotal(pagination.total || 0);
           setNewsTotalPages(pagination.totalPages || 1);
+=======
+        setAnnouncements(data.data?.announcements || data.announcements || data.data || []);
+        const pagination = data.data?.pagination || data.pagination;
+        if (pagination) {
+          setAnnouncementTotal(pagination.total || 0);
+          setAnnouncementTotalPages(pagination.totalPages || 1);
+>>>>>>> Stashed changes
         }
       }
     } catch (err) {
@@ -385,6 +415,7 @@ export default function AdminPage() {
         fetchProducts(),
         fetchOrders(),
         fetchReviews(),
+        fetchAnnouncements(),
       ]);
       setLoading(false);
     };
@@ -423,6 +454,13 @@ export default function AdminPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, reviewPage, reviewFilters]);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchAnnouncements();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, announcementPage, announcementFilters]);
 
   // Generate slug from name
   const generateSlug = (name: string) => {
@@ -637,6 +675,7 @@ export default function AdminPage() {
     }
   };
 
+<<<<<<< Updated upstream
   // Handle Toggle News Status
   const handleToggleNewsStatus = async (announcement: Announcement) => {
     try {
@@ -656,6 +695,43 @@ export default function AdminPage() {
     } catch (err) {
       console.error('Error toggling news status:', err);
       showToast('Có lỗi xảy ra khi cập nhật trạng thái', 'error');
+=======
+  // Handle Announcement Submit
+  const handleAnnouncementSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    
+    if (!announcementForm.title.trim() || !announcementForm.summary.trim()) {
+      showToast('Vui lòng nhập tiêu đề và tóm tắt', 'error');
+      return;
+    }
+
+    try {
+      const url = editingAnnouncement
+        ? `/api/admin/announcements/${editingAnnouncement.id}`
+        : '/api/admin/announcements';
+      const method = editingAnnouncement ? 'PATCH' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: getHeaders(),
+        body: JSON.stringify(announcementForm),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setShowAnnouncementModal(false);
+        setEditingAnnouncement(null);
+        setAnnouncementForm({ title: '', summary: '', content: '', isActive: true });
+        setAnnouncementPage(1);
+        showToast(editingAnnouncement ? 'Đã cập nhật tin tức' : 'Đã thêm tin tức mới', 'success');
+        await fetchAnnouncements();
+      } else {
+        showToast(data.error || 'Có lỗi xảy ra', 'error');
+      }
+    } catch (err) {
+      console.error('Error submitting announcement:', err);
+      showToast('Không thể kết nối đến server', 'error');
+>>>>>>> Stashed changes
     }
   };
 
@@ -669,15 +745,24 @@ export default function AdminPage() {
         headers: getHeaders(),
       });
 
+<<<<<<< Updated upstream
       if (response.ok) {
         await fetchAnnouncements();
         showToast('Đã xóa tin tức', 'success');
       } else {
         const data = await response.json();
+=======
+      const data = await response.json();
+      if (response.ok) {
+        showToast('Đã xóa tin tức', 'success');
+        await fetchAnnouncements();
+      } else {
+>>>>>>> Stashed changes
         showToast(data.error || 'Có lỗi xảy ra', 'error');
       }
     } catch (err) {
       console.error('Error deleting announcement:', err);
+<<<<<<< Updated upstream
       showToast('Có lỗi xảy ra khi xóa tin tức', 'error');
     }
   };
@@ -713,10 +798,27 @@ export default function AdminPage() {
     } catch (err) {
       console.error('Error creating announcement:', err);
       setError('Không thể kết nối đến server');
+=======
+>>>>>>> Stashed changes
       showToast('Không thể kết nối đến server', 'error');
     }
   };
 
+<<<<<<< Updated upstream
+=======
+  // Handle Edit Announcement
+  const handleEditAnnouncement = (announcement: Announcement) => {
+    setEditingAnnouncement(announcement);
+    setAnnouncementForm({
+      title: announcement.title,
+      summary: announcement.summary,
+      content: announcement.content || '',
+      isActive: announcement.isActive,
+    });
+    setShowAnnouncementModal(true);
+  };
+
+>>>>>>> Stashed changes
   // Add image to product
   const handleAddImage = () => {
     if (imageUrl.trim()) {
@@ -867,6 +969,7 @@ export default function AdminPage() {
             { id: 'news', label: 'Tin tức', icon: FileText },
             { id: 'orders', label: 'Đơn hàng', icon: PackageCheck },
             { id: 'reviews', label: 'Đánh giá', icon: MessageSquare },
+            { id: 'announcements', label: 'Tin tức', icon: Newspaper },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1617,12 +1720,18 @@ export default function AdminPage() {
           </div>
         )}
 
+<<<<<<< Updated upstream
         {/* News Tab */}
         {activeTab === 'news' && (
+=======
+        {/* Announcements Tab */}
+        {activeTab === 'announcements' && (
+>>>>>>> Stashed changes
           <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold">Quản lý tin tức ({announcements.length})</h2>
               <button
+<<<<<<< Updated upstream
                 onClick={() => { setEditingNews(null); setNewsForm({ title: '', summary: '', content: '', isActive: true }); setShowNewsModal(true); }}
                 className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-full font-semibold text-sm hover:bg-slate-800"
               >
@@ -1655,10 +1764,47 @@ export default function AdminPage() {
               <button
                 onClick={() => { setNewsFilters({ search: '', isActive: '' }); setNewsPage(1); }}
                 className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-semibold"
+=======
+                onClick={() => {
+                  setEditingAnnouncement(null);
+                  setAnnouncementForm({ title: '', summary: '', content: '', isActive: true });
+                  setShowAnnouncementModal(true);
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-600 text-white font-semibold hover:bg-indigo-700 text-sm"
+              >
+                <FilePlus size={16} />
+                Thêm tin tức
+              </button>
+            </div>
+
+            <div className="flex gap-4 items-end mb-6">
+              <div className="min-w-[180px]">
+                <label className="text-sm text-slate-600">Trạng thái</label>
+                <select
+                  value={announcementFilters.isActive}
+                  onChange={(e) => {
+                    setAnnouncementPage(1);
+                    setAnnouncementFilters({ ...announcementFilters, isActive: e.target.value });
+                  }}
+                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none mt-1"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="true">Đang hoạt động</option>
+                  <option value="false">Ẩn</option>
+                </select>
+              </div>
+              <button
+                onClick={() => {
+                  setAnnouncementFilters({ isActive: '' });
+                  setAnnouncementPage(1);
+                }}
+                className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm font-semibold"
+>>>>>>> Stashed changes
               >
                 Xóa lọc
               </button>
             </div>
+<<<<<<< Updated upstream
             <div className="space-y-4">
               {announcements.map((announcement) => (
                 <div key={announcement.id} className="rounded-2xl border border-slate-100 p-6">
@@ -1723,6 +1869,90 @@ export default function AdminPage() {
                 </div>
               </div>
             )}
+=======
+
+            <div className="space-y-4">
+              {announcements.map((announcement) => (
+                <div key={announcement.id} className="rounded-2xl border border-slate-100 p-6 hover:border-slate-200 transition-all">
+                  <div className="flex items-start justify-between gap-4 mb-4">
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-slate-900 text-lg mb-1">{announcement.title}</h3>
+                      <p className="text-slate-600 text-sm line-clamp-2">{announcement.summary}</p>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                        announcement.isActive
+                          ? 'bg-emerald-50 text-emerald-600'
+                          : 'bg-slate-100 text-slate-600'
+                      }`}
+                    >
+                      {announcement.isActive ? 'Hoạt động' : 'Ẩn'}
+                    </span>
+                  </div>
+
+                  {announcement.content && (
+                    <div className="mb-3 text-slate-600 text-sm line-clamp-2">
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: announcement.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...',
+                        }}
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                    <p className="text-xs text-slate-500">{formatDate(announcement.createdAt)}</p>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => handleEditAnnouncement(announcement)}
+                        className="flex items-center gap-1 px-3 py-2 rounded-lg bg-blue-50 text-blue-600 text-sm font-semibold hover:bg-blue-100"
+                      >
+                        <Edit size={14} />
+                        Sửa
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAnnouncement(announcement.id)}
+                        className="flex items-center gap-1 px-3 py-2 rounded-lg bg-rose-50 text-rose-600 text-sm font-semibold hover:bg-rose-100"
+                      >
+                        <Trash2 size={14} />
+                        Xóa
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              {announcements.length === 0 && (
+                <div className="text-center py-12">
+                  <Newspaper size={48} className="mx-auto text-slate-300 mb-4" />
+                  <p className="text-slate-500">Chưa có tin tức nào</p>
+                </div>
+              )}
+
+              {/* Pagination */}
+              {announcementTotalPages > 1 && (
+                <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-sm text-slate-600">
+                  <span>Trang {announcementPage}/{announcementTotalPages} · {announcementTotal} tin tức</span>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setAnnouncementPage((p) => Math.max(1, p - 1))}
+                      disabled={announcementPage === 1}
+                      className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
+                    >
+                      Trước
+                    </button>
+                    <button
+                      onClick={() => setAnnouncementPage((p) => Math.min(announcementTotalPages, p + 1))}
+                      disabled={announcementPage === announcementTotalPages}
+                      className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
+                    >
+                      Sau
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+>>>>>>> Stashed changes
           </div>
         )}
 
@@ -2180,6 +2410,121 @@ export default function AdminPage() {
                   </>
                 )}
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Announcement Modal */}
+        {showAnnouncementModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="sticky top-0 bg-white flex items-center justify-between p-6 border-b border-slate-100">
+                <h2 className="text-xl font-bold text-slate-900">
+                  {editingAnnouncement ? 'Chỉnh sửa tin tức' : 'Thêm tin tức mới'}
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowAnnouncementModal(false);
+                    setEditingAnnouncement(null);
+                    setAnnouncementForm({ title: '', summary: '', content: '', isActive: true });
+                  }}
+                  className="p-2 rounded-full hover:bg-slate-100"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+
+              <form onSubmit={handleAnnouncementSubmit} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Tiêu đề <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    required
+                    type="text"
+                    value={announcementForm.title}
+                    onChange={(e) =>
+                      setAnnouncementForm({ ...announcementForm, title: e.target.value })
+                    }
+                    placeholder="Nhập tiêu đề tin tức..."
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Tóm tắt <span className="text-rose-500">*</span>
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={announcementForm.summary}
+                    onChange={(e) =>
+                      setAnnouncementForm({ ...announcementForm, summary: e.target.value })
+                    }
+                    placeholder="Nhập tóm tắt (10-500 ký tự)..."
+                    maxLength={500}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    {announcementForm.summary.length}/500 ký tự
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Nội dung chi tiết
+                  </label>
+                  <textarea
+                    rows={6}
+                    value={announcementForm.content}
+                    onChange={(e) =>
+                      setAnnouncementForm({ ...announcementForm, content: e.target.value })
+                    }
+                    placeholder="Nhập nội dung chi tiết (hỗ trợ HTML)..."
+                    maxLength={5000}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none font-mono text-sm"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">
+                    {announcementForm.content.length}/5000 ký tự
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3 pt-2">
+                  <input
+                    type="checkbox"
+                    id="isActive"
+                    checked={announcementForm.isActive}
+                    onChange={(e) =>
+                      setAnnouncementForm({ ...announcementForm, isActive: e.target.checked })
+                    }
+                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 cursor-pointer"
+                  />
+                  <label htmlFor="isActive" className="text-sm font-medium text-slate-700 cursor-pointer">
+                    Đang hoạt động (hiển thị trên trang web)
+                  </label>
+                </div>
+
+                <div className="flex gap-3 pt-6 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAnnouncementModal(false);
+                      setEditingAnnouncement(null);
+                      setAnnouncementForm({ title: '', summary: '', content: '', isActive: true });
+                    }}
+                    className="flex-1 py-3 rounded-2xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    className="flex-1 py-3 rounded-2xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
+                  >
+                    {editingAnnouncement ? 'Cập nhật' : 'Thêm'} tin tức
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         )}

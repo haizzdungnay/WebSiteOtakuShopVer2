@@ -121,3 +121,31 @@
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-primary-dark;
 }
+
+/* HTML Content in articles - Fix overflow */
+article div[style*="overflowWrap"],
+article > div {
+  max-width: 100%;
+  overflow-x: auto;
+  box-sizing: border-box;
+}
+
+article img {
+  max-width: 100% !important;
+  height: auto !important;
+  display: block;
+}
+
+article table {
+  max-width: 100% !important;
+  width: 100% !important;
+  overflow-x: auto;
+  display: block;
+}
+
+article pre,
+article code {
+  max-width: 100% !important;
+  overflow-x: auto;
+  display: block;
+}
