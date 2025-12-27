@@ -23,7 +23,7 @@ const createReviewSchema = z.object({
 export async function POST(request: NextRequest) {
     try {
         // 1 Check authentication
-        const user = getUserFromRequest(request)
+        const user = await getUserFromRequest(request)
         if (!user) {
             return NextResponse.json(
                 {
@@ -113,22 +113,25 @@ export async function POST(request: NextRequest) {
 
         // 6 Tạo đánh giá mới
         const result = await prisma.$transaction(async (tx) => {
-            // 6.1 Tạo review
+            // 6.1 Tạo review với isVerified = true (đã mua hàng)
             const review = await tx.review.create({
                 data: {
                     userId: user.userId,
                     productId: validatedData.productId,
+                    orderId: hasPurchased.orderId, // Liên kết với đơn hàng
                     rating: validatedData.rating,
                     title: validatedData.title,
                     comment: validatedData.comment,
-                    images: validatedData.images
+                    images: validatedData.images || [],
+                    isVerified: true // Đã xác nhận mua hàng
                 },
                 include: {
                     user: {
                         select: {
                             id: true,
                             fullName: true,
-                            email: true
+                            email: true,
+                            avatar: true
                         }
                     }
                 }
@@ -223,7 +226,8 @@ export async function GET(request: NextRequest) {
                         select: {
                             id: true,
                             fullName: true,
-                            email: true
+                            email: true,
+                            avatar: true
                         }
                     },
                     product: {
@@ -236,6 +240,7 @@ export async function GET(request: NextRequest) {
                     }
                 },
                 orderBy: [
+                    { isPinned: 'desc' },
                     { createdAt: 'desc' }
                 ],
                 skip,

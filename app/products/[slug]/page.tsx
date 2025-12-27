@@ -8,6 +8,7 @@ import { Minus, Plus, ShoppingCart, Heart, Share2, Truck, RotateCcw, Shield, Cre
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import ProductCard from '@/components/ProductCard';
+import ReviewSection from '@/components/ReviewSection';
 
 interface Product {
   id: string;
@@ -512,6 +513,11 @@ export default function ProductDetailPage() {
               ))}
             </div>
           </div>
+        )}
+
+        {/* Review Section */}
+        {product && (
+          <ReviewSection productId={product.id} productName={product.name} />
         )}
       </div>
     </div>

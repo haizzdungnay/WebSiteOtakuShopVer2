@@ -218,7 +218,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
                 onMouseEnter={() => handleMouseEnter('profile')}
                 onMouseLeave={handleMouseLeave}
               >
-                <div className="sidebar-link group cursor-pointer">
+                <div suppressHydrationWarning className="sidebar-link group cursor-pointer">
                   <User size={20} className="text-blue-500" />
                   <span className="flex-1 text-sm font-medium">Trang cá nhân</span>
                   <ChevronRight

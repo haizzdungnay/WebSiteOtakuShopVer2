@@ -67,6 +67,7 @@ export async function GET(request: NextRequest) {
           customerPhone: true,
           totalAmount: true,
           status: true,
+          note: true,
           createdAt: true,
           updatedAt: true,
           user: {
@@ -74,6 +75,7 @@ export async function GET(request: NextRequest) {
               id: true,
               email: true,
               fullName: true,
+              phone: true,
               avatar: true
             }
           },
@@ -84,11 +86,33 @@ export async function GET(request: NextRequest) {
               price: true,
               product: {
                 select: {
+                  id: true,
                   name: true,
                   slug: true,
                   images: true
                 }
               }
+            }
+          },
+          shipping: {
+            select: {
+              id: true,
+              recipientName: true,
+              phone: true,
+              address: true,
+              ward: true,
+              district: true,
+              province: true,
+              carrier: true,
+              trackingCode: true,
+              status: true
+            }
+          },
+          payment: {
+            select: {
+              id: true,
+              method: true,
+              status: true
             }
           },
           _count: {
@@ -138,18 +162,22 @@ export async function GET(request: NextRequest) {
       }, {} as Record<string, number>)
     }
 
+    // Transform orders to match expected format
+    const transformedOrders = orders.map(order => ({
+      ...order,
+      items: order.orderItems
+    }))
+
     return NextResponse.json({
       success: true,
-      data: {
-        orders,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit)
-        },
-        summary
-      }
+      data: transformedOrders,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      },
+      summary
     })
 
   } catch (error) {
