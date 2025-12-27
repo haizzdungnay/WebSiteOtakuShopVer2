@@ -11,6 +11,8 @@ interface User {
   phone?: string | null
   role?: 'admin' | 'user'
   avatar?: string | null
+  gender?: 'MALE' | 'FEMALE' | 'OTHER' | null
+  dateOfBirth?: string | null
 }
 
 interface LoginResult {
@@ -71,7 +73,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fullName: userData.fullName,
           phone: userData.phone,
           role: userData.role,
-          avatar: userData.avatar
+          avatar: userData.avatar,
+          gender: userData.gender,
+          dateOfBirth: userData.dateOfBirth
         })
         return
       }
@@ -127,7 +131,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           fullName: userData.fullName,
           phone: userData.phone,
           role: userData.role,
-          avatar: userData.avatar
+          avatar: userData.avatar,
+          gender: userData.gender,
+          dateOfBirth: userData.dateOfBirth
         })
         return true
       }

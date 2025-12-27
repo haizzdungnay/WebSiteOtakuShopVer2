@@ -1,11 +1,12 @@
 import nodemailer from 'nodemailer';
 
 // Create transporter using Gmail
+// EMAIL_USER and EMAIL_PASS must be set in environment variables
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER || 'tuanduongtempproject@gmail.com',
-    pass: process.env.EMAIL_PASS || 'tuanduongne2004',
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 
@@ -16,9 +17,14 @@ interface SendEmailOptions {
 }
 
 export async function sendEmail({ to, subject, html }: SendEmailOptions): Promise<boolean> {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    console.error('Email configuration missing: EMAIL_USER or EMAIL_PASS not set');
+    return false;
+  }
+
   try {
     await transporter.sendMail({
-      from: `"OtakuShop" <${process.env.EMAIL_USER || 'tuanduongtempproject@gmail.com'}>`,
+      from: `"OtakuShop" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
