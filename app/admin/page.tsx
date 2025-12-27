@@ -160,15 +160,7 @@ export default function AdminPage() {
   const isAdmin = user?.role === 'admin';
 
   // States
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'reviews' | 'news'>('dashboard');
-=======
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'reviews' | 'announcements'>('dashboard');
->>>>>>> Stashed changes
-=======
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'reviews' | 'articles'>('dashboard');
->>>>>>> Stashed changes
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -211,33 +203,6 @@ export default function AdminPage() {
   const [reviewPage, setReviewPage] = useState(1);
   const [reviewTotalPages, setReviewTotalPages] = useState(1);
   const [reviewTotal, setReviewTotal] = useState(0);
-
-<<<<<<< Updated upstream
-  // News filters & pagination
-  const [newsFilters, setNewsFilters] = useState({ search: '', isActive: '' });
-  const [newsPage, setNewsPage] = useState(1);
-  const [newsTotalPages, setNewsTotalPages] = useState(1);
-  const [newsTotal, setNewsTotal] = useState(0);
-
-  // News modal states
-  const [showNewsModal, setShowNewsModal] = useState(false);
-  const [editingNews, setEditingNews] = useState<Announcement | null>(null);
-  const [newsForm, setNewsForm] = useState({
-    title: '',
-    summary: '',
-    content: '',
-    isActive: true
-  });
-=======
-  // Announcements states
-  const [announcementFilters, setAnnouncementFilters] = useState({ isActive: '' });
-  const [announcementPage, setAnnouncementPage] = useState(1);
-  const [announcementTotalPages, setAnnouncementTotalPages] = useState(1);
-  const [announcementTotal, setAnnouncementTotal] = useState(0);
-  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
-  const [editingAnnouncement, setEditingAnnouncement] = useState<Announcement | null>(null);
-  const [announcementForm, setAnnouncementForm] = useState({ title: '', summary: '', content: '', isActive: true });
->>>>>>> Stashed changes
 
   // Order detail modal
   const [showOrderModal, setShowOrderModal] = useState(false);
@@ -376,29 +341,12 @@ export default function AdminPage() {
     }
   };
 
-<<<<<<< Updated upstream
-  // Fetch Announcements
-  const fetchAnnouncements = async () => {
-    try {
-      const params = new URLSearchParams();
-<<<<<<< Updated upstream
-      params.set('page', String(newsPage));
-      params.set('limit', '10');
-      if (newsFilters.search) params.set('search', newsFilters.search);
-      if (newsFilters.isActive) params.set('isActive', newsFilters.isActive);
-=======
-      params.set('page', String(announcementPage));
-      params.set('limit', '10');
-      if (announcementFilters.isActive) params.set('isActive', announcementFilters.isActive);
->>>>>>> Stashed changes
-=======
   // Fetch Announcements/Articles
   const fetchAnnouncements = async () => {
     try {
       const params = new URLSearchParams();
       params.set('page', String(articlePage));
       params.set('limit', '10');
->>>>>>> Stashed changes
 
       const response = await fetch(`/api/admin/announcements?${params.toString()}`, {
         headers: getHeaders(),
@@ -406,28 +354,11 @@ export default function AdminPage() {
       });
       if (response.ok) {
         const data = await response.json();
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        // API trả về data.data.announcements
-        setAnnouncements(data.data?.announcements || data.announcements || data.data || []);
-        const pagination = data.data?.pagination || data.pagination;
-        if (pagination) {
-          setNewsTotal(pagination.total || 0);
-          setNewsTotalPages(pagination.totalPages || 1);
-=======
-        setAnnouncements(data.data?.announcements || data.announcements || data.data || []);
-        const pagination = data.data?.pagination || data.pagination;
-        if (pagination) {
-          setAnnouncementTotal(pagination.total || 0);
-          setAnnouncementTotalPages(pagination.totalPages || 1);
->>>>>>> Stashed changes
-=======
         setAnnouncements(data.data?.announcements || data.announcements || data.data || []);
         const pagination = data.data?.pagination || data.pagination;
         if (pagination) {
           setArticleTotal(pagination.total || 0);
           setArticleTotalPages(pagination.totalPages || 1);
->>>>>>> Stashed changes
         }
       }
     } catch (err) {
@@ -455,15 +386,6 @@ export default function AdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin]);
 
-<<<<<<< Updated upstream
-  // Fetch announcements when news tab is active
-  useEffect(() => {
-    if (isAdmin && activeTab === 'news') {
-      fetchAnnouncements();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdmin, activeTab, newsPage, newsFilters]);
-=======
   // Refetch announcements when pagination changes
   useEffect(() => {
     if (isAdmin) {
@@ -471,7 +393,6 @@ export default function AdminPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, articlePage]);
->>>>>>> Stashed changes
 
   // Refetch when filters/pagination change
   useEffect(() => {
@@ -500,11 +421,7 @@ export default function AdminPage() {
       fetchAnnouncements();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-<<<<<<< Updated upstream
-  }, [isAdmin, announcementPage, announcementFilters]);
-=======
   }, [isAdmin, articlePage]);
->>>>>>> Stashed changes
 
   // Generate slug from name
   const generateSlug = (name: string) => {
@@ -719,68 +636,30 @@ export default function AdminPage() {
     }
   };
 
-<<<<<<< Updated upstream
-  // Handle Toggle News Status
-  const handleToggleNewsStatus = async (announcement: Announcement) => {
+  // Handle Toggle Article Status
+  const handleToggleArticleStatus = async (article: Announcement) => {
     try {
-      const response = await fetch(`/api/admin/announcements/${announcement.id}`, {
+      const response = await fetch(`/api/admin/announcements/${article.id}`, {
         method: 'PATCH',
         headers: getHeaders(),
-        body: JSON.stringify({ isActive: !announcement.isActive }),
+        body: JSON.stringify({ isActive: !article.isActive }),
       });
 
       if (response.ok) {
         await fetchAnnouncements();
-        showToast(`Đã ${!announcement.isActive ? 'xuất bản' : 'ẩn'} tin tức`, 'success');
+        showToast(`Đã ${!article.isActive ? 'xuất bản' : 'ẩn'} tin tức`, 'success');
       } else {
         const data = await response.json();
         showToast(data.error || 'Có lỗi xảy ra', 'error');
       }
     } catch (err) {
-      console.error('Error toggling news status:', err);
+      console.error('Error toggling article status:', err);
       showToast('Có lỗi xảy ra khi cập nhật trạng thái', 'error');
-=======
-  // Handle Announcement Submit
-  const handleAnnouncementSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    
-    if (!announcementForm.title.trim() || !announcementForm.summary.trim()) {
-      showToast('Vui lòng nhập tiêu đề và tóm tắt', 'error');
-      return;
-    }
-
-    try {
-      const url = editingAnnouncement
-        ? `/api/admin/announcements/${editingAnnouncement.id}`
-        : '/api/admin/announcements';
-      const method = editingAnnouncement ? 'PATCH' : 'POST';
-
-      const response = await fetch(url, {
-        method,
-        headers: getHeaders(),
-        body: JSON.stringify(announcementForm),
-      });
-
-      const data = await response.json();
-      if (response.ok) {
-        setShowAnnouncementModal(false);
-        setEditingAnnouncement(null);
-        setAnnouncementForm({ title: '', summary: '', content: '', isActive: true });
-        setAnnouncementPage(1);
-        showToast(editingAnnouncement ? 'Đã cập nhật tin tức' : 'Đã thêm tin tức mới', 'success');
-        await fetchAnnouncements();
-      } else {
-        showToast(data.error || 'Có lỗi xảy ra', 'error');
-      }
-    } catch (err) {
-      console.error('Error submitting announcement:', err);
-      showToast('Không thể kết nối đến server', 'error');
->>>>>>> Stashed changes
     }
   };
 
-  // Handle Delete Announcement
-  const handleDeleteAnnouncement = async (id: string) => {
+  // Handle Delete Article
+  const handleDeleteArticle = async (id: string) => {
     if (!confirm('Bạn có chắc muốn xóa tin tức này?')) return;
 
     try {
@@ -789,80 +668,31 @@ export default function AdminPage() {
         headers: getHeaders(),
       });
 
-<<<<<<< Updated upstream
-      if (response.ok) {
-        await fetchAnnouncements();
-        showToast('Đã xóa tin tức', 'success');
-      } else {
-        const data = await response.json();
-=======
       const data = await response.json();
       if (response.ok) {
         showToast('Đã xóa tin tức', 'success');
         await fetchAnnouncements();
       } else {
->>>>>>> Stashed changes
         showToast(data.error || 'Có lỗi xảy ra', 'error');
       }
     } catch (err) {
-      console.error('Error deleting announcement:', err);
-<<<<<<< Updated upstream
-      showToast('Có lỗi xảy ra khi xóa tin tức', 'error');
-    }
-  };
-
-  // Handle Edit Announcement (placeholder - would need modal implementation)
-  const handleEditAnnouncement = async (announcement: Announcement) => {
-    // TODO: Implement edit modal for announcements
-    showToast('Chức năng chỉnh sửa đang được phát triển', 'info');
-  };
-
-  // Handle News Submit
-  const handleNewsSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError(null);
-
-    try {
-      const response = await fetch('/api/admin/announcements', {
-        method: 'POST',
-        headers: getHeaders(),
-        body: JSON.stringify(newsForm),
-      });
-
-      if (response.ok) {
-        await fetchAnnouncements();
-        setShowNewsModal(false);
-        setNewsForm({ title: '', summary: '', content: '', isActive: true });
-        showToast('Đã thêm tin tức mới', 'success');
-      } else {
-        const data = await response.json();
-        setError(data.error || 'Có lỗi xảy ra');
-        showToast(data.error || 'Có lỗi xảy ra', 'error');
-      }
-    } catch (err) {
-      console.error('Error creating announcement:', err);
-      setError('Không thể kết nối đến server');
-=======
->>>>>>> Stashed changes
+      console.error('Error deleting article:', err);
       showToast('Không thể kết nối đến server', 'error');
     }
   };
 
-<<<<<<< Updated upstream
-=======
-  // Handle Edit Announcement
-  const handleEditAnnouncement = (announcement: Announcement) => {
-    setEditingAnnouncement(announcement);
-    setAnnouncementForm({
-      title: announcement.title,
-      summary: announcement.summary,
-      content: announcement.content || '',
-      isActive: announcement.isActive,
+  // Handle Edit Article
+  const handleEditArticle = async (article: Announcement) => {
+    setEditingArticle(article);
+    setArticleForm({ 
+      title: article.title, 
+      summary: article.summary, 
+      content: article.content || '', 
+      isActive: article.isActive 
     });
-    setShowAnnouncementModal(true);
+    setShowArticleModal(true);
   };
 
->>>>>>> Stashed changes
   // Add image to product
   const handleAddImage = () => {
     if (imageUrl.trim()) {
@@ -930,40 +760,6 @@ export default function AdminPage() {
       setError(message);
       setToast({ type: 'error', message });
     }
-  };
-
-  // Handle Delete Article
-  const handleDeleteArticle = async (id: string) => {
-    if (!confirm('Bạn có chắc muốn xóa tin tức này?')) return;
-
-    try {
-      const response = await fetch(`/api/admin/announcements/${id}`, {
-        method: 'DELETE',
-        headers: getHeaders(),
-      });
-
-      if (!response.ok) {
-        throw new Error('Lỗi khi xóa tin tức');
-      }
-
-      await fetchAnnouncements();
-      setToast({ type: 'success', message: 'Xóa tin tức thành công' });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Lỗi không xác định';
-      setToast({ type: 'error', message });
-    }
-  };
-
-  // Handle Edit Article
-  const handleEditArticle = (article: Announcement) => {
-    setEditingArticle(article);
-    setArticleForm({
-      title: article.title,
-      summary: article.summary,
-      content: article.content || '',
-      isActive: article.isActive,
-    });
-    setShowArticleModal(true);
   };
 
   // Calculate pending orders
@@ -1094,14 +890,9 @@ export default function AdminPage() {
           {[
             { id: 'dashboard', label: 'Tổng quan', icon: BarChart3 },
             { id: 'products', label: 'Sản phẩm', icon: FolderPlus },
-<<<<<<< Updated upstream
-            { id: 'news', label: 'Tin tức', icon: FileText },
-=======
             { id: 'articles', label: 'Tin tức', icon: FileText },
->>>>>>> Stashed changes
             { id: 'orders', label: 'Đơn hàng', icon: PackageCheck },
             { id: 'reviews', label: 'Đánh giá', icon: MessageSquare },
-            { id: 'announcements', label: 'Tin tức', icon: Newspaper },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -1852,242 +1643,6 @@ export default function AdminPage() {
           </div>
         )}
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-        {/* News Tab */}
-        {activeTab === 'news' && (
-=======
-        {/* Announcements Tab */}
-        {activeTab === 'announcements' && (
->>>>>>> Stashed changes
-          <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-semibold">Quản lý tin tức ({announcements.length})</h2>
-              <button
-<<<<<<< Updated upstream
-                onClick={() => { setEditingNews(null); setNewsForm({ title: '', summary: '', content: '', isActive: true }); setShowNewsModal(true); }}
-                className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-full font-semibold text-sm hover:bg-slate-800"
-              >
-                <FilePlus size={18} />
-                Thêm tin tức
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-4 items-end mb-6">
-              <div className="flex-1 min-w-[200px]">
-                <label className="text-sm text-slate-600">Tìm kiếm</label>
-                <input
-                  value={newsFilters.search}
-                  onChange={(e) => { setNewsPage(1); setNewsFilters({ ...newsFilters, search: e.target.value }); }}
-                  className="input-field mt-1"
-                  placeholder="Tên tin tức"
-                />
-              </div>
-              <div className="min-w-[200px]">
-                <label className="text-sm text-slate-600">Trạng thái</label>
-                <select
-                  value={newsFilters.isActive}
-                  onChange={(e) => { setNewsPage(1); setNewsFilters({ ...newsFilters, isActive: e.target.value }); }}
-                  className="input-field mt-1"
-                >
-                  <option value="">Tất cả</option>
-                  <option value="true">Đã xuất bản</option>
-                  <option value="false">Nháp</option>
-                </select>
-              </div>
-              <button
-                onClick={() => { setNewsFilters({ search: '', isActive: '' }); setNewsPage(1); }}
-                className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-semibold"
-=======
-                onClick={() => {
-                  setEditingAnnouncement(null);
-                  setAnnouncementForm({ title: '', summary: '', content: '', isActive: true });
-                  setShowAnnouncementModal(true);
-                }}
-                className="flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-600 text-white font-semibold hover:bg-indigo-700 text-sm"
-              >
-                <FilePlus size={16} />
-                Thêm tin tức
-              </button>
-            </div>
-
-            <div className="flex gap-4 items-end mb-6">
-              <div className="min-w-[180px]">
-                <label className="text-sm text-slate-600">Trạng thái</label>
-                <select
-                  value={announcementFilters.isActive}
-                  onChange={(e) => {
-                    setAnnouncementPage(1);
-                    setAnnouncementFilters({ ...announcementFilters, isActive: e.target.value });
-                  }}
-                  className="w-full px-4 py-2 rounded-lg border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none mt-1"
-                >
-                  <option value="">Tất cả</option>
-                  <option value="true">Đang hoạt động</option>
-                  <option value="false">Ẩn</option>
-                </select>
-              </div>
-              <button
-                onClick={() => {
-                  setAnnouncementFilters({ isActive: '' });
-                  setAnnouncementPage(1);
-                }}
-                className="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-sm font-semibold"
->>>>>>> Stashed changes
-              >
-                Xóa lọc
-              </button>
-            </div>
-<<<<<<< Updated upstream
-            <div className="space-y-4">
-              {announcements.map((announcement) => (
-                <div key={announcement.id} className="rounded-2xl border border-slate-100 p-6">
-                  <div className="flex flex-wrap items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${announcement.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'}`}>
-                          {announcement.isActive ? 'Đã xuất bản' : 'Nháp'}
-                        </span>
-                        <p className="text-sm text-slate-500">{formatDate(announcement.createdAt)}</p>
-                      </div>
-                      <h3 className="text-lg font-semibold text-slate-900 mb-2">{announcement.title}</h3>
-                      <p className="text-slate-600 text-sm line-clamp-2">{announcement.summary}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 flex gap-2">
-                    <button
-                      onClick={() => handleToggleNewsStatus(announcement)}
-                      className={`px-4 py-2 rounded-full text-sm font-semibold ${announcement.isActive ? 'bg-slate-50 text-slate-600 hover:bg-slate-100' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'}`}
-                    >
-                      {announcement.isActive ? 'Ẩn' : 'Xuất bản'}
-                    </button>
-                    <button
-                      onClick={() => handleEditAnnouncement(announcement)}
-                      className="px-4 py-2 rounded-full bg-blue-50 text-blue-600 text-sm font-semibold hover:bg-blue-100"
-                    >
-                      Chỉnh sửa
-                    </button>
-                    <button
-                      onClick={() => handleDeleteAnnouncement(announcement.id)}
-                      className="px-4 py-2 rounded-full bg-rose-50 text-rose-600 text-sm font-semibold hover:bg-rose-100"
-                    >
-                      Xóa
-                    </button>
-                  </div>
-                </div>
-              ))}
-              {announcements.length === 0 && (
-                <p className="text-center text-slate-500 py-8">Chưa có tin tức nào</p>
-              )}
-            </div>
-
-            {/* Pagination */}
-            {newsTotalPages > 1 && (
-              <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-sm text-slate-600">
-                <span>Trang {newsPage}/{newsTotalPages} · {newsTotal} tin tức</span>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setNewsPage((p) => Math.max(1, p - 1))}
-                    disabled={newsPage === 1}
-                    className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
-                  >
-                    Trước
-                  </button>
-                  <button
-                    onClick={() => setNewsPage((p) => Math.min(newsTotalPages, p + 1))}
-                    disabled={newsPage === newsTotalPages}
-                    className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
-                  >
-                    Sau
-                  </button>
-                </div>
-              </div>
-            )}
-=======
-
-            <div className="space-y-4">
-              {announcements.map((announcement) => (
-                <div key={announcement.id} className="rounded-2xl border border-slate-100 p-6 hover:border-slate-200 transition-all">
-                  <div className="flex items-start justify-between gap-4 mb-4">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-slate-900 text-lg mb-1">{announcement.title}</h3>
-                      <p className="text-slate-600 text-sm line-clamp-2">{announcement.summary}</p>
-                    </div>
-                    <span
-                      className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
-                        announcement.isActive
-                          ? 'bg-emerald-50 text-emerald-600'
-                          : 'bg-slate-100 text-slate-600'
-                      }`}
-                    >
-                      {announcement.isActive ? 'Hoạt động' : 'Ẩn'}
-                    </span>
-                  </div>
-
-                  {announcement.content && (
-                    <div className="mb-3 text-slate-600 text-sm line-clamp-2">
-                      <div
-                        dangerouslySetInnerHTML={{
-                          __html: announcement.content.replace(/<[^>]*>/g, '').substring(0, 150) + '...',
-                        }}
-                      />
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                    <p className="text-xs text-slate-500">{formatDate(announcement.createdAt)}</p>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => handleEditAnnouncement(announcement)}
-                        className="flex items-center gap-1 px-3 py-2 rounded-lg bg-blue-50 text-blue-600 text-sm font-semibold hover:bg-blue-100"
-                      >
-                        <Edit size={14} />
-                        Sửa
-                      </button>
-                      <button
-                        onClick={() => handleDeleteAnnouncement(announcement.id)}
-                        className="flex items-center gap-1 px-3 py-2 rounded-lg bg-rose-50 text-rose-600 text-sm font-semibold hover:bg-rose-100"
-                      >
-                        <Trash2 size={14} />
-                        Xóa
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              {announcements.length === 0 && (
-                <div className="text-center py-12">
-                  <Newspaper size={48} className="mx-auto text-slate-300 mb-4" />
-                  <p className="text-slate-500">Chưa có tin tức nào</p>
-                </div>
-              )}
-
-              {/* Pagination */}
-              {announcementTotalPages > 1 && (
-                <div className="flex items-center justify-between pt-4 border-t border-slate-100 text-sm text-slate-600">
-                  <span>Trang {announcementPage}/{announcementTotalPages} · {announcementTotal} tin tức</span>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => setAnnouncementPage((p) => Math.max(1, p - 1))}
-                      disabled={announcementPage === 1}
-                      className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
-                    >
-                      Trước
-                    </button>
-                    <button
-                      onClick={() => setAnnouncementPage((p) => Math.min(announcementTotalPages, p + 1))}
-                      disabled={announcementPage === announcementTotalPages}
-                      className="px-3 py-2 rounded-lg border border-slate-200 disabled:opacity-50"
-                    >
-                      Sau
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
->>>>>>> Stashed changes
-          </div>
-=======
         {/* Articles/News Tab */}
         {activeTab === 'articles' && (
           <>
@@ -2218,7 +1773,6 @@ export default function AdminPage() {
               </div>
             )}
           </>
->>>>>>> Stashed changes
         )}
 
         {/* Product Modal */}
@@ -2679,121 +2233,6 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Announcement Modal */}
-        {showAnnouncementModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white flex items-center justify-between p-6 border-b border-slate-100">
-                <h2 className="text-xl font-bold text-slate-900">
-                  {editingAnnouncement ? 'Chỉnh sửa tin tức' : 'Thêm tin tức mới'}
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowAnnouncementModal(false);
-                    setEditingAnnouncement(null);
-                    setAnnouncementForm({ title: '', summary: '', content: '', isActive: true });
-                  }}
-                  className="p-2 rounded-full hover:bg-slate-100"
-                >
-                  <X size={20} />
-                </button>
-              </div>
-
-              <form onSubmit={handleAnnouncementSubmit} className="p-6 space-y-4">
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Tiêu đề <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    value={announcementForm.title}
-                    onChange={(e) =>
-                      setAnnouncementForm({ ...announcementForm, title: e.target.value })
-                    }
-                    placeholder="Nhập tiêu đề tin tức..."
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Tóm tắt <span className="text-rose-500">*</span>
-                  </label>
-                  <textarea
-                    required
-                    rows={3}
-                    value={announcementForm.summary}
-                    onChange={(e) =>
-                      setAnnouncementForm({ ...announcementForm, summary: e.target.value })
-                    }
-                    placeholder="Nhập tóm tắt (10-500 ký tự)..."
-                    maxLength={500}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none"
-                  />
-                  <p className="text-xs text-slate-500 mt-1">
-                    {announcementForm.summary.length}/500 ký tự
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-2">
-                    Nội dung chi tiết
-                  </label>
-                  <textarea
-                    rows={6}
-                    value={announcementForm.content}
-                    onChange={(e) =>
-                      setAnnouncementForm({ ...announcementForm, content: e.target.value })
-                    }
-                    placeholder="Nhập nội dung chi tiết (hỗ trợ HTML)..."
-                    maxLength={5000}
-                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none resize-none font-mono text-sm"
-                  />
-                  <p className="text-xs text-slate-500 mt-1">
-                    {announcementForm.content.length}/5000 ký tự
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-3 pt-2">
-                  <input
-                    type="checkbox"
-                    id="isActive"
-                    checked={announcementForm.isActive}
-                    onChange={(e) =>
-                      setAnnouncementForm({ ...announcementForm, isActive: e.target.checked })
-                    }
-                    className="w-4 h-4 rounded border-slate-300 text-indigo-600 cursor-pointer"
-                  />
-                  <label htmlFor="isActive" className="text-sm font-medium text-slate-700 cursor-pointer">
-                    Đang hoạt động (hiển thị trên trang web)
-                  </label>
-                </div>
-
-                <div className="flex gap-3 pt-6 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowAnnouncementModal(false);
-                      setEditingAnnouncement(null);
-                      setAnnouncementForm({ title: '', summary: '', content: '', isActive: true });
-                    }}
-                    className="flex-1 py-3 rounded-2xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50"
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 py-3 rounded-2xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
-                  >
-                    {editingAnnouncement ? 'Cập nhật' : 'Thêm'} tin tức
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
         {/* Shipping Modal - Nhập thông tin vận chuyển */}
         {showShippingModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -2862,22 +2301,6 @@ export default function AdminPage() {
           </div>
         )}
 
-<<<<<<< Updated upstream
-        {/* News Modal */}
-        {showNewsModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">
-                  {editingNews ? 'Chỉnh sửa tin tức' : 'Thêm tin tức mới'}
-                </h2>
-                <button
-                  onClick={() => setShowNewsModal(false)}
-                  className="p-2 rounded-full hover:bg-slate-100"
-                  title="Đóng"
-                >
-                  <X size={20} />
-=======
         {/* Article Modal - Thêm/Sửa tin tức */}
         {showArticleModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
@@ -2902,75 +2325,10 @@ export default function AdminPage() {
                   title="Đóng"
                 >
                   <X size={24} className="text-slate-600" />
->>>>>>> Stashed changes
                 </button>
               </div>
 
               {error && (
-<<<<<<< Updated upstream
-                <div className="mb-4 p-4 bg-rose-50 text-rose-600 rounded-xl text-sm">
-                  {error}
-                </div>
-              )}
-
-              <form onSubmit={handleNewsSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Tiêu đề tin tức *
-                  </label>
-                  <input
-                    required
-                    value={newsForm.title}
-                    onChange={(e) => setNewsForm({ ...newsForm, title: e.target.value })}
-                    className="input-field"
-                    placeholder="Nhập tiêu đề tin tức"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Tóm tắt *
-                  </label>
-                  <textarea
-                    required
-                    rows={3}
-                    value={newsForm.summary}
-                    onChange={(e) => setNewsForm({ ...newsForm, summary: e.target.value })}
-                    className="input-field"
-                    placeholder="Tóm tắt nội dung chính của tin tức"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">
-                    Nội dung chi tiết
-                  </label>
-                  <textarea
-                    rows={8}
-                    value={newsForm.content}
-                    onChange={(e) => setNewsForm({ ...newsForm, content: e.target.value })}
-                    className="input-field"
-                    placeholder="Nội dung chi tiết (có thể dùng HTML)"
-                  />
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id="newsActive"
-                    checked={newsForm.isActive}
-                    onChange={(e) => setNewsForm({ ...newsForm, isActive: e.target.checked })}
-                    className="w-4 h-4"
-                  />
-                  <label htmlFor="newsActive" className="text-sm text-slate-700">Xuất bản ngay</label>
-                </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowNewsModal(false)}
-                    className="flex-1 py-3 rounded-2xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50"
-=======
                 <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-700 rounded-xl text-sm flex items-start gap-3">
                   <span className="text-lg">⚠️</span>
                   <div>
@@ -3060,22 +2418,15 @@ export default function AdminPage() {
                       setArticleForm({ title: '', summary: '', content: '', isActive: true });
                     }}
                     className="flex-1 py-3 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
->>>>>>> Stashed changes
                   >
                     Hủy
                   </button>
                   <button
                     type="submit"
-<<<<<<< Updated upstream
-                    className="flex-1 py-3 rounded-2xl bg-slate-900 text-white font-semibold hover:bg-slate-800"
-                  >
-                    {editingNews ? 'Cập nhật' : 'Thêm tin tức'}
-=======
                     className="flex-1 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all flex items-center justify-center gap-2 shadow-lg"
                   >
                     <FilePlus size={18} />
                     {editingArticle ? '💾 Cập nhật' : '➕ Thêm'} tin tức
->>>>>>> Stashed changes
                   </button>
                 </div>
               </form>
