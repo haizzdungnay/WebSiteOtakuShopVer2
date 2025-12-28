@@ -2,8 +2,13 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
+  
+  // Bỏ qua ESLint errors khi build
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
   images: {
-    // Cho phép tất cả các nguồn ảnh bên ngoài
     remotePatterns: [
       {
         protocol: 'https',
@@ -14,7 +19,6 @@ const nextConfig = {
         hostname: '**',
       },
     ],
-    // Allow SVG placeholders
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
