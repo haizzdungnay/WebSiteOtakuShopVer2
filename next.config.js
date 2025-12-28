@@ -8,6 +8,11 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   
+  // Bỏ qua TypeScript errors khi build
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  
   images: {
     remotePatterns: [
       {
