@@ -1,645 +1,318 @@
-'use client';
+'use client'
 
-import { useState } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, useEffect } from 'react'
+import Link from 'next/link'
+import Image from 'next/image'
+import { useAuth } from '@/contexts/AuthContext'
+import { useRouter } from 'next/navigation'
 import {
   ChevronRight,
   User,
-  Gift,
   Package,
-  MapPin,
-  ShoppingCart,
-  Search,
-  Phone,
-  Mail,
-  Clock,
   Heart,
-  Star,
-  TrendingUp,
+  MapPin,
+  Gift,
+  Clock,
+  ShoppingBag,
   Truck,
-  Shield
-} from 'lucide-react';
+  CheckCircle,
+  XCircle,
+  Eye
+} from 'lucide-react'
 
-interface PreOrder {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  image: string;
-  brand: string;
-  status: 'in-stock' | 'pre-order' | 'coming-soon';
-  discount?: number;
-  isNew?: boolean;
-  isHot?: boolean;
-  rating?: number;
-  soldCount?: number;
+interface OrderItem {
+  id: string
+  quantity: number
+  price: number
+  product: {
+    id: string
+    name: string
+    slug: string
+    images: string[]
+  }
 }
 
-// Mock data với nhiều sản phẩm hơn
-const mockPreOrders: PreOrder[] = [
-  {
-    id: '1',
-    name: 'Hatsune Miku - Sakura Miku 2024',
-    price: 595000,
-    originalPrice: 720000,
-    image: 'https://via.placeholder.com/300x400/FFB6C1/FFFFFF?text=Miku+2024',
-    brand: 'Good Smile Company',
-    status: 'pre-order',
-    discount: 17,
-    isNew: true,
-    isHot: true,
-    rating: 4.8,
-    soldCount: 234
-  },
-  {
-    id: '2',
-    name: 'Nendoroid Chainsaw Man - Denji',
-    price: 720000,
-    image: 'https://via.placeholder.com/300x400/FFC0CB/FFFFFF?text=Chainsaw+Man',
-    brand: 'Good Smile Company',
-    status: 'pre-order',
-    isHot: true,
-    rating: 4.9,
-    soldCount: 189
-  },
-  {
-    id: '3',
-    name: 'Nendoroid Demon Slayer - Nezuko',
-    price: 680000,
-    image: 'https://via.placeholder.com/300x400/FFE5ED/FFFFFF?text=Nezuko',
-    brand: 'Good Smile Company',
-    status: 'pre-order',
-    isNew: true,
-    rating: 4.7,
-    soldCount: 156
-  },
-  {
-    id: '4',
-    name: 'Figma Spy x Family - Anya Forger',
-    price: 1950000,
-    originalPrice: 2200000,
-    image: 'https://via.placeholder.com/300x400/FFD5DC/FFFFFF?text=Anya',
-    brand: 'Max Factory',
-    status: 'in-stock',
-    discount: 11,
-    rating: 5.0,
-    soldCount: 312
-  },
-  {
-    id: '5',
-    name: 'Scale Figure - Rem - 1/7',
-    price: 2800000,
-    image: 'https://via.placeholder.com/300x400/FF8FAB/FFFFFF?text=Rem+1/7',
-    brand: 'Emontoys',
-    status: 'pre-order',
-    isHot: true,
-    rating: 4.9,
-    soldCount: 78
-  },
-  {
-    id: '6',
-    name: 'Nendoroid Chainsaw Man - Power',
-    price: 720000,
-    image: 'https://via.placeholder.com/300x400/FFB6C1/FFFFFF?text=Power',
-    brand: 'Good Smile Company',
-    status: 'pre-order',
-    rating: 4.8,
-    soldCount: 167
-  },
-  {
-    id: '7',
-    name: 'Scale Figure - Miku Racing 2025',
-    price: 3360000,
-    originalPrice: 3800000,
-    image: 'https://via.placeholder.com/300x400/FFC0CB/FFFFFF?text=Racing+Miku',
-    brand: 'Good Smile Racing',
-    status: 'pre-order',
-    discount: 12,
-    isNew: true,
-    isHot: true,
-    rating: 5.0,
-    soldCount: 45
-  },
-  {
-    id: '8',
-    name: 'Pop Up Parade - Gojo Satoru',
-    price: 750000,
-    image: 'https://via.placeholder.com/300x400/FFE5ED/FFFFFF?text=Gojo',
-    brand: 'Good Smile Company',
-    status: 'in-stock',
-    rating: 4.6,
-    soldCount: 289
-  },
-];
+interface Order {
+  id: string
+  orderNumber: string
+  status: string
+  totalAmount: number
+  createdAt: string
+  items: OrderItem[]
+}
 
-const categories = [
-  { name: 'NEW RELEASES !!', icon: '🆕', color: 'bg-accent-red' },
-  { name: 'NOW In Stock!', icon: '✨', color: 'bg-green-500' },
-  { name: 'ALL PRODUCTS', icon: '📦', color: 'bg-blue-500' },
-  { name: 'PVC Figure', icon: '🎭', color: 'bg-purple-500' },
-  { name: 'RESIN Figure', icon: '💎', color: 'bg-accent-pink' },
-  { name: 'Bandai Army', icon: '🤖', color: 'bg-accent-orange' },
-  { name: 'Gundam / Plastic Model / Valuables Toys', icon: '🛠️', color: 'bg-yellow-500' },
-  { name: 'Bath / Character Goods', icon: '🎁', color: 'bg-indigo-500' },
-  { name: 'Pre-order /Order', icon: '⏰', color: 'bg-teal-500' },
-  { name: 'Khách hàng thân thiết', icon: '⭐', color: 'bg-amber-500' },
-];
+const menuItems = [
+  { icon: User, label: 'Thông tin tài khoản', href: '/profile' },
+  { icon: Package, label: 'Đơn hàng của tôi', href: '/profile/orders' },
+  { icon: Heart, label: 'Sản phẩm yêu thích', href: '/profile/wishlist' },
+  { icon: MapPin, label: 'Sổ địa chỉ', href: '/profile/addresses' },
+  { icon: Gift, label: 'Đặt trước & Mua hộ', href: '/profile/preorders', active: true },
+]
 
-const filterTabs = [
-  { id: 'all', label: 'Tất cả sản phẩm', icon: Package },
-  { id: 'pre-order', label: 'Đặt trước', icon: Clock },
-  { id: 'in-stock', label: 'Còn hàng', icon: ShoppingCart },
-  { id: 'hot', label: 'Bán chạy', icon: TrendingUp },
-];
+const statusConfig: Record<string, { label: string; color: string; icon: React.ElementType }> = {
+  PENDING: { label: 'Chờ xác nhận', color: 'bg-yellow-100 text-yellow-700', icon: Clock },
+  PROCESSING: { label: 'Đang xử lý', color: 'bg-blue-100 text-blue-700', icon: Package },
+  SHIPPING: { label: 'Đang giao', color: 'bg-purple-100 text-purple-700', icon: Truck },
+  DELIVERED: { label: 'Đã giao', color: 'bg-green-100 text-green-700', icon: CheckCircle },
+  COMPLETED: { label: 'Hoàn thành', color: 'bg-green-100 text-green-700', icon: CheckCircle },
+  CANCELLED: { label: 'Đã hủy', color: 'bg-red-100 text-red-700', icon: XCircle },
+}
 
 export default function PreOrdersPage() {
-  const { user } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('newest');
+  const { user, loading: authLoading } = useAuth()
+  const router = useRouter()
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
+  const [activeTab, setActiveTab] = useState<'pending' | 'processing' | 'all'>('pending')
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement search functionality
-  };
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login')
+    }
+  }, [user, authLoading, router])
 
-  const filteredOrders = mockPreOrders.filter((order) => {
-    if (activeFilter === 'all') return true;
-    if (activeFilter === 'hot') return order.isHot;
-    return order.status === activeFilter;
-  });
+  useEffect(() => {
+    if (user) {
+      fetchOrders()
+    }
+  }, [user])
+
+  const fetchOrders = async () => {
+    try {
+      const response = await fetch('/api/orders', { credentials: 'include' })
+      const data = await response.json()
+      if (data.success) {
+        setOrders(data.data.orders || [])
+      }
+    } catch (err) {
+      console.error('Failed to fetch orders:', err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredOrders = orders.filter(order => {
+    if (activeTab === 'pending') return order.status === 'PENDING'
+    if (activeTab === 'processing') return ['PROCESSING', 'SHIPPING'].includes(order.status)
+    return true
+  })
+
+  const pendingCount = orders.filter(o => o.status === 'PENDING').length
+  const processingCount = orders.filter(o => ['PROCESSING', 'SHIPPING'].includes(o.status)).length
+
+  if (authLoading || loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-background-light">
-      {/* Top Header Bar */}
-      <div className="bg-gradient-to-r from-primary to-accent-red text-white py-2">
-        <div className="container-custom">
-          <div className="flex justify-between items-center text-sm">
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <Phone size={16} />
-                <span>0399624662</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin size={16} />
-                <span>135 Đường ABC, Quận 1, TP.HCM</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Mail size={16} />
-                <span>luankhung2002@icloud.com</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <ShoppingCart size={16} />
-              <span>Giỏ hàng: 0</span>
-            </div>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Breadcrumb */}
+        <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
+          <Link href="/" className="hover:text-red-500">Trang chủ</Link>
+          <ChevronRight className="w-4 h-4" />
+          <Link href="/profile" className="hover:text-red-500">Tài khoản</Link>
+          <ChevronRight className="w-4 h-4" />
+          <span className="text-gray-900">Đặt trước & Mua hộ</span>
         </div>
-      </div>
 
-      {/* Main Navigation */}
-      <header className="bg-background-white shadow-md sticky top-0 z-40">
-        <div className="container-custom">
-          <div className="flex items-center justify-between py-4">
-            {/* Logo */}
-            <Link href="/" className="flex items-center gap-2">
-              <div className="text-2xl font-bold text-accent-red">DN FIGURE</div>
-            </Link>
-
-            {/* Search Bar */}
-            <form onSubmit={handleSearch} className="flex-1 max-w-2xl mx-8">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Tìm kiếm sản phẩm..."
-                  className="w-full px-4 py-2 pr-10 border-2 border-primary-light rounded-full focus:border-primary focus:outline-none transition-colors"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary text-white p-2 rounded-full hover:bg-primary-dark transition-colors"
-                >
-                  <Search size={18} />
-                </button>
-              </div>
-            </form>
-
-            {/* User Menu */}
-            <div className="flex items-center gap-4">
-              {user ? (
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors"
-                >
-                  <User size={18} />
-                  <span className="font-medium">{user.username}</span>
-                </Link>
-              ) : (
-                <Link href="/login" className="btn-accent">
-                  Đăng nhập
-                </Link>
-              )}
-            </div>
-          </div>
-
-          {/* Navigation Menu */}
-          <nav className="border-t border-gray-200">
-            <div className="flex items-center gap-6 py-3 text-sm font-medium overflow-x-auto">
-              <Link href="/" className="nav-link text-text-gray hover:text-primary">
-                🏠 Trang chủ
-              </Link>
-              <Link href="/gioi-thieu" className="nav-link text-text-gray hover:text-primary">
-                ℹ️ Giới thiệu & bán hàng
-              </Link>
-              <Link href="/tra-cuu" className="nav-link text-text-gray hover:text-primary">
-                🔍 Tra cứu đơn đặt trước
-              </Link>
-              <Link href="/tinh-gia" className="nav-link text-text-gray hover:text-primary">
-                💰 Tính giá mua hộ hàng
-              </Link>
-              <Link href="/faq" className="nav-link text-text-gray hover:text-primary">
-                ❓ FAQ
-              </Link>
-              <Link href="/tin-tuc" className="nav-link text-text-gray hover:text-primary">
-                📰 Tin tức
-              </Link>
-            </div>
-          </nav>
-        </div>
-      </header>
-
-      {/* Breadcrumb */}
-      <div className="bg-background-white border-b">
-        <div className="container-custom py-3">
-          <nav className="flex items-center gap-2 text-sm">
-            <Link href="/" className="text-text-gray hover:text-primary">
-              Trang chủ
-            </Link>
-            <ChevronRight size={16} className="text-gray-400" />
-            <Link href="/profile" className="text-text-gray hover:text-primary">
-              Tài khoản
-            </Link>
-            <ChevronRight size={16} className="text-gray-400" />
-            <span className="text-primary font-medium">Đơn đặt trước & mua hộ</span>
-          </nav>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="container-custom py-8">
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
-          <aside className="w-64 flex-shrink-0">
-            <div className="bg-background-white rounded-lg shadow-sm overflow-hidden sticky top-24">
-              {/* User Info */}
-              {user && (
-                <div className="bg-gradient-to-r from-primary to-accent-red p-4 text-white">
-                  <div className="flex items-center gap-3 mb-3">
-                    {user.avatar ? (
-                      <img 
-                        src={user.avatar} 
-                        alt={user.username || 'User'} 
-                        className="w-12 h-12 rounded-full object-cover border-2 border-white"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-background-white rounded-full flex items-center justify-center text-primary font-bold text-xl">
-                        {user.username?.[0]?.toUpperCase() || 'U'}
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-sm truncate">{user.username}</h3>
-                      <p className="text-xs opacity-90 truncate">{user.email}</p>
-                    </div>
-                  </div>
+          <aside className="lg:w-64 flex-shrink-0">
+            <div className="bg-white rounded-xl shadow-sm p-4">
+              <div className="flex items-center gap-3 pb-4 border-b">
+                <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                  <User className="w-6 h-6 text-red-500" />
                 </div>
-              )}
-
-              {/* Categories Menu */}
-              <div className="p-2">
-                <h3 className="font-bold text-text-dark px-3 py-2 mb-2">DANH MỤC SẢN PHẨM</h3>
-                <nav className="space-y-1">
-                  {categories.map((category, index) => (
-                    <Link
-                      key={index}
-                      href={`/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`}
-                      className="sidebar-link"
-                    >
-                      <span className="text-lg">{category.icon}</span>
-                      <span className="font-medium text-sm">{category.name}</span>
-                    </Link>
-                  ))}
-                </nav>
+                <div>
+                  <p className="font-medium text-gray-900">{user?.fullName}</p>
+                  <p className="text-sm text-gray-500">{user?.email}</p>
+                </div>
               </div>
-
-              {/* Profile Menu */}
-              <div className="border-t border-gray-200 p-2 mt-4">
-                <h3 className="font-bold text-text-dark px-3 py-2 mb-2">TÀI KHOẢN</h3>
-                <nav className="space-y-1">
-                  <Link href="/profile" className="sidebar-link">
-                    <User size={18} />
-                    <span className="font-medium text-sm">Thông tin cá nhân</span>
+              <nav className="mt-4 space-y-1">
+                {menuItems.map((item) => (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors ${
+                      item.active
+                        ? 'bg-red-50 text-red-600'
+                        : 'text-gray-600 hover:bg-gray-50'
+                    }`}
+                  >
+                    <item.icon className="w-5 h-5" />
+                    <span className="text-sm font-medium">{item.label}</span>
                   </Link>
-                  <Link href="/profile/loyalty" className="sidebar-link">
-                    <Gift size={18} />
-                    <span className="font-medium text-sm">Khách hàng thân thiết</span>
-                  </Link>
-                  <Link href="/profile/orders" className="sidebar-link">
-                    <Package size={18} />
-                    <span className="font-medium text-sm">Đơn thông thường</span>
-                  </Link>
-                  <Link href="/profile/preorders" className="sidebar-link active bg-gradient-to-r from-primary to-accent-red text-white">
-                    <ShoppingCart size={18} />
-                    <span className="font-medium text-sm">Đơn đặt trước & mua hộ</span>
-                  </Link>
-                  <Link href="/profile/addresses" className="sidebar-link">
-                    <MapPin size={18} />
-                    <span className="font-medium text-sm">Địa chỉ giao hàng</span>
-                  </Link>
-                </nav>
-              </div>
+                ))}
+              </nav>
             </div>
           </aside>
 
-          {/* Main Content Area */}
-          <div className="flex-1">
-            {/* Page Title */}
-            <div className="bg-gradient-to-r from-primary to-accent-red rounded-lg p-6 mb-6 text-white">
-              <h1 className="section-title text-white mb-2">
-                <span className="section-title-bar bg-white"></span>
-                Đơn Đặt Trước & Mua Hộ
-              </h1>
-              <p className="text-primary-50">Quản lý tất cả đơn hàng đặt trước và mua hộ của bạn</p>
-            </div>
+          {/* Main Content */}
+          <main className="flex-1">
+            <div className="bg-white rounded-xl shadow-sm p-6">
+              <h1 className="text-xl font-bold text-gray-900 mb-6">Đơn đặt trước & Mua hộ</h1>
 
-            {/* Info Banners */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="bg-background-white rounded-lg p-4 shadow-sm border-l-4 border-blue-500">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Truck className="text-blue-500" size={24} />
+              {/* Info Banner */}
+              <div className="bg-gradient-to-r from-red-50 to-orange-50 border border-red-100 rounded-lg p-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                    <ShoppingBag className="w-5 h-5 text-red-500" />
                   </div>
                   <div>
-                    <h3 className="font-bold text-text-dark">Miễn phí vận chuyển</h3>
-                    <p className="text-sm text-text-gray">Đơn từ 500k</p>
+                    <h3 className="font-medium text-gray-900">Đơn hàng đang chờ xử lý</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Các đơn hàng chờ xác nhận hoặc đang xử lý sẽ được hiển thị tại đây.
+                      Bạn có thể theo dõi trạng thái đơn hàng realtime.
+                    </p>
                   </div>
                 </div>
               </div>
-              <div className="bg-background-white rounded-lg p-4 shadow-sm border-l-4 border-green-500">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <Shield className="text-green-500" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-text-dark">Bảo hành chính hãng</h3>
-                    <p className="text-sm text-text-gray">100% authentic</p>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-background-white rounded-lg p-4 shadow-sm border-l-4 border-primary">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-primary-50 rounded-full flex items-center justify-center">
-                    <Heart className="text-primary" size={24} />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-text-dark">Hỗ trợ 24/7</h3>
-                    <p className="text-sm text-text-gray">Tư vấn nhiệt tình</p>
-                  </div>
-                </div>
-              </div>
-            </div>
 
-            {/* Filter Tabs */}
-            <div className="bg-background-white rounded-lg shadow-sm p-4 mb-6">
-              <div className="flex flex-wrap gap-3">
-                {filterTabs.map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveFilter(tab.id)}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${activeFilter === tab.id
-                      ? 'bg-gradient-to-r from-primary to-accent-red text-white shadow-lg scale-105'
-                      : 'bg-background-light text-text-gray hover:bg-primary-50'
-                      }`}
-                  >
-                    <tab.icon size={18} />
-                    <span>{tab.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Sort Options */}
-            <div className="bg-background-white rounded-lg shadow-sm p-4 mb-6">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-text-gray">
-                  Hiển thị <span className="font-bold text-text-dark">{filteredOrders.length}</span> sản phẩm
-                </div>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="input-field w-auto"
+              {/* Tabs */}
+              <div className="flex gap-2 mb-6 border-b">
+                <button
+                  onClick={() => setActiveTab('pending')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === 'pending'
+                      ? 'border-red-500 text-red-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
                 >
-                  <option value="newest">Mới nhất</option>
-                  <option value="price-asc">Giá thấp đến cao</option>
-                  <option value="price-desc">Giá cao đến thấp</option>
-                  <option value="popular">Phổ biến nhất</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Products Grid */}
-            {filteredOrders.length === 0 ? (
-              <div className="bg-background-white rounded-lg shadow-sm p-12 text-center">
-                <div className="w-32 h-32 bg-background-light rounded-full flex items-center justify-center mx-auto mb-6">
-                  <ShoppingCart size={64} className="text-text-gray" />
-                </div>
-                <h3 className="text-2xl font-bold text-text-dark mb-2">Chưa có đơn hàng nào</h3>
-                <p className="text-text-gray mb-6">Hãy bắt đầu đặt trước những sản phẩm yêu thích của bạn!</p>
-                <Link href="/products" className="btn-accent inline-block">
-                  Khám phá ngay
-                </Link>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {filteredOrders.map((product) => (
-                  <div key={product.id} className="product-card group">
-                    {/* Badges */}
-                    <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
-                      {product.isNew && (
-                        <span className="badge badge-new">MỚI</span>
-                      )}
-                      {product.isHot && (
-                        <span className="badge badge-hot">HOT</span>
-                      )}
-                      {product.discount && (
-                        <span className="badge badge-sale">-{product.discount}%</span>
-                      )}
-                    </div>
-
-                    {/* Favorite Button */}
-                    <button className="absolute top-2 right-2 z-10 w-8 h-8 bg-background-white rounded-full flex items-center justify-center shadow-md hover:bg-primary hover:text-white transition-colors">
-                      <Heart size={16} />
-                    </button>
-
-                    {/* Product Image */}
-                    <Link href={`/products/${product.id}`}>
-                      <div className="relative aspect-[3/4] overflow-hidden bg-background-light">
-                        <Image
-                          src={product.image}
-                          alt={product.name}
-                          fill
-                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                        />
-                      </div>
-                    </Link>
-
-                    {/* Product Info */}
-                    <div className="p-4">
-                      {/* Brand */}
-                      <div className="text-xs text-text-gray mb-1">{product.brand}</div>
-
-                      {/* Product Name */}
-                      <Link href={`/products/${product.id}`}>
-                        <h3 className="font-semibold text-text-dark mb-2 line-clamp-2 hover:text-primary transition-colors min-h-[2.5rem]">
-                          {product.name}
-                        </h3>
-                      </Link>
-
-                      {/* Rating & Sold */}
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="flex items-center gap-1">
-                          <Star size={14} className="text-yellow-400 fill-yellow-400" />
-                          <span className="text-xs font-medium text-text-dark">{product.rating}</span>
-                        </div>
-                        <span className="text-xs text-gray-400">•</span>
-                        <span className="text-xs text-text-gray">Đã bán {product.soldCount}</span>
-                      </div>
-
-                      {/* Price */}
-                      <div className="flex items-baseline gap-2 mb-3">
-                        <span className="price-sale">
-                          {product.price.toLocaleString('vi-VN')}₫
-                        </span>
-                        {product.originalPrice && (
-                          <span className="price-original">
-                            {product.originalPrice.toLocaleString('vi-VN')}₫
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Status Badge */}
-                      <div className="flex items-center justify-between">
-                        {product.status === 'in-stock' ? (
-                          <span className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded">
-                            ✓ Còn hàng
-                          </span>
-                        ) : product.status === 'pre-order' ? (
-                          <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded">
-                            ⏰ Đặt trước
-                          </span>
-                        ) : (
-                          <span className="text-xs font-medium text-text-gray bg-background-light px-2 py-1 rounded">
-                            🔜 Sắp về
-                          </span>
-                        )}
-
-                        {/* Add to Cart Button */}
-                        <button className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-dark transition-colors shadow-md">
-                          <ShoppingCart size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Load More Button */}
-            {filteredOrders.length > 0 && (
-              <div className="text-center mt-8">
-                <button className="btn-accent">
-                  Xem thêm sản phẩm
+                  Chờ xác nhận ({pendingCount})
+                </button>
+                <button
+                  onClick={() => setActiveTab('processing')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === 'processing'
+                      ? 'border-red-500 text-red-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Đang xử lý ({processingCount})
+                </button>
+                <button
+                  onClick={() => setActiveTab('all')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    activeTab === 'all'
+                      ? 'border-red-500 text-red-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Tất cả ({orders.length})
                 </button>
               </div>
-            )}
-          </div>
+
+              {/* Orders List */}
+              {filteredOrders.length === 0 ? (
+                <div className="text-center py-12">
+                  <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <p className="text-gray-500 mb-4">
+                    {activeTab === 'pending'
+                      ? 'Không có đơn hàng nào đang chờ xác nhận'
+                      : activeTab === 'processing'
+                      ? 'Không có đơn hàng nào đang xử lý'
+                      : 'Bạn chưa có đơn hàng nào'}
+                  </p>
+                  <Link
+                    href="/products"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
+                  >
+                    Mua sắm ngay
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {filteredOrders.map((order) => {
+                    const status = statusConfig[order.status] || statusConfig.PENDING
+                    const StatusIcon = status.icon
+
+                    return (
+                      <div key={order.id} className="border rounded-lg overflow-hidden">
+                        {/* Order Header */}
+                        <div className="bg-gray-50 px-4 py-3 flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <span className="text-sm text-gray-500">
+                              Mã đơn: <span className="font-medium text-gray-900">{order.orderNumber}</span>
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              {new Date(order.createdAt).toLocaleDateString('vi-VN')}
+                            </span>
+                          </div>
+                          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${status.color}`}>
+                            <StatusIcon className="w-3.5 h-3.5" />
+                            {status.label}
+                          </div>
+                        </div>
+
+                        {/* Order Items */}
+                        <div className="p-4">
+                          {order.items.slice(0, 2).map((item) => (
+                            <div key={item.id} className="flex gap-4 mb-3 last:mb-0">
+                              <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                {item.product.images?.[0] ? (
+                                  <Image
+                                    src={item.product.images[0]}
+                                    alt={item.product.name}
+                                    width={64}
+                                    height={64}
+                                    className="w-full h-full object-cover"
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center">
+                                    <Package className="w-6 h-6 text-gray-400" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <Link
+                                  href={`/products/${item.product.slug}`}
+                                  className="font-medium text-gray-900 hover:text-red-500 line-clamp-1"
+                                >
+                                  {item.product.name}
+                                </Link>
+                                <p className="text-sm text-gray-500">
+                                  x{item.quantity} · {item.price.toLocaleString('vi-VN')}₫
+                                </p>
+                              </div>
+                            </div>
+                          ))}
+                          {order.items.length > 2 && (
+                            <p className="text-sm text-gray-500">
+                              +{order.items.length - 2} sản phẩm khác
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Order Footer */}
+                        <div className="bg-gray-50 px-4 py-3 flex items-center justify-between">
+                          <div className="text-sm">
+                            <span className="text-gray-500">Tổng tiền: </span>
+                            <span className="font-bold text-red-500">
+                              {order.totalAmount.toLocaleString('vi-VN')}₫
+                            </span>
+                          </div>
+                          <Link
+                            href={`/profile/orders`}
+                            className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-600"
+                          >
+                            <Eye className="w-4 h-4" />
+                            Xem chi tiết
+                          </Link>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </main>
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white mt-16">
-        <div className="container-custom py-12">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            {/* Company Info */}
-            <div>
-              <h3 className="text-xl font-bold text-primary mb-4">DN FIGURE</h3>
-              <p className="text-gray-400 text-sm mb-4">
-                Chuyên cung cấp các sản phẩm Figure & Anime chính hãng, uy tín hàng đầu Việt Nam.
-              </p>
-              <div className="flex gap-3">
-                <a href="#" className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                  f
-                </a>
-                <a href="#" className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                  📷
-                </a>
-                <a href="#" className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
-                  🐦
-                </a>
-              </div>
-            </div>
-
-            {/* Quick Links */}
-            <div>
-              <h4 className="font-bold mb-4 text-primary">Liên kết nhanh</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="/about" className="hover:text-primary">Giới thiệu</Link></li>
-                <li><Link href="/products" className="hover:text-primary">Sản phẩm</Link></li>
-                <li><Link href="/news" className="hover:text-primary">Tin tức</Link></li>
-                <li><Link href="/contact" className="hover:text-primary">Liên hệ</Link></li>
-              </ul>
-            </div>
-
-            {/* Support */}
-            <div>
-              <h4 className="font-bold mb-4 text-primary">Hỗ trợ khách hàng</h4>
-              <ul className="space-y-2 text-sm text-gray-400">
-                <li><Link href="/shipping" className="hover:text-primary">Chính sách vận chuyển</Link></li>
-                <li><Link href="/return" className="hover:text-primary">Chính sách đổi trả</Link></li>
-                <li><Link href="/payment" className="hover:text-primary">Hướng dẫn thanh toán</Link></li>
-                <li><Link href="/warranty" className="hover:text-primary">Chính sách bảo hành</Link></li>
-              </ul>
-            </div>
-
-            {/* Contact Info */}
-            <div>
-              <h4 className="font-bold mb-4 text-primary">Liên hệ</h4>
-              <ul className="space-y-3 text-sm text-gray-400">
-                <li className="flex items-start gap-2">
-                  <MapPin size={16} className="mt-1 flex-shrink-0" />
-                  <span>135 Đường ABC, Quận 1, TP.HCM</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Phone size={16} />
-                  <span>0399624662</span>
-                </li>
-                <li className="flex items-center gap-2">
-                  <Mail size={16} />
-                  <span>luankhung2002@icloud.com</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          {/* Bottom Bar */}
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-sm text-gray-400">
-            <p>© 2024 DN Figure. All rights reserved. Made with ❤️ in Vietnam</p>
-          </div>
-        </div>
-      </footer>
     </div>
-  );
+  )
 }

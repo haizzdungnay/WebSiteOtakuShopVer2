@@ -18,7 +18,6 @@ import {
   Save,
   X,
   Camera,
-  Gift,
   Link as LinkIcon,
   Check
 } from 'lucide-react';
@@ -168,7 +167,6 @@ export default function ProfilePage() {
     { href: '/profile/preorders', label: 'Đơn đặt trước & mua hộ', icon: ShoppingCart },
     { href: '/profile/wishlist', label: 'Sản phẩm yêu thích', icon: Heart },
     { href: '/profile/addresses', label: 'Địa chỉ giao hàng', icon: MapPin },
-    { href: '/profile/loyalty', label: 'Khách hàng thân thiết', icon: Gift },
   ];
 
   return (
@@ -456,13 +454,6 @@ export default function ProfilePage() {
                         >
                           <MapPin size={32} className="text-gray-400 group-hover:text-primary" />
                           <span className="text-sm font-medium text-gray-700 group-hover:text-primary">Địa chỉ</span>
-                        </Link>
-                        <Link
-                          href="/profile/loyalty"
-                          className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-lg hover:bg-primary/10 transition-colors group"
-                        >
-                          <Gift size={32} className="text-gray-400 group-hover:text-primary" />
-                          <span className="text-sm font-medium text-gray-700 group-hover:text-primary">Thân thiết</span>
                         </Link>
                       </div>
                     </div>
