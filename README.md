@@ -20,6 +20,7 @@ Cửa hàng figure anime chính hãng - Next.js E-commerce Platform với Prisma
 - [Scripts](#-scripts)
 - [API Endpoints](#-api-endpoints)
 - [Hướng dẫn sử dụng](#-hướng-dẫn-sử-dụng)
+- [Deploy lên Internet](#-deploy-lên-internet)
 - [Troubleshooting](#-troubleshooting)
 
 ---
@@ -499,6 +500,322 @@ npm run docker:build     # Build Docker image
 npm run db:studio
 # Mở http://localhost:5555
 ```
+
+---
+
+## 🌐 Deploy lên Internet
+
+Dưới đây là hướng dẫn deploy OtakuShop lên các nền tảng hosting phổ biến.
+
+### 🚀 Deploy lên Vercel (Khuyến nghị)
+
+Vercel là nền tảng tốt nhất cho Next.js applications với free tier hào phóng.
+
+#### Bước 1: Chuẩn bị Database (Neon/Supabase)
+
+**Option A: Neon (Khuyến nghị - Free tier tốt)**
+
+1. Đăng ký tại https://neon.tech
+2. Tạo project mới, chọn region gần nhất (Singapore)
+3. Copy connection string:
+   ```
+   postgresql://username:password@ep-xxx.ap-southeast-1.aws.neon.tech/neondb?sslmode=require
+   ```
+
+**Option B: Supabase**
+
+1. Đăng ký tại https://supabase.com
+2. Tạo project mới
+3. Vào **Settings → Database → Connection string**
+4. Copy connection string (chọn URI)
+
+#### Bước 2: Deploy lên Vercel
+
+1. **Push code lên GitHub** (nếu chưa có)
+
+2. **Import project vào Vercel**:
+   - Truy cập https://vercel.com/new
+   - Kết nối GitHub repository
+   - Chọn repository `WebSiteOtakuShopVer2`
+
+3. **Cấu hình Environment Variables**:
+   
+   Trong Vercel Dashboard → Settings → Environment Variables, thêm:
+
+   ```env
+   # Database
+   DATABASE_URL=postgresql://user:pass@host/db?sslmode=require
+   
+   # JWT (Tạo secret mới, ít nhất 32 ký tự)
+   JWT_SECRET=your-super-secret-production-key-min-32-chars
+   JWT_EXPIRES_IN=7d
+   
+   # Admin
+   ADMIN_USERNAME=admin@yourdomain.com
+   ADMIN_PASSWORD=YourStrongPassword123!
+   ADMIN_DISPLAY_NAME=Administrator
+   
+   # Application
+   NODE_ENV=production
+   NEXT_PUBLIC_API_URL=https://your-app.vercel.app
+   NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+   
+   # Email (Gmail App Password)
+   EMAIL_USER=your-email@gmail.com
+   EMAIL_PASS=your-16-char-app-password
+   
+   # UploadThing
+   UPLOADTHING_SECRET=sk_live_xxx
+   UPLOADTHING_APP_ID=xxx
+   
+   # VNPAY (Production keys)
+   VNP_TMN_CODE=your-production-code
+   VNP_HASH_SECRET=your-production-secret
+   VNP_URL=https://pay.vnpay.vn/vpcpay.html
+   VNP_RETURN_URL=https://your-app.vercel.app/api/payment/vnpay/return
+   VNP_IPN_URL=https://your-app.vercel.app/api/payment/vnpay/ipn
+   ```
+
+4. **Cấu hình Build Settings**:
+   - Framework Preset: `Next.js`
+   - Build Command: `npx prisma generate && npm run build`
+   - Output Directory: `.next`
+
+5. **Deploy**:
+   - Click "Deploy"
+   - Đợi build hoàn tất (3-5 phút)
+
+#### Bước 3: Khởi tạo Database
+
+Sau khi deploy thành công:
+
+```bash
+# Cài đặt Vercel CLI
+npm i -g vercel
+
+# Login
+vercel login
+
+# Kết nối project
+vercel link
+
+# Push schema lên database production
+vercel env pull .env.production.local
+npx prisma db push
+
+# (Tùy chọn) Seed data
+npx prisma db seed
+```
+
+#### Bước 4: Cấu hình Domain (Tùy chọn)
+
+1. Vào Vercel Dashboard → Settings → Domains
+2. Thêm domain của bạn
+3. Cấu hình DNS theo hướng dẫn
+
+---
+
+### 🚂 Deploy lên Railway
+
+Railway là alternative tốt với PostgreSQL built-in.
+
+#### Bước 1: Tạo Project
+
+1. Đăng ký tại https://railway.app
+2. Click **"New Project"** → **"Deploy from GitHub repo"**
+3. Chọn repository
+
+#### Bước 2: Thêm PostgreSQL
+
+1. Click **"+ New"** → **"Database"** → **"PostgreSQL"**
+2. Railway tự động tạo `DATABASE_URL`
+
+#### Bước 3: Cấu hình Variables
+
+Trong tab **Variables**, thêm các biến như Vercel ở trên.
+
+> **Lưu ý**: `DATABASE_URL` đã được Railway tự động thêm.
+
+#### Bước 4: Deploy
+
+1. Railway tự động detect Next.js
+2. Build command: `npx prisma generate && npx prisma db push && npm run build`
+3. Start command: `npm start`
+
+---
+
+### 🐳 Deploy với Docker (VPS/Cloud)
+
+Phù hợp cho AWS EC2, DigitalOcean, Google Cloud, hoặc VPS riêng.
+
+#### Bước 1: Chuẩn bị Server
+
+```bash
+# Ubuntu/Debian
+sudo apt update
+sudo apt install docker.io docker-compose git
+
+# Khởi động Docker
+sudo systemctl start docker
+sudo systemctl enable docker
+```
+
+#### Bước 2: Clone và Cấu hình
+
+```bash
+# Clone repository
+git clone https://github.com/haizzdungnay/WebSiteOtakuShopVer2.git
+cd WebSiteOtakuShopVer2
+
+# Tạo file .env.production
+cp .env.example .env.production
+nano .env.production  # Sửa các biến cần thiết
+```
+
+#### Bước 3: Docker Compose Production
+
+Tạo file `docker-compose.prod.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: otakushop
+      POSTGRES_PASSWORD: your_strong_password
+      POSTGRES_DB: otakushop
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: always
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://otakushop:your_strong_password@postgres:5432/otakushop
+    env_file:
+      - .env.production
+    depends_on:
+      - postgres
+    restart: always
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    depends_on:
+      - app
+    restart: always
+
+volumes:
+  postgres_data:
+```
+
+#### Bước 4: Build và Chạy
+
+```bash
+# Build image
+docker-compose -f docker-compose.prod.yml build
+
+# Chạy containers
+docker-compose -f docker-compose.prod.yml up -d
+
+# Khởi tạo database
+docker-compose -f docker-compose.prod.yml exec app npx prisma db push
+docker-compose -f docker-compose.prod.yml exec app npx prisma db seed
+
+# Xem logs
+docker-compose -f docker-compose.prod.yml logs -f app
+```
+
+#### Bước 5: Cấu hình SSL (Let's Encrypt)
+
+```bash
+# Cài đặt Certbot
+sudo apt install certbot
+
+# Tạo certificate
+sudo certbot certonly --standalone -d yourdomain.com
+
+# Tự động renew
+sudo crontab -e
+# Thêm: 0 0 * * * certbot renew --quiet
+```
+
+---
+
+### ☁️ Deploy lên Render
+
+#### Bước 1: Tạo Database
+
+1. Đăng ký tại https://render.com
+2. Dashboard → **New** → **PostgreSQL**
+3. Chọn Free tier
+4. Copy **Internal Database URL**
+
+#### Bước 2: Tạo Web Service
+
+1. Dashboard → **New** → **Web Service**
+2. Kết nối GitHub repository
+3. Cấu hình:
+   - **Name**: otakushop
+   - **Environment**: Node
+   - **Build Command**: `npm install && npx prisma generate && npx prisma db push && npm run build`
+   - **Start Command**: `npm start`
+
+4. Thêm Environment Variables (như Vercel)
+
+5. Click **Create Web Service**
+
+---
+
+### 📋 Checklist Production
+
+Trước khi go-live, kiểm tra:
+
+- [ ] **Security**
+  - [ ] Đổi `JWT_SECRET` thành chuỗi ngẫu nhiên (32+ ký tự)
+  - [ ] Đổi `ADMIN_PASSWORD` mạnh
+  - [ ] Bật HTTPS
+  - [ ] Cấu hình CORS đúng domain
+
+- [ ] **Database**
+  - [ ] Backup tự động đã bật
+  - [ ] Connection pooling đã cấu hình (Neon/Supabase tự động)
+
+- [ ] **Environment**
+  - [ ] `NODE_ENV=production`
+  - [ ] `NEXT_PUBLIC_APP_URL` đúng domain production
+  - [ ] VNPAY đã chuyển sang production keys
+
+- [ ] **Email**
+  - [ ] Test gửi email xác thực
+  - [ ] Test email thông báo đơn hàng
+
+- [ ] **Payment**
+  - [ ] VNPAY callback URLs đúng
+  - [ ] Test thanh toán end-to-end
+
+### 💰 Chi phí ước tính
+
+| Nền tảng | Database | Web Hosting | Tổng/tháng |
+|----------|----------|-------------|------------|
+| **Vercel + Neon** | Free (0.5GB) | Free (100GB bandwidth) | **$0** |
+| **Railway** | $5 (1GB) | Free (500 giờ) | **$5** |
+| **Render** | Free (1GB, sleep after 15min) | Free | **$0** |
+| **VPS (DigitalOcean)** | Included | $4-6/tháng | **$4-6** |
+
+> 💡 **Khuyến nghị**: Bắt đầu với **Vercel + Neon** (miễn phí hoàn toàn), sau đó upgrade khi cần.
 
 ---
 
