@@ -599,3 +599,6 @@ MIT License
 ---
 
 **Made with ❤️ in Vietnam 🇻🇳**
+DATABASE_URL="postgresql://neondb_owner:npg_pHPaOE3Msi6q@ep-quiet-breeze-a1i77m94-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+# uncomment next line if you use Prisma <5.10
+# DATABASE_URL_UNPOOLED="postgresql://neondb_owner:npg_pHPaOE3Msi6q@ep-quiet-breeze-a1i77m94.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { CheckCircle, Package, Truck, Home, Receipt } from 'lucide-react';
@@ -20,7 +20,8 @@ interface OrderData {
     createdAt: string;
 }
 
-export default function CheckoutSuccessPage() {
+// Component chính sử dụng useSearchParams
+function CheckoutSuccessContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const orderNumber = searchParams.get('order');
@@ -272,5 +273,26 @@ export default function CheckoutSuccessPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+// Loading fallback component
+function LoadingFallback() {
+    return (
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="text-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-red mx-auto mb-4"></div>
+                <p className="text-gray-600">Đang tải...</p>
+            </div>
+        </div>
+    );
+}
+
+// Page component wrap với Suspense
+export default function CheckoutSuccessPage() {
+    return (
+        <Suspense fallback={<LoadingFallback />}>
+            <CheckoutSuccessContent />
+        </Suspense>
     );
 }
