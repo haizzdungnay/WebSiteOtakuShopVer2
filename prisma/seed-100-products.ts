@@ -109,9 +109,16 @@ function generateSlug(name: string): string {
         .replace(/(^-|-$)/g, '')
 }
 
-function getRandomImages(): string[] {
-    const shuffled = [...figureImages].sort(() => 0.5 - Math.random())
-    return shuffled.slice(0, Math.floor(Math.random() * 3) + 2)
+function getImagesForProduct(name: string, seedBase: number): string[] {
+    const encodedName = encodeURIComponent(name)
+    const count = Math.floor(Math.random() * 2) + 1
+    const images = []
+    for (let i = 0; i < count; i++) {
+        const seed = seedBase * 10 + i
+        const imageUrl = `https://image.pollinations.ai/prompt/anime%20figure%20${encodedName}?width=800&height=800&nologo=true&seed=${seed}&model=flux`
+        images.push(imageUrl)
+    }
+    return images
 }
 
 function getRandomPrice(min: number, max: number): number {
@@ -244,7 +251,7 @@ async function main() {
             price,
             comparePrice: hasComparePrice ? Math.floor(price * 1.15) : null,
             stockQuantity: getStockForStatus(preorderStatus),
-            images: getRandomImages(),
+            images: getImagesForProduct(name, counter),
             isActive: true,
             featured: (counter % 5) === 0, // Mỗi 5 sản phẩm có 1 featured
             categoryId: figuresCategory?.id || defaultCategory.id,
@@ -270,7 +277,7 @@ async function main() {
             price,
             comparePrice: hasComparePrice ? Math.floor(price * 1.2) : null,
             stockQuantity: Math.floor(Math.random() * 100) + 20,
-            images: getRandomImages(),
+            images: getImagesForProduct(name, counter),
             isActive: true,
             featured: (counter % 6) === 0,
             categoryId: apparelCategory?.id || defaultCategory.id,
@@ -296,7 +303,7 @@ async function main() {
             price,
             comparePrice: hasComparePrice ? Math.floor(price * 1.15) : null,
             stockQuantity: Math.floor(Math.random() * 30) + 10,
-            images: getRandomImages(),
+            images: getImagesForProduct(name, counter),
             isActive: true,
             featured: (counter % 5) === 0,
             categoryId: mangaCategory?.id || defaultCategory.id,
@@ -322,7 +329,7 @@ async function main() {
             price,
             comparePrice: hasComparePrice ? Math.floor(price * 1.18) : null,
             stockQuantity: Math.floor(Math.random() * 25) + 5,
-            images: getRandomImages(),
+            images: getImagesForProduct(name, counter),
             isActive: true,
             featured: (counter % 4) === 0,
             categoryId: gamingCategory?.id || defaultCategory.id,
@@ -348,7 +355,7 @@ async function main() {
             price,
             comparePrice: hasComparePrice ? Math.floor(price * 1.25) : null,
             stockQuantity: Math.floor(Math.random() * 150) + 30,
-            images: getRandomImages(),
+            images: getImagesForProduct(name, counter),
             isActive: true,
             featured: (counter % 4) === 0,
             categoryId: collectiblesCategory?.id || defaultCategory.id,

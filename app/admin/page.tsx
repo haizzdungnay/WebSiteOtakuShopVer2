@@ -875,7 +875,7 @@ export default function AdminPage() {
             </div>
             <div className="flex items-center gap-4">
               <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
-                <div className="text-2xl font-bold">{products.length}</div>
+                <div className="text-2xl font-bold">{stats?.totalProducts || 0}</div>
                 <p className="text-sm text-slate-300">Sản phẩm</p>
               </div>
               <div className="rounded-2xl bg-white/10 px-6 py-4 text-center">
@@ -1282,96 +1282,6 @@ export default function AdminPage() {
               )}
             </div>
           </>
-        )}
-
-        {/* Products Tab */}
-        {activeTab === 'products' && (
-          <div className="space-y-6">
-            {/* Add Product Button */}
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Quản lý sản phẩm ({products.length})</h2>
-              <button
-                onClick={() => {
-                  setEditingProduct(null);
-                  setProductForm(initialProductForm);
-                  setShowProductModal(true);
-                }}
-                className="flex items-center gap-2 px-6 py-3 bg-slate-900 text-white rounded-full font-semibold text-sm hover:bg-slate-800"
-              >
-                <FilePlus size={18} />
-                Thêm sản phẩm
-              </button>
-            </div>
-
-            {/* Products List */}
-            <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="text-left py-3 px-4">Hình ảnh</th>
-                      <th className="text-left py-3 px-4">Tên sản phẩm</th>
-                      <th className="text-left py-3 px-4">Danh mục</th>
-                      <th className="text-left py-3 px-4">Giá</th>
-                      <th className="text-left py-3 px-4">Tồn kho</th>
-                      <th className="text-left py-3 px-4">Trạng thái</th>
-                      <th className="text-left py-3 px-4">Thao tác</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {products.map((product) => (
-                      <tr key={product.id} className="border-b border-slate-50">
-                        <td className="py-3 px-4">
-                          {product.images?.[0] ? (
-                            <img
-                              src={product.images[0]}
-                              alt={product.name}
-                              className="w-12 h-12 object-cover rounded-lg"
-                            />
-                          ) : (
-                            <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center">
-                              <Image size={20} className="text-slate-400" />
-                            </div>
-                          )}
-                        </td>
-                        <td className="py-3 px-4">
-                          <p className="font-medium">{product.name}</p>
-                          <p className="text-xs text-slate-500">{product.slug}</p>
-                        </td>
-                        <td className="py-3 px-4">{product.category?.name || '-'}</td>
-                        <td className="py-3 px-4">{formatCurrency(Number(product.price))}</td>
-                        <td className="py-3 px-4">{product.stockQuantity}</td>
-                        <td className="py-3 px-4">
-                          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${product.isActive ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-50 text-slate-600'
-                            }`}>
-                            {product.isActive ? 'Đang bán' : 'Tạm ẩn'}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4">
-                          <div className="flex gap-2">
-                            <button
-                              onClick={() => handleEditProduct(product)}
-                              className="p-2 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100"
-                              title="Chỉnh sửa"
-                            >
-                              <Edit size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteProduct(product.id)}
-                              className="p-2 rounded-full bg-rose-50 text-rose-600 hover:bg-rose-100"
-                              title="Xóa"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
         )}
 
         {/* Orders Tab */}
