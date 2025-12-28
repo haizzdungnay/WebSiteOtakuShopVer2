@@ -140,8 +140,6 @@ export async function GET(request: NextRequest) {
             prisma.product.count({ where })
         ])
 
-        console.log(`API /api/products: Found ${products.length} products. Total: ${total}`);
-
         // Return với pagination info
         return NextResponse.json({
             success: true,

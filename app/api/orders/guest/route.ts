@@ -33,21 +33,16 @@ export async function POST(request: NextRequest) {
         const user = await getUserFromRequest(request);
         let userId: string | null = null;
 
-        console.log('Guest order - user from token:', user ? user.userId : 'null');
-
         if (user) {
             // Verify user exists in DB to avoid foreign key constraint errors
             const dbUser = await prisma.user.findUnique({
                 where: { id: user.userId },
                 select: { id: true }
             });
-            console.log('Guest order - dbUser found:', dbUser ? dbUser.id : 'null');
             if (dbUser) {
                 userId = dbUser.id;
             }
         }
-
-        console.log('Guest order - final userId:', userId);
 
         // Validate input
         const body = await request.json();

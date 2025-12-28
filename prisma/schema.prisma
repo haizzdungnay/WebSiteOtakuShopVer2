@@ -237,6 +237,7 @@ model Order {
   @@index([orderNumber])
   @@index([status])
   @@index([createdAt])
+  @@index([userId, status]) // Composite index for user's orders by status
   @@map("orders")
 }
 
@@ -280,9 +281,35 @@ model Admin {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
+  auditLogs AdminAuditLog[]
+
   @@index([username])
   @@index([email])
   @@map("admins")
+}
+
+// ==========================================
+// ADMIN AUDIT LOG (Tracking admin actions)
+// ==========================================
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  adminId     String
+  action      String   // e.g., "UPDATE_ORDER_STATUS", "DELETE_PRODUCT"
+  entityType  String   // e.g., "Order", "Product", "User"
+  entityId    String   // ID of the affected entity
+  oldValue    Json?    // Previous state (for updates)
+  newValue    Json?    // New state (for updates)
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  admin Admin @relation(fields: [adminId], references: [id], onDelete: Cascade)
+
+  @@index([adminId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("admin_audit_logs")
 }
 
 // ==========================================
@@ -448,6 +475,8 @@ model Review {
   @@index([isApproved])
   @@index([isPinned])
   @@index([createdAt])
+  @@index([productId, isApproved]) // Composite index for approved product reviews
+  @@index([userId, productId]) // Check if user reviewed product
   @@map("reviews")
 }
 
