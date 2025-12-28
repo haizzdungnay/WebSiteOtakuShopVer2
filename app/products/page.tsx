@@ -41,7 +41,7 @@ function ProductsContent() {
   const order = searchParams.get('order') || 'desc';
   const featured = searchParams.get('featured') === 'true';
   const searchQuery = searchParams.get('q') || '';
-  const limit = 48;
+  const limit = 24;
 
   // Fetch categories
   useEffect(() => {
