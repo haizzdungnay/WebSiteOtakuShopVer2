@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { User, Award, Package, ShoppingBag, MapPin, Search, Calendar, TruckIcon, CheckCircle2, X, Loader2 } from 'lucide-react';
+import { User, Package, ShoppingBag, MapPin, Search, Calendar, TruckIcon, CheckCircle2, X, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 interface OrderItem {
@@ -105,7 +105,6 @@ export default function OrderTrackingPage() {
 
   const sidebarItems = [
     { id: 'profile', icon: User, label: 'Thông tin cá nhân' },
-    { id: 'loyalty', icon: Award, label: 'Khách hàng thân thiết' },
     { id: 'orders', icon: Package, label: 'Tra cứu đơn hàng' },
     { id: 'preorders', icon: ShoppingBag, label: 'Đơn đặt trước & mua hộ' },
     { id: 'addresses', icon: MapPin, label: 'Địa chỉ giao hàng' },
