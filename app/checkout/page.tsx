@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
@@ -34,7 +34,7 @@ interface SavedAddress {
 type PaymentMethod = 'cod' | 'bank-transfer' | 'qr' | 'store-pickup' | 'vnpay';
 type ShippingMethod = 'standard' | 'express' | 'store-pickup';
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const { items, getTotalPrice, clearCart } = useCart();
   const { user } = useAuth();
   const router = useRouter();
@@ -51,7 +51,7 @@ export default function CheckoutPage() {
   const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
   const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
   const [showAddressDropdown, setShowAddressDropdown] = useState(false);
-  const [loadingAddresses, setLoadingAddresses] = useState(false);
+  const [, setLoadingAddresses] = useState(false);
 
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     fullName: '',
@@ -101,6 +101,7 @@ export default function CheckoutPage() {
     if (user) {
       fetchSavedAddresses();
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchSavedAddresses = async () => {
@@ -788,5 +789,26 @@ export default function CheckoutPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-red mx-auto mb-4"></div>
+        <p className="text-gray-600">Đang tải trang thanh toán...</p>
+      </div>
+    </div>
+  );
+}
+
+// Page component wrap với Suspense
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <CheckoutContent />
+    </Suspense>
   );
 }
