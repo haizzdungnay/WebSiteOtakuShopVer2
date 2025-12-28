@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/auth';
+import { sendEmail, getOrderConfirmationEmailTemplate } from '@/lib/email';
 import { z } from 'zod';
 import {
     generateOrderNumber,
@@ -12,7 +13,8 @@ import {
 const guestOrderSchema = z.object({
     customerName: z.string().min(1, 'Customer name is required'),
     customerPhone: z.string().min(1, 'Customer phone is required'),
-    customerEmail: z.string().email().optional(),
+    customerEmail: z.string().email().optional().or(z.literal('')),
+    notificationEmail: z.string().email().optional().nullable(), // Email phụ để nhận thông báo
     shippingAddress: z.string().min(1, 'Shipping address is required'),
     shippingWard: z.string().optional(),
     shippingDistrict: z.string().min(1, 'Shipping district is required'),
@@ -126,6 +128,7 @@ export async function POST(request: NextRequest) {
                     customerName: validatedData.customerName,
                     customerEmail: validatedData.customerEmail || null,
                     customerPhone: validatedData.customerPhone,
+                    notificationEmail: validatedData.notificationEmail || null, // Email phụ để nhận thông báo
 
                     // Shipping info
                     shippingFullName: validatedData.customerName,
@@ -214,9 +217,80 @@ export async function POST(request: NextRequest) {
                     }
                 },
                 payment: true,
-                shipping: true
+                shipping: true,
+                user: {
+                    select: {
+                        email: true,
+                        emailVerified: true
+                    }
+                }
             }
         });
+
+        // Gửi email xác nhận đơn hàng
+        if (fullOrder) {
+            try {
+                const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+                const orderUrl = userId ? `${baseUrl}/profile/orders` : `${baseUrl}/tra-cuu?orderNumber=${orderNumber}`;
+                
+                const emailHtml = getOrderConfirmationEmailTemplate({
+                    customerName: validatedData.customerName,
+                    orderNumber: orderNumber,
+                    items: cartItems.map(item => ({
+                        name: item.product.name,
+                        quantity: item.quantity,
+                        price: Number(item.product.price) * item.quantity
+                    })),
+                    subtotal: subtotal,
+                    shippingFee: shippingFee,
+                    total: total,
+                    shippingAddress: `${validatedData.customerName}, ${validatedData.customerPhone}, ${validatedData.shippingAddress}${validatedData.shippingWard ? `, ${validatedData.shippingWard}` : ''}, ${validatedData.shippingDistrict}, ${validatedData.shippingCity}`,
+                    paymentMethod: validatedData.paymentMethod,
+                    orderUrl
+                });
+
+                const emailSubject = `Xác nhận đơn hàng #${orderNumber} - OtakuShop`;
+
+                // Xác định email để gửi
+                // 1. Nếu user đã verified -> gửi đến email tài khoản
+                // 2. Nếu có customerEmail -> gửi đến customerEmail
+                // 3. Nếu có notificationEmail và khác -> gửi thêm
+                
+                const emailsToSend: string[] = [];
+
+                // Email chính của user đã verified
+                if (fullOrder.user?.emailVerified && fullOrder.user.email) {
+                    emailsToSend.push(fullOrder.user.email);
+                }
+
+                // Email khách hàng nhập (nếu có và chưa có trong list)
+                if (validatedData.customerEmail && !emailsToSend.includes(validatedData.customerEmail)) {
+                    emailsToSend.push(validatedData.customerEmail);
+                }
+
+                // Notification email (nếu có và chưa có trong list)
+                if (validatedData.notificationEmail && !emailsToSend.includes(validatedData.notificationEmail)) {
+                    emailsToSend.push(validatedData.notificationEmail);
+                }
+
+                // Gửi email đến tất cả địa chỉ
+                for (const email of emailsToSend) {
+                    const sent = await sendEmail({
+                        to: email,
+                        subject: emailSubject,
+                        html: emailHtml
+                    });
+                    if (sent) {
+                        console.log(`[EMAIL] Order confirmation sent to ${email} for order #${orderNumber}`);
+                    } else {
+                        console.error(`[EMAIL] Failed to send order confirmation to ${email}`);
+                    }
+                }
+            } catch (emailError) {
+                // Don't fail the order if email fails
+                console.error('[EMAIL] Failed to send order confirmation email:', emailError);
+            }
+        }
 
         return NextResponse.json(
             {

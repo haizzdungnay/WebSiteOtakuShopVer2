@@ -301,6 +301,165 @@ interface OrderStatusEmailData {
   orderUrl: string;
 }
 
+interface OrderConfirmationEmailData {
+  customerName: string;
+  orderNumber: string;
+  items: Array<{
+    name: string;
+    quantity: number;
+    price: number;
+  }>;
+  subtotal: number;
+  shippingFee: number;
+  total: number;
+  shippingAddress: string;
+  paymentMethod: string;
+  orderUrl: string;
+}
+
+export function getOrderConfirmationEmailTemplate(data: OrderConfirmationEmailData): string {
+  const itemsHtml = data.items.map(item => `
+    <tr>
+      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">
+        <span style="color: #374151;">${item.name}</span>
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: center; color: #6b7280;">
+        x${item.quantity}
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: right; color: #374151; font-weight: 500;">
+        ${item.price.toLocaleString('vi-VN')}đ
+      </td>
+    </tr>
+  `).join('');
+
+  const paymentMethodText: Record<string, string> = {
+    'COD': 'Thanh toán khi nhận hàng (COD)',
+    'BANK_TRANSFER': 'Chuyển khoản ngân hàng',
+    'VNPAY': 'Thanh toán qua VNPAY',
+    'MOMO': 'Thanh toán qua MoMo',
+    'ZALOPAY': 'Thanh toán qua ZaloPay',
+    'CREDIT_CARD': 'Thẻ tín dụng/ghi nợ'
+  };
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Xác nhận đơn hàng - OtakuShop</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+      <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td align="center" style="padding: 40px 0;">
+            <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <!-- Header -->
+              <tr>
+                <td style="padding: 40px 40px 20px; text-align: center; background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); border-radius: 8px 8px 0 0;">
+                  <div style="font-size: 48px; margin-bottom: 10px;">✓</div>
+                  <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: bold;">
+                    Đặt hàng thành công!
+                  </h1>
+                  <p style="margin: 10px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">
+                    Cảm ơn bạn đã mua sắm tại OtakuShop
+                  </p>
+                </td>
+              </tr>
+
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px;">
+                  <h2 style="margin: 0 0 20px; color: #333; font-size: 20px;">Xin chào ${data.customerName}!</h2>
+                  
+                  <p style="margin: 0 0 20px; color: #666; font-size: 16px; line-height: 1.6;">
+                    Đơn hàng <strong style="color: #333;">#${data.orderNumber}</strong> của bạn đã được tiếp nhận và đang được xử lý.
+                  </p>
+
+                  <!-- Order Items -->
+                  <div style="margin: 25px 0; border: 1px solid #e5e7eb; border-radius: 8px; overflow: hidden;">
+                    <div style="background-color: #f9fafb; padding: 12px 16px; font-weight: 600; color: #374151;">
+                      Chi tiết đơn hàng
+                    </div>
+                    <table style="width: 100%; border-collapse: collapse;">
+                      <thead>
+                        <tr style="background-color: #f9fafb;">
+                          <th style="padding: 12px; text-align: left; color: #6b7280; font-weight: 500;">Sản phẩm</th>
+                          <th style="padding: 12px; text-align: center; color: #6b7280; font-weight: 500;">SL</th>
+                          <th style="padding: 12px; text-align: right; color: #6b7280; font-weight: 500;">Giá</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        ${itemsHtml}
+                      </tbody>
+                    </table>
+                    <div style="padding: 16px; background-color: #f9fafb;">
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #6b7280;">Tạm tính:</span>
+                        <span style="color: #374151;">${data.subtotal.toLocaleString('vi-VN')}đ</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="color: #6b7280;">Phí vận chuyển:</span>
+                        <span style="color: #374151;">${data.shippingFee.toLocaleString('vi-VN')}đ</span>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+                        <span style="font-weight: 600; color: #374151;">Tổng cộng:</span>
+                        <span style="font-weight: 700; color: #dc2626; font-size: 18px;">${data.total.toLocaleString('vi-VN')}đ</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Shipping Info -->
+                  <div style="margin: 25px 0; padding: 16px; background-color: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+                    <h3 style="margin: 0 0 10px; color: #0369a1; font-size: 16px;">📦 Địa chỉ giao hàng</h3>
+                    <p style="margin: 0; color: #475569; font-size: 14px; line-height: 1.6;">
+                      ${data.shippingAddress}
+                    </p>
+                  </div>
+
+                  <!-- Payment Method -->
+                  <div style="margin: 25px 0; padding: 16px; background-color: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                    <h3 style="margin: 0 0 10px; color: #92400e; font-size: 16px;">💳 Phương thức thanh toán</h3>
+                    <p style="margin: 0; color: #78350f; font-size: 14px;">
+                      ${paymentMethodText[data.paymentMethod] || data.paymentMethod}
+                    </p>
+                  </div>
+
+                  <!-- Track Order Button -->
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="${data.orderUrl}" style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(238, 90, 90, 0.3);">
+                      Theo dõi đơn hàng
+                    </a>
+                  </div>
+
+                  <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="margin: 0; color: #999; font-size: 13px;">
+                      Chúng tôi sẽ thông báo cho bạn khi đơn hàng được vận chuyển.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 20px 40px; background-color: #f9f9f9; border-radius: 0 0 8px 8px; text-align: center;">
+                  <p style="margin: 0 0 10px; color: #999; font-size: 12px;">
+                    © 2025 OtakuShop. All rights reserved.
+                  </p>
+                  <p style="margin: 0; color: #999; font-size: 12px;">
+                    Hotline: 0389836514 | Email: tuanduongtempproject@gmail.com
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
 export function getOrderStatusEmailTemplate(data: OrderStatusEmailData): string {
   const statusConfig = ORDER_STATUS_CONFIG[data.newStatus] || { 
     text: data.newStatus, 

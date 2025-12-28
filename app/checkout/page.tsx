@@ -183,6 +183,12 @@ function CheckoutContent() {
       return;
     }
 
+    // Email bắt buộc cho khách vãng lai và user chưa xác minh email
+    if ((!user || !user.emailVerified) && !shippingInfo.email) {
+      alert('Vui lòng nhập địa chỉ email');
+      return;
+    }
+
     if (items.length === 0) {
       alert('Giỏ hàng trống');
       return;
@@ -198,6 +204,14 @@ function CheckoutContent() {
       else if (paymentMethod === 'vnpay') apiPaymentMethod = 'VNPAY';
       else apiPaymentMethod = 'COD';
 
+      // Xác định email cho đơn hàng
+      // - Nếu user đã verified: customerEmail = user.email, notificationEmail = email nhập (nếu khác)
+      // - Nếu guest hoặc chưa verified: customerEmail = email nhập
+      const customerEmail = user?.emailVerified ? user.email : (shippingInfo.email || '');
+      const notificationEmail = user?.emailVerified && shippingInfo.email && shippingInfo.email !== user.email 
+        ? shippingInfo.email 
+        : null;
+
       // Gọi API tạo đơn hàng
       const response = await fetch('/api/orders/guest', {
         method: 'POST',
@@ -208,7 +222,8 @@ function CheckoutContent() {
         body: JSON.stringify({
           customerName: shippingInfo.fullName,
           customerPhone: shippingInfo.phone,
-          customerEmail: shippingInfo.email || '',
+          customerEmail: customerEmail,
+          notificationEmail: notificationEmail,
           shippingAddress: shippingInfo.address,
           shippingWard: shippingInfo.ward || '',
           shippingDistrict: shippingInfo.district,
@@ -460,14 +475,28 @@ function CheckoutContent() {
                     />
                   </div>
                   <div className="md:col-span-2">
-                    <label className="block text-sm font-medium mb-2">Email</label>
+                    <label className="block text-sm font-medium mb-2">
+                      Email {(!user || !user.emailVerified) && <span className="text-red-500">*</span>}
+                      {user?.emailVerified && (
+                        <span className="text-gray-500 font-normal ml-1">(Tùy chọn)</span>
+                      )}
+                    </label>
                     <input
                       type="email"
+                      required={!user || !user.emailVerified}
                       value={shippingInfo.email}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, email: e.target.value })}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-red focus:border-transparent outline-none"
-                      placeholder="example@gmail.com"
+                      placeholder={user?.emailVerified ? `Mặc định: ${user.email}` : "example@gmail.com"}
                     />
+                    {user?.emailVerified && (
+                      <p className="text-sm text-gray-500 mt-1">
+                        {shippingInfo.email && shippingInfo.email !== user.email 
+                          ? `Thông báo sẽ được gửi đến cả ${user.email} và ${shippingInfo.email}`
+                          : `Thông báo sẽ được gửi đến ${user.email}`
+                        }
+                      </p>
+                    )}
                   </div>
                   <div className="md:col-span-2">
                     <label className="block text-sm font-medium mb-2">

@@ -203,9 +203,10 @@ model Order {
   userId      String?
 
   // Snapshot customer info
-  customerName  String
-  customerEmail String?
-  customerPhone String
+  customerName      String
+  customerEmail     String?
+  customerPhone     String
+  notificationEmail String?  // Email phụ để gửi thông báo (nếu khác email tài khoản)
 
   // Snapshot shipping address
   shippingFullName String

@@ -93,6 +93,7 @@ export async function PUT(
         customerName: true,
         customerEmail: true,
         note: true,
+        notificationEmail: true, // Email phụ để nhận thông báo
         user: {
           select: {
             id: true,
@@ -272,24 +273,53 @@ export async function PUT(
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
         const orderUrl = `${baseUrl}/profile/orders`
         
+        const statusTextMap: Record<string, string> = {
+          'SHIPPING': 'Đang giao hàng',
+          'DELIVERED': 'Đã giao hàng',
+          'CONFIRMED': 'Đã xác nhận',
+          'PREPARING': 'Đang chuẩn bị',
+          'COMPLETED': 'Hoàn thành',
+          'CANCELLED': 'Đã hủy'
+        }
+        const statusText = statusTextMap[validatedData.status] || 'Cập nhật'
+        const emailSubject = `Cập nhật đơn hàng #${order.orderNumber} - ${statusText}`
+        
+        const emailHtml = getOrderStatusEmailTemplate({
+          customerName: order.user.fullName,
+          orderNumber: order.orderNumber,
+          newStatus: validatedData.status,
+          trackingCode: validatedData.trackingCode,
+          carrier: validatedData.carrier,
+          adminNote: validatedData.adminNote,
+          orderUrl
+        })
+
+        // Gửi email đến email tài khoản chính
         const emailSent = await sendEmail({
           to: order.user.email,
-          subject: `Cập nhật đơn hàng #${order.orderNumber} - ${validatedData.status === 'SHIPPING' ? 'Đang giao hàng' : validatedData.status === 'DELIVERED' ? 'Đã giao hàng' : validatedData.status === 'CONFIRMED' ? 'Đã xác nhận' : validatedData.status === 'PREPARING' ? 'Đang chuẩn bị' : validatedData.status === 'COMPLETED' ? 'Hoàn thành' : validatedData.status === 'CANCELLED' ? 'Đã hủy' : 'Cập nhật'}`,
-          html: getOrderStatusEmailTemplate({
-            customerName: order.user.fullName,
-            orderNumber: order.orderNumber,
-            newStatus: validatedData.status,
-            trackingCode: validatedData.trackingCode,
-            carrier: validatedData.carrier,
-            adminNote: validatedData.adminNote,
-            orderUrl
-          })
+          subject: emailSubject,
+          html: emailHtml
         })
 
         if (emailSent) {
           console.log(`[EMAIL] Order status notification sent to ${order.user.email} for order #${order.orderNumber}`)
         } else {
           console.error(`[EMAIL] Failed to send order status notification to ${order.user.email}`)
+        }
+
+        // Gửi email đến notificationEmail nếu có và khác với email chính
+        if (order.notificationEmail && order.notificationEmail !== order.user.email) {
+          const secondEmailSent = await sendEmail({
+            to: order.notificationEmail,
+            subject: emailSubject,
+            html: emailHtml
+          })
+
+          if (secondEmailSent) {
+            console.log(`[EMAIL] Order status notification also sent to ${order.notificationEmail} for order #${order.orderNumber}`)
+          } else {
+            console.error(`[EMAIL] Failed to send order status notification to ${order.notificationEmail}`)
+          }
         }
       } catch (emailError) {
         // Don't fail the request if email sending fails
