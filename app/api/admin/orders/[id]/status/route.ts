@@ -235,7 +235,7 @@ export async function PUT(
     try {
       await prisma.adminAuditLog.create({
         data: {
-          adminId: admin.id,
+          adminId: admin.userId,
           action: 'UPDATE_ORDER_STATUS',
           entityType: 'Order',
           entityId: id,
