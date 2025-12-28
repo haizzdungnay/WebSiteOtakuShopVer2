@@ -1,14 +1,43 @@
 import nodemailer from 'nodemailer';
 
-// Create transporter lazily to ensure environment variables are loaded
-function createTransporter() {
-  return nodemailer.createTransport({
+// Cached transporter for better performance
+let cachedTransporter: nodemailer.Transporter | null = null;
+let cachedCredentials: { user: string; pass: string } | null = null;
+
+// Get or create transporter with caching
+function getTransporter(): nodemailer.Transporter {
+  const currentUser = process.env.EMAIL_USER || '';
+  const currentPass = process.env.EMAIL_PASS || '';
+
+  // Check if credentials changed (hot reload support)
+  if (
+    cachedTransporter &&
+    cachedCredentials?.user === currentUser &&
+    cachedCredentials?.pass === currentPass
+  ) {
+    return cachedTransporter;
+  }
+
+  // Create new transporter
+  cachedTransporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
+      user: currentUser,
+      pass: currentPass,
     },
+    // Connection pooling for better performance
+    pool: true,
+    maxConnections: 5,
+    maxMessages: 100,
   });
+
+  cachedCredentials = { user: currentUser, pass: currentPass };
+  
+  if (process.env.NODE_ENV !== 'production') {
+    console.log('[EMAIL] Transporter created/updated');
+  }
+
+  return cachedTransporter;
 }
 
 interface SendEmailOptions {
@@ -19,18 +48,16 @@ interface SendEmailOptions {
 
 export async function sendEmail({ to, subject, html }: SendEmailOptions): Promise<boolean> {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.error('Email configuration missing: EMAIL_USER or EMAIL_PASS not set');
-    console.error('EMAIL_USER:', process.env.EMAIL_USER ? 'SET' : 'NOT SET');
-    console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? 'SET' : 'NOT SET');
+    console.error('[EMAIL] Configuration missing: EMAIL_USER or EMAIL_PASS not set');
     return false;
   }
 
   try {
-    console.log('Attempting to send email to:', to);
-    console.log('Using EMAIL_USER:', process.env.EMAIL_USER);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[EMAIL] Sending to:', to);
+    }
     
-    // Create transporter on each call to ensure fresh env vars
-    const transporter = createTransporter();
+    const transporter = getTransporter();
     
     const result = await transporter.sendMail({
       from: `"OtakuShop" <${process.env.EMAIL_USER}>`,
@@ -39,15 +66,16 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions): Promis
       html,
     });
     
-    console.log('Email sent successfully. Message ID:', result.messageId);
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[EMAIL] Sent successfully. Message ID:', result.messageId);
+    }
     return true;
   } catch (error: any) {
-    console.error('=== EMAIL SENDING ERROR ===');
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
-    console.error('Error response:', error.response);
-    console.error('Full error:', error);
-    console.error('=== END EMAIL ERROR ===');
+    // Always log errors
+    console.error('[EMAIL] Sending failed:', error.code || error.message);
+    if (process.env.NODE_ENV !== 'production') {
+      console.error('[EMAIL] Full error:', error);
+    }
     return false;
   }
 }

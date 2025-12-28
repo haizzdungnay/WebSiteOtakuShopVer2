@@ -156,16 +156,49 @@ function CheckoutContent() {
   const shippingFee = shippingMethod === 'express' ? 50000 : shippingMethod === 'store-pickup' ? 0 : 30000;
   const totalAmount = subtotal + shippingFee - discount;
 
-  const handleApplyPromo = () => {
-    // Mock promo code validation
-    if (promoCode.toUpperCase() === 'WELCOME10') {
-      setDiscount(subtotal * 0.1);
-      setPromoApplied(true);
-    } else if (promoCode.toUpperCase() === 'FREESHIP') {
-      setDiscount(shippingFee);
-      setPromoApplied(true);
-    } else {
-      alert('Mã khuyến mãi không hợp lệ');
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [appliedCouponId, setAppliedCouponId] = useState<string | null>(null);
+
+  const handleApplyPromo = async () => {
+    if (!promoCode.trim()) {
+      setPromoError('Vui lòng nhập mã khuyến mãi');
+      return;
+    }
+
+    setPromoLoading(true);
+    setPromoError(null);
+
+    try {
+      const response = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          code: promoCode.toUpperCase(),
+          subtotal: subtotal
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setDiscount(data.data.calculation.discountAmount);
+        setPromoApplied(true);
+        setAppliedCouponId(data.data.coupon.id);
+        setPromoError(null);
+      } else {
+        setPromoError(data.error || 'Mã khuyến mãi không hợp lệ');
+        setPromoApplied(false);
+        setDiscount(0);
+      }
+    } catch (error) {
+      console.error('Error validating promo code:', error);
+      setPromoError('Không thể kiểm tra mã khuyến mãi. Vui lòng thử lại.');
+    } finally {
+      setPromoLoading(false);
     }
   };
 
@@ -761,22 +794,33 @@ function CheckoutContent() {
                     <input
                       type="text"
                       value={promoCode}
-                      onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
-                      disabled={promoApplied}
+                      onChange={(e) => {
+                        setPromoCode(e.target.value.toUpperCase());
+                        setPromoError(null);
+                      }}
+                      disabled={promoApplied || promoLoading}
                       placeholder="Nhập mã khuyến mãi"
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-red focus:border-transparent outline-none disabled:bg-gray-100"
                     />
                     <button
                       type="button"
                       onClick={handleApplyPromo}
-                      disabled={promoApplied || !promoCode}
-                      className="px-4 py-2 bg-accent-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      disabled={promoApplied || !promoCode || promoLoading}
+                      className="px-4 py-2 bg-accent-red text-white rounded-lg font-semibold hover:bg-red-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed min-w-[90px]"
                     >
-                      Áp dụng
+                      {promoLoading ? '...' : 'Áp dụng'}
                     </button>
                   </div>
                   {promoApplied && (
                     <p className="text-sm text-green-600 mt-2">✓ Mã giảm giá đã được áp dụng</p>
+                  )}
+                  {promoError && (
+                    <p className="text-sm text-red-500 mt-2">{promoError}</p>
+                  )}
+                  {!user && !promoApplied && (
+                    <p className="text-sm text-gray-500 mt-2">
+                      <Link href="/login" className="text-accent-red hover:underline">Đăng nhập</Link> để sử dụng mã giảm giá
+                    </p>
                   )}
                 </div>
 

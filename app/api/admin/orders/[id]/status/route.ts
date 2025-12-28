@@ -267,25 +267,49 @@ export async function PUT(
       console.error('[AUDIT] Failed to log admin action:', logError)
     }
 
-    // 8. Gửi email thông báo trạng thái đơn hàng (chỉ khi user đã xác minh email)
-    if (order.user && order.user.emailVerified) {
+    // 8. Gửi email thông báo trạng thái đơn hàng
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    const statusTextMap: Record<string, string> = {
+      'SHIPPING': 'Đang giao hàng',
+      'DELIVERED': 'Đã giao hàng',
+      'CONFIRMED': 'Đã xác nhận',
+      'PREPARING': 'Đang chuẩn bị',
+      'COMPLETED': 'Hoàn thành',
+      'CANCELLED': 'Đã hủy'
+    }
+    const statusText = statusTextMap[validatedData.status] || 'Cập nhật'
+    const emailSubject = `Cập nhật đơn hàng #${order.orderNumber} - ${statusText}`
+
+    // Thu thập tất cả email cần gửi (loại bỏ trùng lặp)
+    const emailsToSend: Set<string> = new Set()
+    let customerNameForEmail = order.customerName
+
+    // 1. Email tài khoản chính (nếu user đã xác minh)
+    if (order.user?.emailVerified && order.user.email) {
+      emailsToSend.add(order.user.email)
+      customerNameForEmail = order.user.fullName
+    }
+
+    // 2. Email khách hàng (cho guest hoặc user chưa verified)
+    if (order.customerEmail && !order.user?.emailVerified) {
+      emailsToSend.add(order.customerEmail)
+    }
+
+    // 3. Notification email (nếu có)
+    if (order.notificationEmail) {
+      emailsToSend.add(order.notificationEmail)
+    }
+
+    // Gửi email nếu có địa chỉ
+    if (emailsToSend.size > 0) {
       try {
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-        const orderUrl = `${baseUrl}/profile/orders`
-        
-        const statusTextMap: Record<string, string> = {
-          'SHIPPING': 'Đang giao hàng',
-          'DELIVERED': 'Đã giao hàng',
-          'CONFIRMED': 'Đã xác nhận',
-          'PREPARING': 'Đang chuẩn bị',
-          'COMPLETED': 'Hoàn thành',
-          'CANCELLED': 'Đã hủy'
-        }
-        const statusText = statusTextMap[validatedData.status] || 'Cập nhật'
-        const emailSubject = `Cập nhật đơn hàng #${order.orderNumber} - ${statusText}`
+        // Xác định orderUrl dựa vào loại người dùng
+        const orderUrl = order.userId 
+          ? `${baseUrl}/profile/orders` 
+          : `${baseUrl}/tra-cuu?orderNumber=${order.orderNumber}`
         
         const emailHtml = getOrderStatusEmailTemplate({
-          customerName: order.user.fullName,
+          customerName: customerNameForEmail,
           orderNumber: order.orderNumber,
           newStatus: validatedData.status,
           trackingCode: validatedData.trackingCode,
@@ -294,41 +318,30 @@ export async function PUT(
           orderUrl
         })
 
-        // Gửi email đến email tài khoản chính
-        const emailSent = await sendEmail({
-          to: order.user.email,
-          subject: emailSubject,
-          html: emailHtml
-        })
-
-        if (emailSent) {
-          console.log(`[EMAIL] Order status notification sent to ${order.user.email} for order #${order.orderNumber}`)
-        } else {
-          console.error(`[EMAIL] Failed to send order status notification to ${order.user.email}`)
-        }
-
-        // Gửi email đến notificationEmail nếu có và khác với email chính
-        if (order.notificationEmail && order.notificationEmail !== order.user.email) {
-          const secondEmailSent = await sendEmail({
-            to: order.notificationEmail,
+        // Gửi email đến tất cả địa chỉ
+        for (const email of emailsToSend) {
+          const emailSent = await sendEmail({
+            to: email,
             subject: emailSubject,
             html: emailHtml
           })
 
-          if (secondEmailSent) {
-            console.log(`[EMAIL] Order status notification also sent to ${order.notificationEmail} for order #${order.orderNumber}`)
+          if (emailSent) {
+            if (process.env.NODE_ENV !== 'production') {
+              console.log(`[EMAIL] Order status notification sent to ${email} for order #${order.orderNumber}`)
+            }
           } else {
-            console.error(`[EMAIL] Failed to send order status notification to ${order.notificationEmail}`)
+            console.error(`[EMAIL] Failed to send order status notification to ${email}`)
           }
         }
       } catch (emailError) {
         // Don't fail the request if email sending fails
         console.error('[EMAIL] Failed to send order status email:', emailError)
       }
-    } else if (order.userId && !order.user?.emailVerified) {
-      console.log(`[EMAIL] Skipping notification for order #${order.orderNumber} - user email not verified`)
     } else {
-      console.log(`[EMAIL] Skipping notification for order #${order.orderNumber} - guest order`)
+      if (process.env.NODE_ENV !== 'production') {
+        console.log(`[EMAIL] No email addresses found for order #${order.orderNumber}`)
+      }
     }
 
     // 9. Trả về kết quả thành công
