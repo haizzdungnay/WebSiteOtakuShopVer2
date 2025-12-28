@@ -478,6 +478,7 @@ model Announcement {
   title     String
   summary   String   @db.Text
   content   String?  @db.Text
+  imageUrl  String?
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

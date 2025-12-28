@@ -9,6 +9,7 @@ interface Announcement {
   title: string;
   summary: string;
   content?: string;
+  imageUrl?: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -86,14 +87,24 @@ export default function NewsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {articles.map((article) => (
                   <article key={article.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-                    {/* Featured Image - Placeholder */}
-                    <Link href={`/tin-tuc/${article.id}`}>
-                      <div className="relative w-full aspect-video bg-gradient-to-br from-indigo-400 to-indigo-600 hover:from-indigo-500 hover:to-indigo-700 transition-all flex items-center justify-center">
-                        <div className="text-white text-center">
-                          <Calendar size={32} className="mx-auto mb-2 opacity-50" />
-                          <p className="text-sm font-semibold opacity-75">Ảnh tin tức</p>
+                    {/* Featured Image */}
+                    <Link href={`/tin-tuc/${article.id}`} className="block overflow-hidden">
+                      {article.imageUrl ? (
+                        <div className="relative w-full aspect-video">
+                          <img
+                            src={article.imageUrl}
+                            alt={article.title}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                          />
                         </div>
-                      </div>
+                      ) : (
+                        <div className="relative w-full aspect-video bg-gradient-to-br from-indigo-400 to-indigo-600 hover:from-indigo-500 hover:to-indigo-700 transition-all flex items-center justify-center">
+                          <div className="text-white text-center">
+                            <Calendar size={32} className="mx-auto mb-2 opacity-50" />
+                            <p className="text-sm font-semibold opacity-75">Ảnh tin tức</p>
+                          </div>
+                        </div>
+                      )}
                     </Link>
 
                     {/* Content */}

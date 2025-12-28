@@ -10,6 +10,7 @@ interface Announcement {
   title: string;
   summary: string;
   content?: string;
+  imageUrl?: string | null;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -137,6 +138,17 @@ export default function NewsDetailPage() {
               )}
             </div>
           </div>
+
+          {/* Featured Image */}
+          {article.imageUrl && (
+            <div className="w-full h-[400px] md:h-[500px] relative">
+              <img
+                src={article.imageUrl}
+                alt={article.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
 
           {/* Summary Box */}
           {article.summary && (
