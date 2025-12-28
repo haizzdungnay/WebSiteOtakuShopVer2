@@ -124,7 +124,7 @@ export function getVerificationEmailTemplate(fullName: string, verificationUrl: 
                     © 2025 OtakuShop. All rights reserved.
                   </p>
                   <p style="margin: 0; color: #999; font-size: 12px;">
-                    Hotline: 0389836514 | Email: support@dnfigure.vn
+                    Hotline: 0389836514 | Email: tuanduongtempproject@gmail.com
                   </p>
                 </td>
               </tr>
@@ -193,7 +193,7 @@ export function getOtpEmailTemplate(fullName: string, otpCode: string): string {
                     © 2025 DN Figure. All rights reserved.
                   </p>
                   <p style="margin: 0; color: #999; font-size: 12px;">
-                    Hotline: 0389836514 | Email: support@dnfigure.vn
+                    Hotline: 0389836514 | Email: tuanduongtempproject@gmail.com
                   </p>
                 </td>
               </tr>
@@ -396,7 +396,7 @@ export function getOrderStatusEmailTemplate(data: OrderStatusEmailData): string 
                     © 2025 OtakuShop. All rights reserved.
                   </p>
                   <p style="margin: 0; color: #999; font-size: 12px;">
-                    Hotline: 0389836514 | Email: support@dnfigure.vn
+                    Hotline: 0389836514 | Email: tuanduongtempproject@gmail.com
                   </p>
                 </td>
               </tr>
@@ -472,7 +472,7 @@ export function getResetPasswordEmailTemplate(fullName: string, resetUrl: string
                     © 2025 OtakuShop. All rights reserved.
                   </p>
                   <p style="margin: 0; color: #999; font-size: 12px;">
-                    Hotline: 0396686826 | Email: support@otakushop.vn
+                    Hotline: 0396686826 | Email: tuanduongtempproject@gmail.com
                   </p>
                 </td>
               </tr>

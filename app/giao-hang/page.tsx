@@ -340,10 +340,10 @@ export default function ShippingPolicyPage() {
                 Hotline: 0389 836 514
               </a>
               <a
-                href="mailto:support@jhfigure.com"
+                href="mailto:tuanduongtempproject@gmail.com"
                 className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
               >
-                Email: support@jhfigure.com
+                Email: tuanduongtempproject@gmail.com
               </a>
             </div>
           </section>

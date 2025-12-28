@@ -123,10 +123,10 @@ export default function Footer() {
               <li className="flex items-center gap-2">
                 <Mail size={18} className="text-primary flex-shrink-0" />
                 <a
-                  href="mailto:support@jhfigure.com"
+                  href="mailto:tuanduongtempproject@gmail.com"
                   className="hover:text-primary transition-colors"
                 >
-                  support@jhfigure.com
+                  tuanduongtempproject@gmail.com
                 </a>
               </li>
             </ul>

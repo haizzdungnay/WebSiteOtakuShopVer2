@@ -50,7 +50,7 @@ How to order on the website? Follow these steps:
       question: 'Tôi có thể hủy hoặc thay đổi đơn hàng không?',
       answer: `Bạn có thể hủy hoặc thay đổi đơn hàng trong vòng 24 giờ sau khi đặt hàng bằng cách liên hệ với bộ phận chăm sóc khách hàng qua:
 - Hotline: 0389836514
-- Email: support@jhfigure.com
+- Email: tuanduongtempproject@gmail.com
 - Facebook Messenger
 
 Sau 24 giờ, nếu đơn hàng đã được xử lý, việc hủy có thể phát sinh phí.
@@ -361,10 +361,10 @@ Yes, within 7 days of receipt if products are unused with original packaging. Fr
               Gọi: 0389 836 514
             </a>
             <a
-              href="mailto:support@jhfigure.com"
+              href="mailto:tuanduongtempproject@gmail.com"
               className="bg-white text-gray-900 px-6 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors"
             >
-              Email: support@jhfigure.com
+              Email: tuanduongtempproject@gmail.com
             </a>
           </div>
         </div>
