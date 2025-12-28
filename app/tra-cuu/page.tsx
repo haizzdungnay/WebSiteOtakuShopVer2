@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -47,14 +47,14 @@ interface Order {
   };
 }
 
-export default function OrderTrackingPage() {
+function OrderTrackingContent() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const orderNumberParam = searchParams.get('order');
   
   const [activeTab, setActiveTab] = useState('profile');
   const [searchQuery, setSearchQuery] = useState(orderNumberParam || '');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [, setStatusFilter] = useState('all');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
@@ -146,8 +146,7 @@ export default function OrderTrackingPage() {
   const filteredOrders = orders.filter((order) => {
     const matchesSearch =
       order.orderNumber.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    return matchesSearch;
   });
 
   return (
@@ -177,9 +176,11 @@ export default function OrderTrackingPage() {
                 <div className="p-6 bg-gradient-to-br from-primary to-primary-light border-b border-gray-200">
                   <div className="flex items-center gap-3">
                     {user.avatar ? (
-                      <img 
+                      <Image 
                         src={user.avatar} 
                         alt={user.username || 'User'} 
+                        width={64}
+                        height={64}
                         className="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm"
                       />
                     ) : (
@@ -482,5 +483,26 @@ export default function OrderTrackingPage() {
         )}
       </div>
     </div>
+  );
+}
+
+// Loading fallback component
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-red mx-auto mb-4"></div>
+        <p className="text-gray-600">Đang tải trang tra cứu...</p>
+      </div>
+    </div>
+  );
+}
+
+// Page component wrap với Suspense
+export default function OrderTrackingPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <OrderTrackingContent />
+    </Suspense>
   );
 }

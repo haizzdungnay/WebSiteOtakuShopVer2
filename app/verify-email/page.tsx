@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle, XCircle, Loader2, Mail } from 'lucide-react';
 
-export default function VerifyEmailPage() {
+function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
@@ -38,7 +38,7 @@ export default function VerifyEmailPage() {
           setStatus('error');
           setMessage(data.error || 'Xác nhận email thất bại');
         }
-      } catch (error) {
+      } catch {
         setStatus('error');
         setMessage('Không thể kết nối đến máy chủ');
       }
@@ -63,7 +63,7 @@ export default function VerifyEmailPage() {
 
       const data = await response.json();
       setResendMessage(data.message || (data.success ? 'Đã gửi email xác nhận!' : 'Gửi email thất bại'));
-    } catch (error) {
+    } catch {
       setResendMessage('Không thể kết nối đến máy chủ');
     } finally {
       setResending(false);
@@ -183,5 +183,30 @@ export default function VerifyEmailPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Loading fallback
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="max-w-md w-full">
+        <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+          <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Loader2 size={40} className="text-blue-500 animate-spin" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Đang tải...</h1>
+          <p className="text-gray-600">Vui lòng đợi trong giây lát</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function VerifyEmailPage() {
+  return (
+    <Suspense fallback={<LoadingFallback />}>
+      <VerifyEmailContent />
+    </Suspense>
   );
 }
