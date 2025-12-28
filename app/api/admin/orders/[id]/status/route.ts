@@ -228,7 +228,29 @@ export async function PUT(
       return updatedOrder
     })
 
-    // 7. Admin activity logged (in production, use proper logging service)
+    // 7. Log admin activity for audit trail
+    try {
+      await prisma.adminAuditLog.create({
+        data: {
+          adminId: admin.id,
+          action: 'UPDATE_ORDER_STATUS',
+          entityType: 'Order',
+          entityId: params.id,
+          oldValue: { status: order.status },
+          newValue: {
+            status: result.status,
+            trackingCode: validatedData.trackingCode,
+            carrier: validatedData.carrier,
+            adminNote: validatedData.adminNote
+          },
+          ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
+          userAgent: request.headers.get('user-agent') || null
+        }
+      })
+    } catch (logError) {
+      // Don't fail the request if audit logging fails
+      console.error('[AUDIT] Failed to log admin action:', logError)
+    }
 
     // 8. Trả về kết quả thành công
     return NextResponse.json({

@@ -15,8 +15,6 @@ function sortObject(obj: any) {
 
 export async function GET(request: NextRequest) {
     try {
-        console.log('VNPAY Return: Processing return request');
-
         // Get all query parameters
         const searchParams = request.nextUrl.searchParams;
         const vnpParams: any = {};
@@ -25,8 +23,6 @@ export async function GET(request: NextRequest) {
         for (const [key, value] of searchParams.entries()) {
             vnpParams[key] = value;
         }
-
-        console.log('VNPAY Return: Parameters received:', vnpParams);
 
         // Get secure hash from VNPAY
         const secureHash = vnpParams['vnp_SecureHash'];

@@ -137,26 +137,18 @@ export async function POST(request: NextRequest) {
                 }
             })
 
-            // 6.2 Cập nhật lại rating trung bình cho sản phẩm
-            const reviews = await tx.review.findMany({
-                where: {
-                    productId: validatedData.productId
-                },
-                select: {
-                    rating: true
-                }
+            // 6.2 Cập nhật lại rating trung bình cho sản phẩm (optimized with aggregate)
+            const stats = await tx.review.aggregate({
+                where: { productId: validatedData.productId },
+                _avg: { rating: true },
+                _count: { rating: true }
             })
 
-            const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0)
-            const averageRating = totalRating / reviews.length
-
             await tx.product.update({
-                where: {
-                    id: validatedData.productId
-                },
+                where: { id: validatedData.productId },
                 data: {
-                    averageRating: averageRating,
-                    reviewCount: reviews.length
+                    averageRating: stats._avg.rating || 0,
+                    reviewCount: stats._count.rating
                 }
             })
 

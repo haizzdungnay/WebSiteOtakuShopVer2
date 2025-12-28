@@ -15,8 +15,6 @@ function sortObject(obj: any) {
 
 export async function GET(request: NextRequest) {
     try {
-        console.log('VNPAY IPN: Processing IPN request');
-
         // Get all query parameters
         const searchParams = request.nextUrl.searchParams;
         const vnpParams: any = {};
@@ -25,8 +23,6 @@ export async function GET(request: NextRequest) {
         for (const [key, value] of searchParams.entries()) {
             vnpParams[key] = value;
         }
-
-        console.log('VNPAY IPN: Parameters received:', vnpParams);
 
         // Get secure hash from VNPAY
         const secureHash = vnpParams['vnp_SecureHash'];
@@ -133,8 +129,6 @@ export async function GET(request: NextRequest) {
                 data: { status: orderStatus }
             });
         }
-
-        console.log(`VNPAY IPN processed: Order ${orderId}, Response: ${responseCode}, Status: ${paymentStatus}`);
 
         // Return success response to VNPAY
         return NextResponse.json({ RspCode: '00', Message: 'success' }, { status: 200 });
