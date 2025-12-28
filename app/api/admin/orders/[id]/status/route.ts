@@ -154,7 +154,7 @@ export async function PUT(
     const result = await prisma.$transaction(async (tx) => {
       // Cập nhật trạng thái đơn hàng và ghi chú
       const updatedOrder = await tx.order.update({
-        where: { id: params.id },
+        where: { id },
         data: {
           status: validatedData.status,
           note: validatedData.adminNote 
@@ -238,7 +238,7 @@ export async function PUT(
           adminId: admin.id,
           action: 'UPDATE_ORDER_STATUS',
           entityType: 'Order',
-          entityId: params.id,
+          entityId: id,
           oldValue: { status: order.status },
           newValue: {
             status: result.status,
