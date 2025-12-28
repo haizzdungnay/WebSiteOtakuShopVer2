@@ -23,7 +23,7 @@ const updateUserSchema = z.object({
 // GET /api/admin/users/[id] - User detail
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. Check admin authorization
@@ -35,7 +35,7 @@ export async function GET(
       )
     }
 
-    const { id } = params
+    const { id } = await params
 
     // 2. Get user detail
     const user = await prisma.user.findUnique({
@@ -185,7 +185,7 @@ export async function GET(
 // PUT /api/admin/users/[id] - Update user
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. Check admin authorization
@@ -197,7 +197,7 @@ export async function PUT(
       )
     }
 
-    const { id } = params
+    const { id } = await params
 
     // 2. Check user exists
     const user = await prisma.user.findUnique({

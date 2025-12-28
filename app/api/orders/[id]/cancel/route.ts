@@ -13,9 +13,12 @@ const cancelOrderSchema = z.object({
 // PUT /api/orders/[id]/cancel - Hủy đơn hàng
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        // Get params (Next.js 16+ requires await)
+        const { id } = await params
+
         // 1 Check authentication
         const user = await getUserFromRequest(request)
         if (!user) {
@@ -35,7 +38,7 @@ export async function PUT(
         // 3 Lấy đơn hàng
         const order = await prisma.order.findUnique({
             where: {
-                id: params.id
+                id
             },
             include: {
                 orderItems: {

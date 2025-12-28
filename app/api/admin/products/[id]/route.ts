@@ -73,7 +73,7 @@ const updateProductSchema = z.object({
 // PUT /api/admin/products/[id] - Cập nhật sản phẩm
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. Check admin authorization
@@ -85,7 +85,7 @@ export async function PUT(
       )
     }
 
-    const { id } = params
+    const { id } = await params
 
     // 2. Kiểm tra sản phẩm tồn tại
     const product = await prisma.product.findUnique({
@@ -250,7 +250,7 @@ export async function PUT(
 // DELETE /api/admin/products/[id] - Xóa sản phẩm
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. Check admin authorization
@@ -262,7 +262,7 @@ export async function DELETE(
       )
     }
 
-    const { id } = params
+    const { id } = await params
 
     // 2. Kiểm tra sản phẩm tồn tại
     const product = await prisma.product.findUnique({

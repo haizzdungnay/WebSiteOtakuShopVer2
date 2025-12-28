@@ -5,7 +5,7 @@ import { verifyAdmin } from '@/lib/admin-auth';
 // POST /api/admin/users/[id]/verify - Admin manually verify user
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Check admin authorization
@@ -17,7 +17,7 @@ export async function POST(
       );
     }
 
-    const { id } = params;
+    const { id } = await params;
 
     // Find user
     const user = await prisma.user.findUnique({

@@ -23,7 +23,7 @@ const updateAnnouncementSchema = z.object({
 // GET /api/admin/announcements/[id] - Lấy chi tiết thông báo
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = await verifyAdmin(request)
@@ -34,8 +34,10 @@ export async function GET(
       )
     }
 
+    const { id } = await params
+
     const announcement = await prisma.announcement.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!announcement) {
@@ -62,7 +64,7 @@ export async function GET(
 // PATCH /api/admin/announcements/[id] - Cập nhật thông báo
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = await verifyAdmin(request)
@@ -73,8 +75,10 @@ export async function PATCH(
       )
     }
 
+    const { id } = await params
+
     const existingAnnouncement = await prisma.announcement.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existingAnnouncement) {
@@ -88,7 +92,7 @@ export async function PATCH(
     const validatedData = updateAnnouncementSchema.parse(body)
 
     const announcement = await prisma.announcement.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         ...(validatedData.title && { title: validatedData.title }),
         ...(validatedData.summary && { summary: validatedData.summary }),
@@ -122,7 +126,7 @@ export async function PATCH(
 // DELETE /api/admin/announcements/[id] - Xóa thông báo
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const admin = await verifyAdmin(request)
@@ -133,8 +137,10 @@ export async function DELETE(
       )
     }
 
+    const { id } = await params
+
     const existingAnnouncement = await prisma.announcement.findUnique({
-      where: { id: params.id }
+      where: { id }
     })
 
     if (!existingAnnouncement) {
@@ -145,7 +151,7 @@ export async function DELETE(
     }
 
     await prisma.announcement.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({

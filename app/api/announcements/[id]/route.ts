@@ -4,11 +4,13 @@ import { prisma } from '@/lib/prisma'
 // GET /api/announcements/[id] - Lấy chi tiết tin tức công khai
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
+
     const announcement = await prisma.announcement.findUnique({
-      where: { id: params.id },
+      where: { id },
     })
 
     if (!announcement) {

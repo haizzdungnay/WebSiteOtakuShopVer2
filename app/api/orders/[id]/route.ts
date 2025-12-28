@@ -6,9 +6,12 @@ import { getUserFromRequest } from '@/lib/auth'
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        // Get params (Next.js 16+ requires await)
+        const { id } = await params
+
         // 1 Check authentication
         const user = await getUserFromRequest(request)
         if (!user) {
@@ -24,7 +27,7 @@ export async function GET(
         // 2 Lấy đơn hàng với đầy đủ thông tin
         const order = await prisma.order.findUnique({
             where: {
-                id: params.id
+                id
             },
             include: {
                 orderItems: {

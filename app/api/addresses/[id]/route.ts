@@ -25,9 +25,12 @@ const updateAddressSchema = z.object({
 // PATCH /api/addresses/[id] - Cập nhật địa chỉ
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        // Get params (Next.js 16+ requires await)
+        const { id } = await params
+
         // 1. Check authentication
         const user = await getUserFromRequest(request)
         if (!user) {
@@ -43,7 +46,7 @@ export async function PATCH(
 
         // 3. Tìm address và check ownership
         const existingAddress = await prisma.address.findUnique({
-            where: { id: params.id }
+            where: { id }
         })
 
         if (!existingAddress) {
@@ -65,7 +68,7 @@ export async function PATCH(
             await prisma.address.updateMany({
                 where: {
                     userId: user.userId,
-                    id: { not: params.id }
+                    id: { not: id }
                 },
                 data: { isDefault: false }
             })
@@ -73,7 +76,7 @@ export async function PATCH(
 
         // 5. Update address
         const updatedAddress = await prisma.address.update({
-            where: { id: params.id },
+            where: { id },
             data: validatedData
         })
 
@@ -106,9 +109,12 @@ export async function PATCH(
 // DELETE /api/addresses/[id] - Xóa địa chỉ
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        // Get params (Next.js 16+ requires await)
+        const { id } = await params
+
         // 1. Check authentication
         const user = await getUserFromRequest(request)
         if (!user) {
@@ -120,7 +126,7 @@ export async function DELETE(
 
         // 2. Tìm address và check ownership
         const address = await prisma.address.findUnique({
-            where: { id: params.id }
+            where: { id }
         })
 
         if (!address) {
@@ -139,7 +145,7 @@ export async function DELETE(
 
         // 3. Xóa address
         await prisma.address.delete({
-            where: { id: params.id }
+            where: { id }
         })
 
         // 4. Nếu xóa default address, set default cho address khác

@@ -12,7 +12,7 @@ const updateReviewSchema = z.object({
 // PUT /api/admin/reviews/[id] - Update review (approve/pin)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. Check admin authorization
@@ -24,7 +24,7 @@ export async function PUT(
       )
     }
 
-    const { id } = params
+    const { id } = await params
 
     // 2. Check review exists
     const review = await prisma.review.findUnique({
@@ -126,7 +126,7 @@ export async function PUT(
 // DELETE /api/admin/reviews/[id] - Delete review
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. Check admin authorization
@@ -138,7 +138,7 @@ export async function DELETE(
       )
     }
 
-    const { id } = params
+    const { id } = await params
 
     // 2. Get review before delete (need productId for recalculation)
     const review = await prisma.review.findUnique({
