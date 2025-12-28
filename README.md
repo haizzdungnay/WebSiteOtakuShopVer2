@@ -599,6 +599,81 @@ MIT License
 ---
 
 **Made with ❤️ in Vietnam 🇻🇳**
-DATABASE_URL="postgresql://neondb_owner:npg_pHPaOE3Msi6q@ep-quiet-breeze-a1i77m94-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
-# uncomment next line if you use Prisma <5.10
-# DATABASE_URL_UNPOOLED="postgresql://neondb_owner:npg_pHPaOE3Msi6q@ep-quiet-breeze-a1i77m94.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
+
+---
+
+## 🔄 Sau khi Merge Branch Cải Thiện
+
+Nếu bạn merge branch `claude/improve-codebase-nSSTt`, cần thực hiện các bước sau:
+
+### 1. Chạy Migration cho AdminAuditLog
+
+```bash
+# Tạo migration cho bảng admin_audit_logs mới
+npx prisma migrate dev --name add_admin_audit_log
+
+# Hoặc đẩy trực tiếp (không tạo migration file)
+npx prisma db push
+```
+
+### 2. Các cải thiện đã thực hiện
+
+| Loại | Mô tả | File |
+|------|-------|------|
+| **Performance** | Thêm composite indexes cho queries thường dùng | `prisma/schema.prisma` |
+| **Performance** | Tối ưu tính rating review bằng aggregate | `api/reviews/route.ts` |
+| **Security** | Thêm Admin Audit Log để theo dõi hành động admin | `prisma/schema.prisma` |
+| **Security** | Ghi log khi admin thay đổi trạng thái đơn hàng | `api/admin/orders/[id]/status/route.ts` |
+| **Clean Code** | Xóa console.log debug trong production | Nhiều files |
+| **Clean Code** | Xóa file test thừa | `route-new.ts` |
+
+### 3. Database Indexes đã thêm
+
+```prisma
+// Order - tìm đơn hàng của user theo status
+@@index([userId, status])
+
+// Review - lọc reviews đã duyệt của sản phẩm
+@@index([productId, isApproved])
+@@index([userId, productId])
+```
+
+### 4. Admin Audit Log Model
+
+Model mới để theo dõi hành động của admin:
+
+```prisma
+model AdminAuditLog {
+  id          String   @id @default(cuid())
+  adminId     String
+  action      String   // VD: "UPDATE_ORDER_STATUS"
+  entityType  String   // VD: "Order", "Product"
+  entityId    String
+  oldValue    Json?    // Trạng thái cũ
+  newValue    Json?    // Trạng thái mới
+  ipAddress   String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+}
+```
+
+### 5. Xem Audit Logs (Prisma Studio)
+
+```bash
+npm run db:studio
+# Mở bảng admin_audit_logs để xem lịch sử hành động admin
+```
+
+---
+
+## 🚀 Các tính năng cần phát triển thêm
+
+| Ưu tiên | Tính năng | Mô tả |
+|---------|-----------|-------|
+| HIGH | Rate Limiting | Giới hạn số request login, OTP |
+| HIGH | Bật Email Verification | Yêu cầu xác thực email trước khi login |
+| MEDIUM | OAuth Login | Đăng nhập bằng Google/Facebook |
+| MEDIUM | Chương trình khách hàng thân thiết | Tích điểm, đổi quà |
+| MEDIUM | Thông báo đẩy | Push notifications cho đơn hàng |
+| LOW | API Documentation | Swagger/OpenAPI docs |
+| LOW | Structured Logging | Thay console.log bằng Winston/Pino |
