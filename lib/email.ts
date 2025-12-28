@@ -1,14 +1,15 @@
 import nodemailer from 'nodemailer';
 
-// Create transporter using Gmail
-// EMAIL_USER and EMAIL_PASS must be set in environment variables
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+// Create transporter lazily to ensure environment variables are loaded
+function createTransporter() {
+  return nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASS,
+    },
+  });
+}
 
 interface SendEmailOptions {
   to: string;
@@ -19,19 +20,34 @@ interface SendEmailOptions {
 export async function sendEmail({ to, subject, html }: SendEmailOptions): Promise<boolean> {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
     console.error('Email configuration missing: EMAIL_USER or EMAIL_PASS not set');
+    console.error('EMAIL_USER:', process.env.EMAIL_USER ? 'SET' : 'NOT SET');
+    console.error('EMAIL_PASS:', process.env.EMAIL_PASS ? 'SET' : 'NOT SET');
     return false;
   }
 
   try {
-    await transporter.sendMail({
+    console.log('Attempting to send email to:', to);
+    console.log('Using EMAIL_USER:', process.env.EMAIL_USER);
+    
+    // Create transporter on each call to ensure fresh env vars
+    const transporter = createTransporter();
+    
+    const result = await transporter.sendMail({
       from: `"OtakuShop" <${process.env.EMAIL_USER}>`,
       to,
       subject,
       html,
     });
+    
+    console.log('Email sent successfully. Message ID:', result.messageId);
     return true;
-  } catch (error) {
-    console.error('Error sending email:', error);
+  } catch (error: any) {
+    console.error('=== EMAIL SENDING ERROR ===');
+    console.error('Error code:', error.code);
+    console.error('Error message:', error.message);
+    console.error('Error response:', error.response);
+    console.error('Full error:', error);
+    console.error('=== END EMAIL ERROR ===');
     return false;
   }
 }

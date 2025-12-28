@@ -44,24 +44,37 @@ interface Order {
   note: string | null;
   createdAt: string;
   updatedAt: string;
+  // Customer info (for guest orders)
+  customerName: string | null;
+  customerEmail: string | null;
+  customerPhone: string | null;
+  // Shipping address fields from order
+  shippingFullName: string | null;
+  shippingPhone: string | null;
+  shippingAddress: string | null;
+  shippingWard: string | null;
+  shippingDistrict: string | null;
+  shippingCity: string | null;
+  // User (optional - for logged in users)
   user: {
     id: string;
     fullName: string;
     email: string;
     phone: string | null;
-  };
+    avatar: string | null;
+  } | null;
   shipping: {
-    recipientName: string;
-    phone: string;
-    address: string;
-    ward: string;
-    district: string;
-    province: string;
+    id: string;
     carrier: string | null;
     trackingCode: string | null;
+    fee: number;
     status: string;
+    estimatedDate: string | null;
+    shippedAt: string | null;
+    deliveredAt: string | null;
   } | null;
   payment: {
+    id: string;
     method: string;
     status: string;
   } | null;
@@ -301,10 +314,10 @@ export default function AdminOrdersPage() {
                       </td>
                       <td className="px-4 py-4">
                         <div className="text-sm font-medium text-gray-900">
-                          {order.user.fullName}
+                          {order.user?.fullName || order.customerName || 'Khách vãng lai'}
                         </div>
                         <div className="text-xs text-gray-500">
-                          {order.user.email}
+                          {order.user?.email || order.customerEmail || order.customerPhone || '-'}
                         </div>
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap">
@@ -422,13 +435,23 @@ export default function AdminOrdersPage() {
               </div>
 
               {/* Customer Note */}
-              {selectedOrder.note && (
+              {selectedOrder.note && selectedOrder.note.trim() !== '' ? (
                 <div className="mb-6 bg-orange-50 border border-orange-200 rounded-lg p-4">
                   <div className="flex items-start gap-2">
                     <FileText size={18} className="text-orange-600 flex-shrink-0 mt-0.5" />
                     <div>
                       <h4 className="font-semibold text-orange-800 mb-1">Ghi chú từ khách hàng</h4>
-                      <p className="text-orange-700">{selectedOrder.note}</p>
+                      <p className="text-orange-700 whitespace-pre-wrap">{selectedOrder.note}</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="mb-6 bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-start gap-2">
+                    <FileText size={18} className="text-gray-400 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-gray-500 mb-1">Ghi chú từ khách hàng</h4>
+                      <p className="text-gray-400 italic">Không có ghi chú</p>
                     </div>
                   </div>
                 </div>
@@ -441,39 +464,43 @@ export default function AdminOrdersPage() {
                   Thông tin khách hàng
                 </h4>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  <p><span className="text-gray-500">Tên:</span> {selectedOrder.user.fullName}</p>
-                  <p><span className="text-gray-500">Email:</span> {selectedOrder.user.email}</p>
-                  {selectedOrder.user.phone && (
-                    <p><span className="text-gray-500">SĐT:</span> {selectedOrder.user.phone}</p>
-                  )}
+                  <p><span className="text-gray-500">Tên:</span> {selectedOrder.user?.fullName || selectedOrder.customerName || 'Khách vãng lai'}</p>
+                  <p><span className="text-gray-500">Email:</span> {selectedOrder.user?.email || selectedOrder.customerEmail || '-'}</p>
+                  <p><span className="text-gray-500">SĐT:</span> {selectedOrder.user?.phone || selectedOrder.customerPhone || '-'}</p>
                 </div>
               </div>
 
               {/* Shipping Info */}
-              {selectedOrder.shipping && (
-                <div className="mb-6">
-                  <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <MapPin size={18} />
-                    Địa chỉ giao hàng
-                  </h4>
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                    <p><span className="text-gray-500">Người nhận:</span> {selectedOrder.shipping.recipientName}</p>
-                    <p className="flex items-center gap-1">
-                      <Phone size={14} className="text-gray-400" />
-                      {selectedOrder.shipping.phone}
+              <div className="mb-6">
+                <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <MapPin size={18} />
+                  Địa chỉ giao hàng
+                </h4>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                  <p><span className="text-gray-500">Người nhận:</span> {selectedOrder.shippingFullName || selectedOrder.customerName || '-'}</p>
+                  <p className="flex items-center gap-1">
+                    <Phone size={14} className="text-gray-400" />
+                    {selectedOrder.shippingPhone || selectedOrder.customerPhone || '-'}
+                  </p>
+                  <p>
+                    {selectedOrder.shippingAddress || '-'}
+                    {selectedOrder.shippingWard && `, ${selectedOrder.shippingWard}`}
+                    {selectedOrder.shippingDistrict && `, ${selectedOrder.shippingDistrict}`}
+                    {selectedOrder.shippingCity && `, ${selectedOrder.shippingCity}`}
+                  </p>
+                  {selectedOrder.shipping?.trackingCode && (
+                    <p className="mt-2">
+                      <span className="text-gray-500">Mã vận đơn:</span>{' '}
+                      <span className="font-mono">{selectedOrder.shipping.trackingCode}</span>
                     </p>
+                  )}
+                  {selectedOrder.shipping?.carrier && (
                     <p>
-                      {selectedOrder.shipping.address}, {selectedOrder.shipping.ward}, {selectedOrder.shipping.district}, {selectedOrder.shipping.province}
+                      <span className="text-gray-500">Đơn vị vận chuyển:</span> {selectedOrder.shipping.carrier}
                     </p>
-                    {selectedOrder.shipping.trackingCode && (
-                      <p className="mt-2">
-                        <span className="text-gray-500">Mã vận đơn:</span>{' '}
-                        <span className="font-mono">{selectedOrder.shipping.trackingCode}</span>
-                      </p>
-                    )}
-                  </div>
+                  )}
                 </div>
-              )}
+              </div>
 
               {/* Payment Info */}
               {selectedOrder.payment && (

@@ -56,18 +56,18 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Case 3: Check if email is verified
-        if (!user.emailVerified) {
-            return NextResponse.json(
-                {
-                    success: false,
-                    error: 'Vui lòng xác nhận email trước khi đăng nhập',
-                    needVerification: true,
-                    email: user.email
-                },
-                { status: 403 }
-            )
-        }
+        // Case 3: Check if email is verified (DISABLED - cho phép đăng nhập không cần xác nhận email)
+        // if (!user.emailVerified) {
+        //     return NextResponse.json(
+        //         {
+        //             success: false,
+        //             error: 'Vui lòng xác nhận email trước khi đăng nhập',
+        //             needVerification: true,
+        //             email: user.email
+        //         },
+        //         { status: 403 }
+        //     )
+        // }
 
         // Case 4: Password đúng -> tạo JWT
         const tokenPayload = {

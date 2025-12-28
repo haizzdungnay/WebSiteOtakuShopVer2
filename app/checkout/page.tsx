@@ -4,8 +4,9 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/contexts/CartContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ChevronRight, MapPin, CreditCard, Truck, Receipt, AlertTriangle } from 'lucide-react';
+import { ChevronRight, MapPin, CreditCard, Truck, Receipt, AlertTriangle, ChevronDown, Check, BookUser } from 'lucide-react';
 
 interface ShippingInfo {
   fullName: string;
@@ -18,11 +19,24 @@ interface ShippingInfo {
   note: string;
 }
 
+interface SavedAddress {
+  id: string;
+  label: string;
+  fullName: string;
+  phone: string;
+  city: string;
+  district: string;
+  ward: string | null;
+  address: string;
+  isDefault: boolean;
+}
+
 type PaymentMethod = 'cod' | 'bank-transfer' | 'qr' | 'store-pickup' | 'vnpay';
 type ShippingMethod = 'standard' | 'express' | 'store-pickup';
 
 export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCart();
+  const { user } = useAuth();
   const router = useRouter();
   const [promoCode, setPromoCode] = useState('');
   const [promoApplied, setPromoApplied] = useState(false);
@@ -32,6 +46,12 @@ export default function CheckoutPage() {
   const [needInvoice, setNeedInvoice] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Saved addresses state
+  const [savedAddresses, setSavedAddresses] = useState<SavedAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
+  const [showAddressDropdown, setShowAddressDropdown] = useState(false);
+  const [loadingAddresses, setLoadingAddresses] = useState(false);
 
   const [shippingInfo, setShippingInfo] = useState<ShippingInfo>({
     fullName: '',
@@ -75,6 +95,61 @@ export default function CheckoutPage() {
       setErrorMessage(errorMessages[error] || 'Có lỗi xảy ra trong quá trình thanh toán');
     }
   }, [searchParams]);
+
+  // Fetch saved addresses when user is logged in
+  useEffect(() => {
+    if (user) {
+      fetchSavedAddresses();
+    }
+  }, [user]);
+
+  const fetchSavedAddresses = async () => {
+    setLoadingAddresses(true);
+    try {
+      const response = await fetch('/api/addresses', { credentials: 'include' });
+      const data = await response.json();
+      if (data.success && data.data.addresses) {
+        setSavedAddresses(data.data.addresses);
+        // Auto-select default address if exists
+        const defaultAddress = data.data.addresses.find((addr: SavedAddress) => addr.isDefault);
+        if (defaultAddress) {
+          selectAddress(defaultAddress);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to fetch addresses:', error);
+    } finally {
+      setLoadingAddresses(false);
+    }
+  };
+
+  const selectAddress = (address: SavedAddress) => {
+    setSelectedAddressId(address.id);
+    setShippingInfo({
+      ...shippingInfo,
+      fullName: address.fullName,
+      phone: address.phone,
+      address: address.address,
+      ward: address.ward || '',
+      district: address.district,
+      city: address.city
+    });
+    setShowAddressDropdown(false);
+  };
+
+  const clearSelectedAddress = () => {
+    setSelectedAddressId(null);
+    setShippingInfo({
+      fullName: '',
+      phone: '',
+      email: shippingInfo.email,
+      address: '',
+      district: '',
+      ward: '',
+      city: '',
+      note: shippingInfo.note
+    });
+  };
 
   const subtotal = getTotalPrice();
   const shippingFee = shippingMethod === 'express' ? 50000 : shippingMethod === 'store-pickup' ? 0 : 30000;
@@ -258,6 +333,104 @@ export default function CheckoutPage() {
                   <MapPin className="text-accent-red" />
                   Thông tin giao hàng
                 </h2>
+
+                {/* Saved Address Selector - Only show for logged in users */}
+                {user && savedAddresses.length > 0 && (
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium mb-2 flex items-center gap-2">
+                      <BookUser size={16} className="text-accent-red" />
+                      Chọn địa chỉ đã lưu
+                    </label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowAddressDropdown(!showAddressDropdown)}
+                        className="w-full px-4 py-3 border border-gray-300 rounded-lg text-left flex items-center justify-between hover:border-accent-red transition-colors"
+                      >
+                        <span className={selectedAddressId ? 'text-gray-900' : 'text-gray-500'}>
+                          {selectedAddressId
+                            ? savedAddresses.find(a => a.id === selectedAddressId)?.label || 'Địa chỉ đã chọn'
+                            : 'Chọn địa chỉ đã lưu...'}
+                        </span>
+                        <ChevronDown size={20} className={`text-gray-400 transition-transform ${showAddressDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {showAddressDropdown && (
+                        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                          {savedAddresses.map((address) => (
+                            <button
+                              key={address.id}
+                              type="button"
+                              onClick={() => selectAddress(address)}
+                              className={`w-full px-4 py-3 text-left hover:bg-gray-50 border-b last:border-b-0 ${
+                                selectedAddressId === address.id ? 'bg-red-50' : ''
+                              }`}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2">
+                                    <span className="font-medium">{address.label}</span>
+                                    {address.isDefault && (
+                                      <span className="px-2 py-0.5 text-xs bg-red-100 text-red-600 rounded">
+                                        Mặc định
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-sm text-gray-600 mt-1">
+                                    {address.fullName} - {address.phone}
+                                  </p>
+                                  <p className="text-sm text-gray-500">
+                                    {address.address}
+                                    {address.ward && `, ${address.ward}`}
+                                    , {address.district}, {address.city}
+                                  </p>
+                                </div>
+                                {selectedAddressId === address.id && (
+                                  <Check size={20} className="text-accent-red flex-shrink-0" />
+                                )}
+                              </div>
+                            </button>
+                          ))}
+
+                          {/* Option to enter new address */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              clearSelectedAddress();
+                              setShowAddressDropdown(false);
+                            }}
+                            className="w-full px-4 py-3 text-left hover:bg-gray-50 text-accent-red font-medium border-t"
+                          >
+                            + Nhập địa chỉ mới
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Link to manage addresses */}
+                    <Link
+                      href="/profile/addresses"
+                      className="text-sm text-accent-red hover:underline mt-2 inline-block"
+                    >
+                      Quản lý địa chỉ của bạn
+                    </Link>
+                  </div>
+                )}
+
+                {/* Divider */}
+                {user && savedAddresses.length > 0 && (
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-gray-200"></div>
+                    </div>
+                    <div className="relative flex justify-center text-sm">
+                      <span className="px-2 bg-white text-gray-500">
+                        {selectedAddressId ? 'Thông tin địa chỉ đã chọn' : 'Hoặc nhập thông tin mới'}
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium mb-2">

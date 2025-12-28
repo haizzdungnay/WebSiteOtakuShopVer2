@@ -41,7 +41,7 @@ function ProductsContent() {
   const order = searchParams.get('order') || 'desc';
   const featured = searchParams.get('featured') === 'true';
   const searchQuery = searchParams.get('q') || '';
-  const limit = 20;
+  const limit = 48;
 
   // Fetch categories
   useEffect(() => {
@@ -77,7 +77,8 @@ function ProductsContent() {
       if (response.ok) {
         const data = await response.json();
         setProducts(data.data || []);
-        setTotalProducts(data.total || data.data?.length || 0);
+        // Lấy total từ pagination.total (API format)
+        setTotalProducts(data.pagination?.total || data.total || data.data?.length || 0);
       }
     } catch (error) {
       console.error('Error fetching products:', error);

@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
 
         // Parse params với default values
         const page = parseInt(searchParams.get('page') || '1')
-        const limit = parseInt(searchParams.get('limit') || '20')
+        const limit = parseInt(searchParams.get('limit') || '48')
         const category = searchParams.get('category') // slug của category (chỉ lấy 1)
         const search = searchParams.get('search')
         const sortParam = searchParams.get('sort') || 'newest' // sort option

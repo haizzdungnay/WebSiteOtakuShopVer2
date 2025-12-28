@@ -83,13 +83,13 @@ export default function Home() {
   };
 
   // Filter products
-  const hotProducts = products.filter(p => p.featured).slice(0, 8);
+  const hotProducts = products.filter(p => p.featured).slice(0, 10);
   const newProducts = products
     .filter(p => new Date(p.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000))
-    .slice(0, 8);
+    .slice(0, 10);
   const saleProducts = products
     .filter(p => p.comparePrice && Number(p.comparePrice) > Number(p.price))
-    .slice(0, 8);
+    .slice(0, 10);
   const allProducts = products.slice(0, 10);
 
   return (

@@ -24,7 +24,7 @@ const guestOrderSchema = z.object({
     paymentMethod: z.enum(['COD', 'BANK_TRANSFER', 'MOMO', 'VNPAY', 'ZALOPAY', 'CREDIT_CARD'], {
         message: 'Invalid payment method'
     }),
-    note: z.string().max(500).optional()
+    note: z.string().max(500).optional().transform(val => val && val.trim() !== '' ? val.trim() : null)
 });
 
 export async function POST(request: NextRequest) {
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
                     // Order details
                     totalAmount: total,
                     status: 'PENDING',
-                    note: validatedData.note || null,
+                    note: validatedData.note,
                     addressId: null
                 }
             });

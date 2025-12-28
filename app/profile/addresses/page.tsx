@@ -24,8 +24,8 @@ interface Address {
   phone: string
   city: string
   district: string
-  ward: string
-  streetAddress: string
+  ward: string | null
+  address: string
   isDefault: boolean
 }
 
@@ -51,7 +51,7 @@ export default function AddressesPage() {
     city: '',
     district: '',
     ward: '',
-    streetAddress: '',
+    address: '',
     isDefault: false
   })
   const [saving, setSaving] = useState(false)
@@ -158,8 +158,8 @@ export default function AddressesPage() {
       phone: address.phone,
       city: address.city,
       district: address.district,
-      ward: address.ward,
-      streetAddress: address.streetAddress,
+      ward: address.ward || '',
+      address: address.address,
       isDefault: address.isDefault
     })
     setShowForm(true)
@@ -175,7 +175,7 @@ export default function AddressesPage() {
       city: '',
       district: '',
       ward: '',
-      streetAddress: '',
+      address: '',
       isDefault: false
     })
     setError('')
@@ -338,12 +338,12 @@ export default function AddressesPage() {
                     </div>
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Địa chỉ chi tiết
+                        Địa chỉ chi tiết <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
-                        value={formData.streetAddress}
-                        onChange={(e) => setFormData({ ...formData, streetAddress: e.target.value })}
+                        value={formData.address}
+                        onChange={(e) => setFormData({ ...formData, address: e.target.value })}
                         placeholder="Số nhà, tên đường..."
                         className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
                         required
@@ -417,7 +417,7 @@ export default function AddressesPage() {
                           <p className="text-gray-900">{address.fullName}</p>
                           <p className="text-gray-600">{address.phone}</p>
                           <p className="text-gray-600 text-sm mt-1">
-                            {address.streetAddress}, {address.ward}, {address.district}, {address.city}
+                            {address.address}{address.ward ? `, ${address.ward}` : ''}, {address.district}, {address.city}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">

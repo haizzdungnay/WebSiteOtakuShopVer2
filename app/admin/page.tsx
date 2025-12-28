@@ -67,6 +67,7 @@ interface Order {
   customerPhone: string;
   totalAmount: number;
   status: string;
+  note?: string | null;
   createdAt: string;
   orderItems: Array<{
     id: string;
@@ -2199,6 +2200,25 @@ export default function AdminPage() {
                   />
                 </div>
               </div>
+
+              {/* Customer Note - Ghi chú từ khách hàng */}
+              {selectedOrder.note && selectedOrder.note.trim() !== '' ? (
+                <div className="mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200">
+                  <p className="text-sm font-semibold text-amber-800 mb-2 flex items-center gap-2">
+                    <FileText size={16} />
+                    Ghi chú từ khách hàng
+                  </p>
+                  <p className="text-sm text-amber-700 whitespace-pre-wrap">{selectedOrder.note}</p>
+                </div>
+              ) : (
+                <div className="mt-4 p-4 rounded-xl bg-slate-50 border border-slate-100">
+                  <p className="text-sm font-semibold text-slate-500 mb-1 flex items-center gap-2">
+                    <FileText size={16} />
+                    Ghi chú từ khách hàng
+                  </p>
+                  <p className="text-sm text-slate-400 italic">Không có ghi chú</p>
+                </div>
+              )}
 
               <div className="mt-4 p-4 rounded-xl bg-white border border-slate-100">
                 <p className="text-sm font-semibold text-slate-700 mb-2">Sản phẩm</p>
