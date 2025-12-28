@@ -79,7 +79,7 @@ export default function Footer() {
             <h3 className="text-white font-bold text-lg mb-4">Hỗ trợ khách hàng</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/shipping" className="hover:text-primary transition-colors">
+                <Link href="/giao-hang" className="hover:text-primary transition-colors">
                   Chính sách vận chuyển
                 </Link>
               </li>
