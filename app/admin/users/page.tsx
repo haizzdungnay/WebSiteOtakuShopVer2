@@ -26,7 +26,8 @@ import {
   UserCheck,
   X,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  Trash2
 } from 'lucide-react';
 
 interface User {
@@ -118,6 +119,9 @@ export default function AdminUsersPage() {
 
   // Toast
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Delete user state
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   // Check admin access
   useEffect(() => {
@@ -227,6 +231,49 @@ export default function AdminUsersPage() {
     }
   };
 
+  // Delete user
+  const deleteUser = async (userId: string, userName: string) => {
+    // Prevent deleting self
+    if (userId === user?.id) {
+      showToast('error', 'Không thể xóa chính tài khoản của bạn');
+      return;
+    }
+
+    if (!confirm(`Bạn có chắc chắn muốn xóa người dùng "${userName}"?\n\nHành động này sẽ xóa tất cả dữ liệu liên quan (đơn hàng, đánh giá, địa chỉ, giỏ hàng, wishlist) và không thể hoàn tác.`)) {
+      return;
+    }
+
+    try {
+      setDeleting(userId);
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+        },
+        credentials: 'include',
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showToast('success', data.message || 'Xóa người dùng thành công');
+        fetchUsers();
+        if (showUserModal && selectedUser?.user?.id === userId) {
+          setShowUserModal(false);
+          setSelectedUser(null);
+        }
+      } else {
+        showToast('error', data.error || 'Không thể xóa người dùng');
+      }
+    } catch (err) {
+      console.error('Error deleting user:', err);
+      showToast('error', 'Lỗi khi xóa người dùng');
+    } finally {
+      setDeleting(null);
+    }
+  };
+
   const showToast = (type: 'success' | 'error', message: string) => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 3000);
@@ -294,6 +341,14 @@ export default function AdminUsersPage() {
               <p className="text-slate-600 mt-1">Xem và quản lý thông tin tài khoản người dùng</p>
             </div>
             <div className="flex items-center gap-4">
+              <button
+                onClick={() => fetchUsers()}
+                disabled={loading}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-50"
+              >
+                <RefreshCw size={16} className={loading ? 'animate-spin' : ''} />
+                Làm mới
+              </button>
               <div className="bg-white rounded-lg px-4 py-2 shadow">
                 <span className="text-sm text-slate-500">Tổng số:</span>
                 <span className="ml-2 font-bold text-slate-900">{total}</span>
@@ -447,6 +502,21 @@ export default function AdminUsersPage() {
                               title="Xác minh thủ công"
                             >
                               <UserCheck size={18} />
+                            </button>
+                          )}
+                          {/* Delete button - only show if not current admin */}
+                          {u.id !== user?.id && (
+                            <button
+                              onClick={() => deleteUser(u.id, u.fullName)}
+                              disabled={deleting === u.id}
+                              className="p-2 text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg transition-colors disabled:opacity-50"
+                              title="Xóa người dùng"
+                            >
+                              {deleting === u.id ? (
+                                <Loader2 size={18} className="animate-spin" />
+                              ) : (
+                                <Trash2 size={18} />
+                              )}
                             </button>
                           )}
                         </div>

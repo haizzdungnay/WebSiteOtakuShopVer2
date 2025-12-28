@@ -283,3 +283,94 @@ export async function PUT(
     )
   }
 }
+
+// DELETE /api/admin/users/[id] - Delete user
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    // 1. Check admin authorization
+    const admin = await verifyAdmin(request)
+    if (!admin) {
+      return NextResponse.json(
+        { success: false, error: 'Không có quyền truy cập' },
+        { status: 403 }
+      )
+    }
+
+    const { id } = await params
+
+    // 2. Prevent deleting yourself
+    if (admin.userId === id) {
+      return NextResponse.json(
+        { success: false, error: 'Không thể xóa chính tài khoản của bạn' },
+        { status: 400 }
+      )
+    }
+
+    // 3. Check user exists
+    const user = await prisma.user.findUnique({
+      where: { id },
+      include: {
+        _count: {
+          select: {
+            orders: true,
+            reviews: true
+          }
+        }
+      }
+    })
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Không tìm thấy người dùng' },
+        { status: 404 }
+      )
+    }
+
+    // 4. Delete related data in transaction
+    await prisma.$transaction(async (tx) => {
+      // Delete wishlists
+      await tx.wishlist.deleteMany({ where: { userId: id } })
+      
+      // Delete cart items
+      await tx.cartItem.deleteMany({ where: { userId: id } })
+      
+      // Delete addresses
+      await tx.address.deleteMany({ where: { userId: id } })
+      
+      // Delete reviews
+      await tx.review.deleteMany({ where: { userId: id } })
+      
+      // For orders - we keep them but set userId to null for record keeping
+      // Or we can delete them - depends on business logic
+      // Here we delete order items first, then orders
+      const userOrders = await tx.order.findMany({
+        where: { userId: id },
+        select: { id: true }
+      })
+      
+      if (userOrders.length > 0) {
+        const orderIds = userOrders.map(o => o.id)
+        await tx.orderItem.deleteMany({ where: { orderId: { in: orderIds } } })
+        await tx.order.deleteMany({ where: { userId: id } })
+      }
+      
+      // Finally delete user
+      await tx.user.delete({ where: { id } })
+    })
+
+    return NextResponse.json({
+      success: true,
+      message: `Đã xóa người dùng "${user.fullName}" thành công`
+    })
+
+  } catch (error) {
+    console.error('[Admin] Delete user error:', error)
+    return NextResponse.json(
+      { success: false, error: 'Không thể xóa người dùng. Vui lòng thử lại sau.' },
+      { status: 500 }
+    )
+  }
+}

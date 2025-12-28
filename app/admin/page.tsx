@@ -1218,7 +1218,16 @@ export default function AdminPage() {
 
             {/* Recent Orders from stats */}
             <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-              <h2 className="text-xl font-semibold mb-6">Đơn hàng gần đây</h2>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-semibold">Đơn hàng gần đây</h2>
+                <button
+                  onClick={fetchDashboardStats}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+                >
+                  <RefreshCw size={16} />
+                  Làm mới
+                </button>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
@@ -1500,7 +1509,16 @@ export default function AdminPage() {
         {/* Orders Tab */}
         {activeTab === 'orders' && (
           <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-            <h2 className="text-xl font-semibold mb-6">Quản lý đơn hàng ({orders.length})</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Quản lý đơn hàng ({orders.length})</h2>
+              <button
+                onClick={fetchOrders}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+              >
+                <RefreshCw size={16} />
+                Làm mới
+              </button>
+            </div>
             <div className="flex flex-wrap gap-4 items-end mb-6">
               <div className="flex-1 min-w-[200px]">
                 <label className="text-sm text-slate-600">Tìm kiếm</label>
@@ -1659,7 +1677,16 @@ export default function AdminPage() {
         {/* Reviews Tab */}
         {activeTab === 'reviews' && (
           <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
-            <h2 className="text-xl font-semibold mb-6">Quản lý đánh giá ({reviews.length})</h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold">Quản lý đánh giá ({reviews.length})</h2>
+              <button
+                onClick={fetchReviews}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+              >
+                <RefreshCw size={16} />
+                Làm mới
+              </button>
+            </div>
             <div className="flex flex-wrap gap-4 items-end mb-6">
               <div className="min-w-[180px]">
                 <label className="text-sm text-slate-600">Trạng thái</label>
@@ -1783,17 +1810,26 @@ export default function AdminPage() {
                 <h2 className="text-3xl font-bold text-slate-900">Quản lý tin tức</h2>
                 <p className="text-slate-600 mt-1">Tổng cộng: <span className="font-semibold">{articleTotal}</span> tin tức</p>
               </div>
-              <button
-                onClick={() => {
-                  setEditingArticle(null);
-                  setArticleForm({ title: '', summary: '', content: '', isActive: true });
-                  setShowArticleModal(true);
-                }}
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg"
-              >
-                <FilePlus size={20} />
-                Thêm tin tức mới
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={fetchAnnouncements}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+                >
+                  <RefreshCw size={16} />
+                  Làm mới
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingArticle(null);
+                    setArticleForm({ title: '', summary: '', content: '', isActive: true });
+                    setShowArticleModal(true);
+                  }}
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg"
+                >
+                  <FilePlus size={20} />
+                  Thêm tin tức mới
+                </button>
+              </div>
             </div>
 
             {announcements.length === 0 ? (
@@ -1915,28 +1951,37 @@ export default function AdminPage() {
                 <h2 className="text-3xl font-bold text-slate-900">Quản lý mã giảm giá</h2>
                 <p className="text-slate-600 mt-1">Tổng cộng: <span className="font-semibold">{couponTotal}</span> mã giảm giá</p>
               </div>
-              <button
-                onClick={() => {
-                  setEditingCoupon(null);
-                  setCouponForm({
-                    code: '',
-                    type: 'PERCENTAGE',
-                    value: '',
-                    minOrder: '',
-                    maxDiscount: '',
-                    validFrom: '',
-                    validTo: '',
-                    usageLimit: '',
-                    description: '',
-                    isActive: true,
-                  });
-                  setShowCouponModal(true);
-                }}
-                className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-lg"
-              >
-                <Plus size={20} />
-                Thêm mã giảm giá
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={fetchCoupons}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors"
+                >
+                  <RefreshCw size={16} />
+                  Làm mới
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingCoupon(null);
+                    setCouponForm({
+                      code: '',
+                      type: 'PERCENTAGE',
+                      value: '',
+                      minOrder: '',
+                      maxDiscount: '',
+                      validFrom: '',
+                      validTo: '',
+                      usageLimit: '',
+                      description: '',
+                      isActive: true,
+                    });
+                    setShowCouponModal(true);
+                  }}
+                  className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 text-white font-semibold hover:from-emerald-700 hover:to-emerald-800 transition-all shadow-lg"
+                >
+                  <Plus size={20} />
+                  Thêm mã giảm giá
+                </button>
+              </div>
             </div>
 
             {/* Filters */}
