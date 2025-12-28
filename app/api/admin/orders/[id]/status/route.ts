@@ -62,7 +62,7 @@ const updateStatusSchema = z.object({
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. Kiểm tra quyền admin
@@ -74,13 +74,16 @@ export async function PUT(
       )
     }
 
+    // Get params (Next.js 16+ requires await)
+    const { id } = await params
+
     // 2. Validate dữ liệu đầu vào
     const body = await request.json()
     const validatedData = updateStatusSchema.parse(body)
 
     // 3. Lấy thông tin đơn hàng hiện tại
     const order = await prisma.order.findUnique({
-      where: { id: params.id },
+      where: { id },
       select: {
         id: true,
         orderNumber: true,

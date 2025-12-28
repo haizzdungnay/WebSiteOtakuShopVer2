@@ -55,7 +55,7 @@ const updateCouponSchema = z.object({
 // PUT /api/admin/coupons/[id] - Update coupon
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. Check admin authorization
@@ -67,7 +67,7 @@ export async function PUT(
       )
     }
 
-    const { id } = params
+    const { id } = await params
 
     // 2. Check coupon exists
     const coupon = await prisma.coupon.findUnique({
@@ -170,7 +170,7 @@ export async function PUT(
 // DELETE /api/admin/coupons/[id] - Xóa coupon
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. Check admin authorization
@@ -182,7 +182,7 @@ export async function DELETE(
       )
     }
 
-    const { id } = params
+    const { id } = await params
 
     // 2. Check coupon exists
     const coupon = await prisma.coupon.findUnique({
