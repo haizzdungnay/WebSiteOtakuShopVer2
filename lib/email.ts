@@ -252,6 +252,163 @@ export function getWelcomeEmailTemplate(fullName: string): string {
   `;
 }
 
+// Map order status to Vietnamese text and colors
+const ORDER_STATUS_CONFIG: Record<string, { text: string; color: string; description: string }> = {
+  PENDING: { 
+    text: 'Chờ xác nhận', 
+    color: '#f59e0b', 
+    description: 'Đơn hàng của bạn đang chờ được xác nhận.' 
+  },
+  CONFIRMED: { 
+    text: 'Đã xác nhận', 
+    color: '#3b82f6', 
+    description: 'Đơn hàng của bạn đã được xác nhận và đang được chuẩn bị.' 
+  },
+  PREPARING: { 
+    text: 'Đang chuẩn bị', 
+    color: '#8b5cf6', 
+    description: 'Đơn hàng của bạn đang được đóng gói và chuẩn bị giao.' 
+  },
+  SHIPPING: { 
+    text: 'Đang giao hàng', 
+    color: '#06b6d4', 
+    description: 'Đơn hàng của bạn đã được giao cho đơn vị vận chuyển.' 
+  },
+  DELIVERED: { 
+    text: 'Đã giao hàng', 
+    color: '#22c55e', 
+    description: 'Đơn hàng của bạn đã được giao thành công.' 
+  },
+  COMPLETED: { 
+    text: 'Hoàn thành', 
+    color: '#10b981', 
+    description: 'Đơn hàng đã hoàn thành. Cảm ơn bạn đã mua sắm tại OtakuShop!' 
+  },
+  CANCELLED: { 
+    text: 'Đã hủy', 
+    color: '#ef4444', 
+    description: 'Đơn hàng của bạn đã bị hủy.' 
+  }
+};
+
+interface OrderStatusEmailData {
+  customerName: string;
+  orderNumber: string;
+  newStatus: string;
+  trackingCode?: string | null;
+  carrier?: string | null;
+  adminNote?: string | null;
+  orderUrl: string;
+}
+
+export function getOrderStatusEmailTemplate(data: OrderStatusEmailData): string {
+  const statusConfig = ORDER_STATUS_CONFIG[data.newStatus] || { 
+    text: data.newStatus, 
+    color: '#6b7280', 
+    description: 'Trạng thái đơn hàng đã được cập nhật.' 
+  };
+
+  const shippingInfo = data.newStatus === 'SHIPPING' && data.trackingCode ? `
+    <div style="margin-top: 20px; padding: 15px; background-color: #f0f9ff; border-radius: 8px; border-left: 4px solid #0ea5e9;">
+      <h3 style="margin: 0 0 10px; color: #0369a1; font-size: 16px;">📦 Thông tin vận chuyển</h3>
+      <p style="margin: 0 0 5px; color: #475569; font-size: 14px;">
+        <strong>Đơn vị vận chuyển:</strong> ${data.carrier || 'Không xác định'}
+      </p>
+      <p style="margin: 0; color: #475569; font-size: 14px;">
+        <strong>Mã vận đơn:</strong> <span style="color: #0284c7; font-weight: bold;">${data.trackingCode}</span>
+      </p>
+    </div>
+  ` : '';
+
+  const adminNoteSection = data.adminNote ? `
+    <div style="margin-top: 15px; padding: 12px; background-color: #fef3c7; border-radius: 6px; border-left: 4px solid #f59e0b;">
+      <p style="margin: 0; color: #92400e; font-size: 14px;">
+        <strong>Ghi chú từ cửa hàng:</strong> ${data.adminNote}
+      </p>
+    </div>
+  ` : '';
+
+  return `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Cập nhật đơn hàng - OtakuShop</title>
+    </head>
+    <body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5;">
+      <table role="presentation" style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td align="center" style="padding: 40px 0;">
+            <table role="presentation" style="width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <!-- Header -->
+              <tr>
+                <td style="padding: 40px 40px 20px; text-align: center; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%); border-radius: 8px 8px 0 0;">
+                  <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: bold;">
+                    <span style="color: #fff;">JH</span><span style="color: #333;">FIGURE</span>
+                  </h1>
+                  <p style="margin: 10px 0 0; color: rgba(255,255,255,0.9); font-size: 14px;">OtakuShop - Figure Anime chính hãng</p>
+                </td>
+              </tr>
+
+              <!-- Content -->
+              <tr>
+                <td style="padding: 40px;">
+                  <h2 style="margin: 0 0 20px; color: #333; font-size: 24px;">Xin chào ${data.customerName}!</h2>
+                  
+                  <p style="margin: 0 0 20px; color: #666; font-size: 16px; line-height: 1.6;">
+                    Đơn hàng <strong style="color: #333;">#${data.orderNumber}</strong> của bạn đã được cập nhật trạng thái.
+                  </p>
+
+                  <!-- Status Badge -->
+                  <div style="text-align: center; margin: 30px 0;">
+                    <div style="display: inline-block; padding: 16px 32px; background-color: ${statusConfig.color}; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+                      <span style="font-size: 20px; font-weight: bold; color: #ffffff;">${statusConfig.text}</span>
+                    </div>
+                  </div>
+
+                  <p style="margin: 0 0 20px; color: #666; font-size: 16px; line-height: 1.6; text-align: center;">
+                    ${statusConfig.description}
+                  </p>
+
+                  ${shippingInfo}
+                  ${adminNoteSection}
+
+                  <!-- Order Details Button -->
+                  <div style="text-align: center; margin: 30px 0;">
+                    <a href="${data.orderUrl}" style="display: inline-block; padding: 14px 36px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%); color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold; box-shadow: 0 4px 15px rgba(238, 90, 90, 0.3);">
+                      Xem chi tiết đơn hàng
+                    </a>
+                  </div>
+
+                  <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+                    <p style="margin: 0; color: #999; font-size: 13px;">
+                      Nếu bạn có bất kỳ câu hỏi nào, vui lòng liên hệ với chúng tôi qua hotline hoặc email bên dưới.
+                    </p>
+                  </div>
+                </td>
+              </tr>
+
+              <!-- Footer -->
+              <tr>
+                <td style="padding: 20px 40px; background-color: #f9f9f9; border-radius: 0 0 8px 8px; text-align: center;">
+                  <p style="margin: 0 0 10px; color: #999; font-size: 12px;">
+                    © 2025 OtakuShop. All rights reserved.
+                  </p>
+                  <p style="margin: 0; color: #999; font-size: 12px;">
+                    Hotline: 0389836514 | Email: support@dnfigure.vn
+                  </p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+    </html>
+  `;
+}
+
 export function getResetPasswordEmailTemplate(fullName: string, resetUrl: string): string {
   return `
     <!DOCTYPE html>

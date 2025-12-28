@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyAdmin } from '@/lib/admin-auth'
+import { sendEmail, getOrderStatusEmailTemplate } from '@/lib/email'
 import { z } from 'zod'
 
 // Quy tắc chuyển trạng thái đơn hàng
@@ -89,7 +90,17 @@ export async function PUT(
         orderNumber: true,
         status: true,
         userId: true,
+        customerName: true,
+        customerEmail: true,
         note: true,
+        user: {
+          select: {
+            id: true,
+            email: true,
+            fullName: true,
+            emailVerified: true
+          }
+        },
         payment: {
           select: { 
             id: true, 
@@ -255,7 +266,42 @@ export async function PUT(
       console.error('[AUDIT] Failed to log admin action:', logError)
     }
 
-    // 8. Trả về kết quả thành công
+    // 8. Gửi email thông báo trạng thái đơn hàng (chỉ khi user đã xác minh email)
+    if (order.user && order.user.emailVerified) {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+        const orderUrl = `${baseUrl}/profile/orders`
+        
+        const emailSent = await sendEmail({
+          to: order.user.email,
+          subject: `Cập nhật đơn hàng #${order.orderNumber} - ${validatedData.status === 'SHIPPING' ? 'Đang giao hàng' : validatedData.status === 'DELIVERED' ? 'Đã giao hàng' : validatedData.status === 'CONFIRMED' ? 'Đã xác nhận' : validatedData.status === 'PREPARING' ? 'Đang chuẩn bị' : validatedData.status === 'COMPLETED' ? 'Hoàn thành' : validatedData.status === 'CANCELLED' ? 'Đã hủy' : 'Cập nhật'}`,
+          html: getOrderStatusEmailTemplate({
+            customerName: order.user.fullName,
+            orderNumber: order.orderNumber,
+            newStatus: validatedData.status,
+            trackingCode: validatedData.trackingCode,
+            carrier: validatedData.carrier,
+            adminNote: validatedData.adminNote,
+            orderUrl
+          })
+        })
+
+        if (emailSent) {
+          console.log(`[EMAIL] Order status notification sent to ${order.user.email} for order #${order.orderNumber}`)
+        } else {
+          console.error(`[EMAIL] Failed to send order status notification to ${order.user.email}`)
+        }
+      } catch (emailError) {
+        // Don't fail the request if email sending fails
+        console.error('[EMAIL] Failed to send order status email:', emailError)
+      }
+    } else if (order.userId && !order.user?.emailVerified) {
+      console.log(`[EMAIL] Skipping notification for order #${order.orderNumber} - user email not verified`)
+    } else {
+      console.log(`[EMAIL] Skipping notification for order #${order.orderNumber} - guest order`)
+    }
+
+    // 9. Trả về kết quả thành công
     return NextResponse.json({
       success: true,
       message: `Đã cập nhật trạng thái đơn hàng thành công`,
