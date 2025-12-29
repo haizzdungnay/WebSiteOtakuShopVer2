@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Calculator, Package, TrendingUp, Users, Info, DollarSign, Weight } from 'lucide-react';
 
@@ -15,10 +15,26 @@ export default function ShippingCalculatorPage() {
     exchangeRate: number;
   } | null>(null);
 
-  const stats = {
-    customers: 2263,
-    orders: 17767,
-  };
+  const [stats, setStats] = useState({
+    customers: 2263, // Default/Fallback value
+    orders: 17767,   // Default/Fallback value
+  });
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const res = await fetch('/api/public-stats');
+        const data = await res.json();
+        if (data.success) {
+          setStats(data.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch stats:', error);
+      }
+    };
+
+    fetchStats();
+  }, []);
 
   // Current exchange rate (mock)
   const EXCHANGE_RATE = 170; // 1 JPY = 170 VND
