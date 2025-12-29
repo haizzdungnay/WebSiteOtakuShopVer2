@@ -38,6 +38,16 @@ function SearchContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
+  
+  // Price filter state
+  const [priceFilter, setPriceFilter] = useState<string>(''); // '', 'under1m', '1m-3m', '3m-5m', 'over5m'
+  
+  // Status filter state
+  const [statusFilters, setStatusFilters] = useState({
+    inStock: false,
+    preorder: false,
+    onSale: false
+  });
 
   // Fetch categories for filter
   useEffect(() => {
@@ -83,8 +93,30 @@ function SearchContent() {
     };
   };
 
+  // Get price range from filter
+  const getPriceRange = (filter: string): { minPrice?: number; maxPrice?: number } => {
+    switch (filter) {
+      case 'under1m':
+        return { maxPrice: 1000000 };
+      case '1m-3m':
+        return { minPrice: 1000000, maxPrice: 3000000 };
+      case '3m-5m':
+        return { minPrice: 3000000, maxPrice: 5000000 };
+      case 'over5m':
+        return { minPrice: 5000000 };
+      default:
+        return {};
+    }
+  };
+
   // Perform real search via API
-  const performSearch = useCallback(async (query: string, page: number = 1, category: string = '') => {
+  const performSearch = useCallback(async (
+    query: string, 
+    page: number = 1, 
+    category: string = '',
+    priceRange: string = '',
+    status: typeof statusFilters = { inStock: false, preorder: false, onSale: false }
+  ) => {
     if (!query.trim()) {
       setResults([]);
       setTotalResults(0);
@@ -98,6 +130,16 @@ function SearchContent() {
       params.set('page', page.toString());
       params.set('limit', '20');
       if (category) params.set('category', category);
+
+      // Add price range filters
+      const { minPrice, maxPrice } = getPriceRange(priceRange);
+      if (minPrice) params.set('minPrice', minPrice.toString());
+      if (maxPrice) params.set('maxPrice', maxPrice.toString());
+
+      // Add status filters
+      if (status.inStock) params.set('inStock', 'true');
+      if (status.preorder) params.set('preorder', 'true');
+      if (status.onSale) params.set('onSale', 'true');
 
       const response = await fetch(`/api/products?${params.toString()}`);
       if (response.ok) {
@@ -117,13 +159,13 @@ function SearchContent() {
     }
   }, []);
 
-  // Search when URL param changes
+  // Search when URL param or filters change
   useEffect(() => {
     if (queryParam) {
       setSearchQuery(queryParam);
-      performSearch(queryParam, currentPage, selectedCategory);
+      performSearch(queryParam, currentPage, selectedCategory, priceFilter, statusFilters);
     }
-  }, [queryParam, currentPage, selectedCategory, performSearch]);
+  }, [queryParam, currentPage, selectedCategory, priceFilter, statusFilters, performSearch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,7 +173,7 @@ function SearchContent() {
       const newUrl = `/search?q=${encodeURIComponent(searchQuery)}`;
       window.history.pushState({}, '', newUrl);
       setCurrentPage(1);
-      performSearch(searchQuery, 1, selectedCategory);
+      performSearch(searchQuery, 1, selectedCategory, priceFilter, statusFilters);
     }
   };
 
@@ -139,7 +181,29 @@ function SearchContent() {
     setSelectedCategory(categorySlug);
     setCurrentPage(1);
     if (queryParam) {
-      performSearch(queryParam, 1, categorySlug);
+      performSearch(queryParam, 1, categorySlug, priceFilter, statusFilters);
+    }
+  };
+
+  const handlePriceFilterChange = (filter: string) => {
+    // Toggle: if same filter is selected, clear it
+    const newFilter = priceFilter === filter ? '' : filter;
+    setPriceFilter(newFilter);
+    setCurrentPage(1);
+    if (queryParam) {
+      performSearch(queryParam, 1, selectedCategory, newFilter, statusFilters);
+    }
+  };
+
+  const handleStatusFilterChange = (status: keyof typeof statusFilters) => {
+    const newStatusFilters = {
+      ...statusFilters,
+      [status]: !statusFilters[status]
+    };
+    setStatusFilters(newStatusFilters);
+    setCurrentPage(1);
+    if (queryParam) {
+      performSearch(queryParam, 1, selectedCategory, priceFilter, newStatusFilters);
     }
   };
 
@@ -247,26 +311,63 @@ function SearchContent() {
                 {/* Sidebar Filters */}
                 <aside className="lg:w-72 flex-shrink-0">
                   <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
-                    <h3 className="font-bold text-lg mb-4">Bộ lọc</h3>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-bold text-lg">Bộ lọc</h3>
+                      {(priceFilter || selectedCategory || statusFilters.inStock || statusFilters.preorder || statusFilters.onSale) && (
+                        <button
+                          onClick={() => {
+                            setPriceFilter('');
+                            setSelectedCategory('');
+                            setStatusFilters({ inStock: false, preorder: false, onSale: false });
+                            if (queryParam) {
+                              performSearch(queryParam, 1, '', '', { inStock: false, preorder: false, onSale: false });
+                            }
+                          }}
+                          className="text-sm text-accent-red hover:underline"
+                        >
+                          Xóa tất cả
+                        </button>
+                      )}
+                    </div>
 
                     {/* Price Range */}
                     <div className="mb-6">
                       <h4 className="font-semibold mb-3">Khoảng giá</h4>
                       <div className="space-y-2">
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="rounded" 
+                            checked={priceFilter === 'under1m'}
+                            onChange={() => handlePriceFilterChange('under1m')}
+                          />
                           <span className="text-sm">Dưới 1,000,000đ</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="rounded" 
+                            checked={priceFilter === '1m-3m'}
+                            onChange={() => handlePriceFilterChange('1m-3m')}
+                          />
                           <span className="text-sm">1,000,000đ - 3,000,000đ</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="rounded" 
+                            checked={priceFilter === '3m-5m'}
+                            onChange={() => handlePriceFilterChange('3m-5m')}
+                          />
                           <span className="text-sm">3,000,000đ - 5,000,000đ</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="rounded" 
+                            checked={priceFilter === 'over5m'}
+                            onChange={() => handlePriceFilterChange('over5m')}
+                          />
                           <span className="text-sm">Trên 5,000,000đ</span>
                         </label>
                       </div>
@@ -306,16 +407,31 @@ function SearchContent() {
                       <h4 className="font-semibold mb-3">Trạng thái</h4>
                       <div className="space-y-2">
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="rounded" 
+                            checked={statusFilters.inStock}
+                            onChange={() => handleStatusFilterChange('inStock')}
+                          />
                           <span className="text-sm">Còn hàng</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="rounded" 
+                            checked={statusFilters.preorder}
+                            onChange={() => handleStatusFilterChange('preorder')}
+                          />
                           <span className="text-sm">Pre-order</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input type="checkbox" className="rounded" />
-                          <span className="text-sm">Sắp về</span>
+                          <input 
+                            type="checkbox" 
+                            className="rounded" 
+                            checked={statusFilters.onSale}
+                            onChange={() => handleStatusFilterChange('onSale')}
+                          />
+                          <span className="text-sm">Đang giảm giá</span>
                         </label>
                       </div>
                     </div>
