@@ -18,6 +18,8 @@ export async function GET(request: NextRequest) {
         const inStock = searchParams.get('inStock') // 'true' = only in-stock products
         const preorder = searchParams.get('preorder') // 'true' = only pre-order products
         const onSale = searchParams.get('onSale') // 'true' = only products with discounts
+        const minPrice = searchParams.get('minPrice') // Giá tối thiểu
+        const maxPrice = searchParams.get('maxPrice') // Giá tối đa
 
         // Map sort param to actual field and order
         let sortField = 'createdAt'
@@ -87,6 +89,23 @@ export async function GET(request: NextRequest) {
         // Filter by on sale - products with discounts (comparePrice is set)
         if (onSale === 'true') {
             where.comparePrice = { not: null }
+        }
+
+        // Filter by price range
+        if (minPrice || maxPrice) {
+            where.price = {}
+            if (minPrice) {
+                const min = parseFloat(minPrice)
+                if (!isNaN(min) && min >= 0) {
+                    where.price.gte = min
+                }
+            }
+            if (maxPrice) {
+                const max = parseFloat(maxPrice)
+                if (!isNaN(max) && max >= 0) {
+                    where.price.lte = max
+                }
+            }
         }
 
         //search by name, description, shortDescription, productCode
