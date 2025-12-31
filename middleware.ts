@@ -21,8 +21,9 @@ export async function middleware(request: NextRequest) {
       // Verify token and check role
       const payload = await verifyTokenEdge(token)
 
-      // If not admin role, redirect to home with error (hỗ trợ cả chữ hoa và chữ thường)
-      if (payload.role?.toLowerCase() !== 'admin') {
+      // If not admin or staff role, redirect to home
+      const role = payload.role?.toLowerCase()
+      if (role !== 'admin' && role !== 'staff') {
         const url = request.nextUrl.clone()
         url.pathname = '/'
         return NextResponse.redirect(url)

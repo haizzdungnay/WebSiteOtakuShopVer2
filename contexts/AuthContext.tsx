@@ -171,7 +171,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           email: userData.email,
           username: userData.username || userData.fullName,
           fullName: userData.fullName,
-          role: 'admin'
+          role: userData.role === 'ADMIN' ? 'admin' : userData.role === 'STAFF' ? 'staff' : 'user'
         })
         return { success: true, isAdmin: true }
       }
@@ -198,7 +198,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           username: userData.fullName,
           fullName: userData.fullName,
           phone: userData.phone,
-          role: 'user'
+          role: userData.role === 'ADMIN' ? 'admin' : userData.role === 'STAFF' ? 'staff' : 'user'
         })
         return { success: true, isAdmin: false }
       }
