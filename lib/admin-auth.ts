@@ -9,10 +9,11 @@ const DEBUG = process.env.NODE_ENV === 'development' && process.env.DEBUG_AUTH =
 export interface AdminUser {
     userId: string
     email: string
-    role: string
+    role: 'ADMIN' | 'STAFF'  // ADMIN = admin gốc, STAFF = admin nhân viên
+    isOriginalAdmin: boolean  // true nếu là ADMIN gốc (có quyền cấp quyền)
 }
 
-// Kiểm tra user có role ADMIN không (đồng bộ - từ JWT)
+// Kiểm tra user có role ADMIN hoặc STAFF không (đồng bộ - từ JWT)
 export function getAdminFromRequest(request: NextRequest): AdminUser | null {
     try {
         // 1. Lấy user từ JWT token
@@ -22,15 +23,17 @@ export function getAdminFromRequest(request: NextRequest): AdminUser | null {
             return null
         }
 
-        // 2. Kiểm tra role (JWT đã có role) - hỗ trợ cả chữ hoa và chữ thường
-        if (user.role?.toUpperCase() !== 'ADMIN') {
+        // 2. Kiểm tra role (JWT đã có role) - hỗ trợ cả ADMIN và STAFF
+        const roleUpper = user.role?.toUpperCase()
+        if (roleUpper !== 'ADMIN' && roleUpper !== 'STAFF') {
             return null
         }
 
         return {
             userId: user.userId,
             email: user.email,
-            role: user.role
+            role: roleUpper as 'ADMIN' | 'STAFF',
+            isOriginalAdmin: roleUpper === 'ADMIN'
         }
     } catch (error) {
         console.error('Lỗi kiểm tra admin:', error)
@@ -57,11 +60,12 @@ export async function verifyAdmin(request: NextRequest): Promise<AdminUser | nul
             return {
                 userId: user.userId,
                 email: user.email,
-                role: 'ADMIN'
+                role: 'ADMIN',
+                isOriginalAdmin: true
             }
         }
 
-        // 3. Kiểm tra trong bảng admins trước
+        // 3. Kiểm tra trong bảng admins trước (admins table = original admin)
         const dbAdmin = await prisma.admin.findUnique({
             where: {
                 id: user.userId
@@ -78,7 +82,8 @@ export async function verifyAdmin(request: NextRequest): Promise<AdminUser | nul
             return {
                 userId: dbAdmin.id,
                 email: dbAdmin.email,
-                role: 'ADMIN'
+                role: 'ADMIN',
+                isOriginalAdmin: true
             }
         }
 
@@ -101,19 +106,20 @@ export async function verifyAdmin(request: NextRequest): Promise<AdminUser | nul
             return null
         }
 
-        // 5. Verify role - hỗ trợ cả chữ hoa và chữ thường
+        // 5. Verify role - hỗ trợ cả ADMIN và STAFF
         const roleUpper = dbUser.role?.toUpperCase()
-        if (DEBUG) console.warn('[verifyAdmin] Role check:', { dbRole: dbUser.role, roleUpper, isAdmin: roleUpper === 'ADMIN' })
+        if (DEBUG) console.warn('[verifyAdmin] Role check:', { dbRole: dbUser.role, roleUpper })
 
-        if (roleUpper !== 'ADMIN') {
-            if (DEBUG) console.warn('[verifyAdmin] User is not admin')
+        if (roleUpper !== 'ADMIN' && roleUpper !== 'STAFF') {
+            if (DEBUG) console.warn('[verifyAdmin] User is not admin or staff')
             return null
         }
 
         return {
             userId: dbUser.id,
             email: dbUser.email,
-            role: dbUser.role
+            role: roleUpper as 'ADMIN' | 'STAFF',
+            isOriginalAdmin: roleUpper === 'ADMIN'
         }
     } catch (error) {
         console.error('Lỗi verify admin:', error)

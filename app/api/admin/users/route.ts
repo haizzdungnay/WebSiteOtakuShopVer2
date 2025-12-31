@@ -122,6 +122,7 @@ export async function GET(request: NextRequest) {
     const summary = {
       total,
       customers: await prisma.user.count({ where: { ...where, role: 'CUSTOMER' } }),
+      staff: await prisma.user.count({ where: { ...where, role: 'STAFF' } }),
       admins: await prisma.user.count({ where: { ...where, role: 'ADMIN' } }),
       newThisMonth: await prisma.user.count({
         where: {
@@ -143,7 +144,12 @@ export async function GET(request: NextRequest) {
           total,
           totalPages: Math.ceil(total / limit)
         },
-        summary
+        summary,
+        // Thông tin về quyền của admin hiện tại
+        currentAdmin: {
+          canPromoteUsers: admin.isOriginalAdmin,
+          role: admin.role
+        }
       }
     })
 
