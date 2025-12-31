@@ -1827,7 +1827,11 @@ export default function AdminPage() {
                           <button
                             onClick={() => handleOrderStatusUpdate(order.id, 'CONFIRMED')}
                             disabled={updatingOrderId === order.id}
-                            className="px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-sm font-semibold hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
+                            className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 min-w-[110px] justify-center transition-all ${
+                              updatingOrderId === order.id
+                                ? 'bg-slate-200 text-slate-500 cursor-wait'
+                                : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                            }`}
                           >
                             {updatingOrderId === order.id ? (
                               <>
@@ -1841,7 +1845,11 @@ export default function AdminPage() {
                           <button
                             onClick={() => handleOrderStatusUpdate(order.id, 'CANCELLED')}
                             disabled={updatingOrderId === order.id}
-                            className="px-4 py-2 rounded-full bg-rose-50 text-rose-600 text-sm font-semibold hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
+                            className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 min-w-[110px] justify-center transition-all ${
+                              updatingOrderId === order.id
+                                ? 'bg-slate-200 text-slate-500 cursor-wait'
+                                : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                            }`}
                           >
                             {updatingOrderId === order.id ? (
                               <>
@@ -1858,7 +1866,11 @@ export default function AdminPage() {
                         <button
                           onClick={() => handleOrderStatusUpdate(order.id, 'PREPARING')}
                           disabled={updatingOrderId === order.id}
-                          className="px-4 py-2 rounded-full bg-purple-50 text-purple-600 text-sm font-semibold hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[120px] justify-center"
+                          className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 min-w-[130px] justify-center transition-all ${
+                            updatingOrderId === order.id
+                              ? 'bg-slate-200 text-slate-500 cursor-wait'
+                              : 'bg-purple-50 text-purple-600 hover:bg-purple-100'
+                          }`}
                         >
                           {updatingOrderId === order.id ? (
                             <>
@@ -1882,7 +1894,11 @@ export default function AdminPage() {
                         <button
                           onClick={() => handleOrderStatusUpdate(order.id, 'DELIVERED')}
                           disabled={updatingOrderId === order.id}
-                          className="px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-sm font-semibold hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
+                          className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 min-w-[110px] justify-center transition-all ${
+                            updatingOrderId === order.id
+                              ? 'bg-slate-200 text-slate-500 cursor-wait'
+                              : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                          }`}
                         >
                           {updatingOrderId === order.id ? (
                             <>
@@ -1898,7 +1914,11 @@ export default function AdminPage() {
                         <button
                           onClick={() => handleOrderStatusUpdate(order.id, 'COMPLETED')}
                           disabled={updatingOrderId === order.id}
-                          className="px-4 py-2 rounded-full bg-green-50 text-green-600 text-sm font-semibold hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
+                          className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 min-w-[110px] justify-center transition-all ${
+                            updatingOrderId === order.id
+                              ? 'bg-slate-200 text-slate-500 cursor-wait'
+                              : 'bg-green-50 text-green-600 hover:bg-green-100'
+                          }`}
                         >
                           {updatingOrderId === order.id ? (
                             <>
@@ -2028,7 +2048,11 @@ export default function AdminPage() {
                       <button
                         onClick={() => handleReviewAction(review.id, 'approve')}
                         disabled={updatingReviewId === review.id}
-                        className="px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-sm font-semibold hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
+                        className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 min-w-[110px] justify-center transition-all ${
+                          updatingReviewId === review.id
+                            ? 'bg-slate-200 text-slate-500 cursor-wait'
+                            : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                        }`}
                       >
                         {updatingReviewId === review.id ? (
                           <>
@@ -2043,7 +2067,11 @@ export default function AdminPage() {
                     <button
                       onClick={() => handleReviewAction(review.id, 'delete')}
                       disabled={updatingReviewId === review.id}
-                      className="px-4 py-2 rounded-full bg-rose-50 text-rose-600 text-sm font-semibold hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
+                      className={`px-4 py-2 rounded-full text-sm font-semibold flex items-center gap-2 min-w-[110px] justify-center transition-all ${
+                        updatingReviewId === review.id
+                          ? 'bg-slate-200 text-slate-500 cursor-wait'
+                          : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                      }`}
                     >
                       {updatingReviewId === review.id ? (
                         <>
@@ -2952,7 +2980,11 @@ export default function AdminPage() {
                     <button
                       onClick={() => handleOrderStatusUpdate(selectedOrder.id, 'CONFIRMED', { adminNote: orderAdminNote || undefined })}
                       disabled={updatingOrderId === selectedOrder.id}
-                      className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-600 font-semibold hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[120px] justify-center"
+                      className={`px-4 py-2 rounded-xl font-semibold flex items-center gap-2 min-w-[120px] justify-center transition-all ${
+                        updatingOrderId === selectedOrder.id
+                          ? 'bg-slate-200 text-slate-500 cursor-wait'
+                          : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'
+                      }`}
                     >
                       {updatingOrderId === selectedOrder.id ? (
                         <>
@@ -2966,7 +2998,11 @@ export default function AdminPage() {
                     <button
                       onClick={() => handleOrderStatusUpdate(selectedOrder.id, 'CANCELLED', { adminNote: orderAdminNote || undefined })}
                       disabled={updatingOrderId === selectedOrder.id}
-                      className="px-4 py-2 rounded-xl bg-rose-50 text-rose-600 font-semibold hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[120px] justify-center"
+                      className={`px-4 py-2 rounded-xl font-semibold flex items-center gap-2 min-w-[120px] justify-center transition-all ${
+                        updatingOrderId === selectedOrder.id
+                          ? 'bg-slate-200 text-slate-500 cursor-wait'
+                          : 'bg-rose-50 text-rose-600 hover:bg-rose-100'
+                      }`}
                     >
                       {updatingOrderId === selectedOrder.id ? (
                         <>
@@ -3044,7 +3080,11 @@ export default function AdminPage() {
                   type="button"
                   onClick={handleShippingSubmit}
                   disabled={updatingOrderId === shippingOrderId}
-                  className="flex-1 py-3 rounded-2xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className={`flex-1 py-3 rounded-2xl font-semibold flex items-center justify-center gap-2 transition-all ${
+                    updatingOrderId === shippingOrderId
+                      ? 'bg-slate-300 text-slate-500 cursor-wait'
+                      : 'bg-indigo-600 text-white hover:bg-indigo-700'
+                  }`}
                 >
                   {updatingOrderId === shippingOrderId ? (
                     <>
