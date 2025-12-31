@@ -164,15 +164,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (adminResponse.ok) {
-        const data = await adminResponse.json()
-        const userData = data.user
-        setUser({
-          id: userData.id,
-          email: userData.email,
-          username: userData.username || userData.fullName,
-          fullName: userData.fullName,
-          role: userData.role === 'ADMIN' ? 'admin' : userData.role === 'STAFF' ? 'staff' : 'user'
-        })
+        // After successful admin login, refresh full profile from /api/auth/me
+        await checkAuth()
         return { success: true, isAdmin: true }
       }
 
@@ -188,18 +181,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
 
       if (userResponse.ok) {
-        const data = await userResponse.json()
-        // API mới trả về data.data.user và data.data.token
-        const userData = data.data?.user || data.user
-
-        setUser({
-          id: userData.id,
-          email: userData.email,
-          username: userData.fullName,
-          fullName: userData.fullName,
-          phone: userData.phone,
-          role: userData.role === 'ADMIN' ? 'admin' : userData.role === 'STAFF' ? 'staff' : 'user'
-        })
+        // After successful user login, refresh full profile from /api/auth/me
+        await checkAuth()
         return { success: true, isAdmin: false }
       }
 
