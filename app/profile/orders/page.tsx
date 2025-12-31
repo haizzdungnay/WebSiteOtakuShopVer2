@@ -175,6 +175,7 @@ export default function OrdersPage() {
     { key: 'PREPARING', label: 'Đang chuẩn bị' },
     { key: 'SHIPPING', label: 'Đang giao' },
     { key: 'DELIVERED', label: 'Đã giao' },
+    { key: 'COMPLETED', label: 'Hoàn thành' },
     { key: 'CANCELLED', label: 'Đã hủy' }
   ];
 
