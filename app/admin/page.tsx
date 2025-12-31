@@ -1405,10 +1405,11 @@ export default function AdminPage() {
                         axisLine={{ stroke: '#e2e8f0' }}
                       />
                       <Tooltip
-                        formatter={(value: number, name: string) => {
-                          if (name === 'revenueDisplay') return [formatCurrency(value), 'Doanh thu'];
-                          if (name === 'orders') return [value, 'Đơn hàng'];
-                          return [value, name];
+                        formatter={(value, name) => {
+                          const numValue = typeof value === 'number' ? value : 0;
+                          if (name === 'revenueDisplay') return [formatCurrency(numValue), 'Doanh thu'];
+                          if (name === 'orders') return [numValue, 'Đơn hàng'];
+                          return [numValue, String(name)];
                         }}
                         contentStyle={{
                           backgroundColor: 'white',

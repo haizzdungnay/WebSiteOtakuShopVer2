@@ -105,7 +105,7 @@ export async function PUT(request: NextRequest) {
           action: 'CHANGE_PASSWORD',
           entityType: 'Admin',
           entityId: admin.id,
-          oldValue: null, // Don't log passwords
+          oldValue: undefined, // Don't log passwords
           newValue: { changedAt: new Date().toISOString() },
           ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
           userAgent: request.headers.get('user-agent') || null

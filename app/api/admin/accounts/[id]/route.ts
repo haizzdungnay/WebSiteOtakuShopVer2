@@ -260,7 +260,7 @@ export async function DELETE(
             email: admin.email,
             fullName: admin.fullName
           },
-          newValue: null,
+          newValue: undefined,
           ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || null,
           userAgent: request.headers.get('user-agent') || null
         }
