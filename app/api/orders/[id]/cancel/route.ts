@@ -135,7 +135,7 @@ export async function PUT(
 
             // 8.4 Update order status
             return await tx.order.update({
-                where: { id: params.id },
+                where: { id },
                 data: {
                     status: 'CANCELLED',
                     note: validatedData.reason 

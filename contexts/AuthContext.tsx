@@ -9,7 +9,7 @@ interface User {
   username: string
   fullName?: string
   phone?: string | null
-  role?: 'admin' | 'user'
+  role?: 'admin' | 'staff' | 'user'
   avatar?: string | null
   gender?: 'MALE' | 'FEMALE' | 'OTHER' | null
   dateOfBirth?: string | null
