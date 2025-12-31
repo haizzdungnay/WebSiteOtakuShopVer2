@@ -30,6 +30,44 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import ArticleEditor from '@/components/ArticleEditor';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from 'recharts';
+
+// Types for Revenue Chart
+interface RevenueChartData {
+  period: string;
+  revenue: number;
+  orders: number;
+  averageOrderValue: number;
+}
+
+interface RevenueSummary {
+  totalRevenue: number;
+  totalOrders: number;
+  averageOrderValue: number;
+  revenueGrowth: number;
+  ordersGrowth: number;
+}
+
+interface RevenueData {
+  summary: RevenueSummary;
+  chartData: RevenueChartData[];
+  period: {
+    type: string;
+    startDate: string;
+    endDate: string;
+    year: number;
+    month: number | null;
+  };
+}
 
 // Types
 interface Product {
@@ -262,6 +300,13 @@ export default function AdminPage() {
   const [couponTotal, setCouponTotal] = useState(0);
   const [couponFilters, setCouponFilters] = useState({ search: '', status: '' });
 
+  // Revenue Chart states
+  const [revenueData, setRevenueData] = useState<RevenueData | null>(null);
+  const [revenueLoading, setRevenueLoading] = useState(false);
+  const [revenuePeriod, setRevenuePeriod] = useState<'month' | 'day'>('month');
+  const [revenueYear, setRevenueYear] = useState(new Date().getFullYear());
+  const [revenueMonth, setRevenueMonth] = useState(new Date().getMonth() + 1);
+
   // API Headers
   const getHeaders = () => ({
     'Content-Type': 'application/json',
@@ -281,6 +326,32 @@ export default function AdminPage() {
       }
     } catch (err) {
       console.error('Error fetching stats:', err);
+    }
+  };
+
+  // Fetch Revenue Data for Chart
+  const fetchRevenueData = async () => {
+    setRevenueLoading(true);
+    try {
+      const params = new URLSearchParams();
+      params.set('period', revenuePeriod);
+      params.set('year', String(revenueYear));
+      if (revenuePeriod === 'day') {
+        params.set('month', String(revenueMonth));
+      }
+
+      const response = await fetch(`/api/admin/dashboard/revenue?${params.toString()}`, {
+        headers: getHeaders(),
+        credentials: 'include',
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setRevenueData(data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching revenue data:', err);
+    } finally {
+      setRevenueLoading(false);
     }
   };
 
@@ -444,6 +515,7 @@ export default function AdminPage() {
       setLoading(true);
       await Promise.all([
         fetchDashboardStats(),
+        fetchRevenueData(),
         fetchCategories(),
         fetchProducts(),
         fetchOrders(),
@@ -503,6 +575,14 @@ export default function AdminPage() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAdmin, couponPage, couponFilters]);
+
+  // Refetch revenue data when period/year/month changes
+  useEffect(() => {
+    if (isAdmin && activeTab === 'dashboard') {
+      fetchRevenueData();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAdmin, revenuePeriod, revenueYear, revenueMonth]);
 
   // Generate slug from name
   const generateSlug = (name: string) => {
@@ -1214,6 +1294,139 @@ export default function AdminPage() {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Revenue Chart */}
+            <div className="rounded-3xl bg-white p-8 shadow-xl border border-slate-100">
+              <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
+                <div>
+                  <h2 className="text-xl font-semibold">Biểu đồ doanh thu</h2>
+                  {revenueData?.summary && (
+                    <div className="flex flex-wrap gap-4 mt-2 text-sm">
+                      <span className="text-slate-600">
+                        Tổng: <span className="font-semibold text-slate-900">{formatCurrency(revenueData.summary.totalRevenue)}</span>
+                      </span>
+                      <span className="text-slate-600">
+                        Đơn hàng: <span className="font-semibold text-slate-900">{revenueData.summary.totalOrders}</span>
+                      </span>
+                      <span className={`${revenueData.summary.revenueGrowth >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
+                        {revenueData.summary.revenueGrowth >= 0 ? '↑' : '↓'} {Math.abs(revenueData.summary.revenueGrowth)}% so với kỳ trước
+                      </span>
+                    </div>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <select
+                    value={revenuePeriod}
+                    onChange={(e) => setRevenuePeriod(e.target.value as 'month' | 'day')}
+                    className="px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  >
+                    <option value="month">Theo tháng</option>
+                    <option value="day">Theo ngày</option>
+                  </select>
+                  <select
+                    value={revenueYear}
+                    onChange={(e) => setRevenueYear(Number(e.target.value))}
+                    className="px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                  >
+                    {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
+                  {revenuePeriod === 'day' && (
+                    <select
+                      value={revenueMonth}
+                      onChange={(e) => setRevenueMonth(Number(e.target.value))}
+                      className="px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-pink-500"
+                    >
+                      {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                        <option key={month} value={month}>Tháng {month}</option>
+                      ))}
+                    </select>
+                  )}
+                  <button
+                    onClick={fetchRevenueData}
+                    disabled={revenueLoading}
+                    className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 transition-colors disabled:opacity-50"
+                  >
+                    <RefreshCw size={16} className={revenueLoading ? 'animate-spin' : ''} />
+                    Làm mới
+                  </button>
+                </div>
+              </div>
+
+              {revenueLoading ? (
+                <div className="h-80 flex items-center justify-center">
+                  <Loader2 className="w-8 h-8 animate-spin text-pink-500" />
+                </div>
+              ) : revenueData?.chartData && revenueData.chartData.length > 0 ? (
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={revenueData.chartData.map((item) => ({
+                        ...item,
+                        name: revenuePeriod === 'month'
+                          ? `T${item.period}`
+                          : `${item.period}/${revenueMonth}`,
+                        revenueDisplay: item.revenue,
+                      }))}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                      <XAxis
+                        dataKey="name"
+                        tick={{ fontSize: 12, fill: '#64748b' }}
+                        axisLine={{ stroke: '#e2e8f0' }}
+                      />
+                      <YAxis
+                        tickFormatter={(value) => {
+                          if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+                          if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+                          return value;
+                        }}
+                        tick={{ fontSize: 12, fill: '#64748b' }}
+                        axisLine={{ stroke: '#e2e8f0' }}
+                      />
+                      <Tooltip
+                        formatter={(value: number, name: string) => {
+                          if (name === 'revenueDisplay') return [formatCurrency(value), 'Doanh thu'];
+                          if (name === 'orders') return [value, 'Đơn hàng'];
+                          return [value, name];
+                        }}
+                        contentStyle={{
+                          backgroundColor: 'white',
+                          border: '1px solid #e2e8f0',
+                          borderRadius: '12px',
+                          padding: '12px',
+                        }}
+                      />
+                      <Legend
+                        formatter={(value) => {
+                          if (value === 'revenueDisplay') return 'Doanh thu';
+                          if (value === 'orders') return 'Số đơn hàng';
+                          return value;
+                        }}
+                      />
+                      <Bar
+                        dataKey="revenueDisplay"
+                        fill="#ec4899"
+                        radius={[4, 4, 0, 0]}
+                        name="revenueDisplay"
+                      />
+                      <Bar
+                        dataKey="orders"
+                        fill="#3b82f6"
+                        radius={[4, 4, 0, 0]}
+                        name="orders"
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              ) : (
+                <div className="h-80 flex items-center justify-center text-slate-500">
+                  Chưa có dữ liệu doanh thu trong khoảng thời gian này
+                </div>
+              )}
             </div>
 
             {/* Recent Orders from stats */}
