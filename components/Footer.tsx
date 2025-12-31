@@ -47,7 +47,7 @@ export default function Footer() {
             <h3 className="text-white font-bold text-lg mb-4">Liên kết nhanh</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/about" className="hover:text-primary transition-colors">
+                <Link href="/gioi-thieu" className="hover:text-primary transition-colors">
                   Giới thiệu
                 </Link>
               </li>
@@ -57,12 +57,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/news" className="hover:text-primary transition-colors">
+                <Link href="/tin-tuc" className="hover:text-primary transition-colors">
                   Tin tức
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="hover:text-primary transition-colors">
+                <Link href="/lien-he" className="hover:text-primary transition-colors">
                   Liên hệ
                 </Link>
               </li>
@@ -79,27 +79,27 @@ export default function Footer() {
             <h3 className="text-white font-bold text-lg mb-4">Hỗ trợ khách hàng</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/shipping" className="hover:text-primary transition-colors">
+                <Link href="/chinh-sach-van-chuyen" className="hover:text-primary transition-colors">
                   Chính sách vận chuyển
                 </Link>
               </li>
               <li>
-                <Link href="/return" className="hover:text-primary transition-colors">
+                <Link href="/chinh-sach-doi-tra" className="hover:text-primary transition-colors">
                   Chính sách đổi trả
                 </Link>
               </li>
               <li>
-                <Link href="/warranty" className="hover:text-primary transition-colors">
+                <Link href="/chinh-sach-bao-hanh" className="hover:text-primary transition-colors">
                   Chính sách bảo hành
                 </Link>
               </li>
               <li>
-                <Link href="/payment" className="hover:text-primary transition-colors">
+                <Link href="/huong-dan-thanh-toan" className="hover:text-primary transition-colors">
                   Hướng dẫn thanh toán
                 </Link>
               </li>
               <li>
-                <Link href="/privacy" className="hover:text-primary transition-colors">
+                <Link href="/chinh-sach-bao-mat" className="hover:text-primary transition-colors">
                   Chính sách bảo mật
                 </Link>
               </li>
