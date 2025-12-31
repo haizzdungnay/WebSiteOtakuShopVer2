@@ -245,6 +245,13 @@ export default function AdminPage() {
   const [shippingOrderId, setShippingOrderId] = useState<string | null>(null);
   const [shippingForm, setShippingForm] = useState({ trackingCode: '', carrier: 'GHN' });
 
+  // Loading states for actions
+  const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
+  const [updatingReviewId, setUpdatingReviewId] = useState<string | null>(null);
+  const [savingProduct, setSavingProduct] = useState(false);
+  const [savingArticle, setSavingArticle] = useState(false);
+  const [savingCoupon, setSavingCoupon] = useState(false);
+
   // Toast notifications
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
 
@@ -727,6 +734,7 @@ export default function AdminPage() {
 
   // Handle Order Status Update
   const handleOrderStatusUpdate = async (orderId: string, status: string, extraData?: { trackingCode?: string; carrier?: string; adminNote?: string }) => {
+    setUpdatingOrderId(orderId);
     try {
       const response = await fetch(`/api/admin/orders/${orderId}/status`, {
         method: 'PUT',
@@ -748,6 +756,8 @@ export default function AdminPage() {
       console.error('Error updating order:', err);
       showToast('Có lỗi xảy ra khi cập nhật đơn hàng', 'error');
       return false;
+    } finally {
+      setUpdatingOrderId(null);
     }
   };
 
@@ -777,23 +787,30 @@ export default function AdminPage() {
 
   // Handle Review Approve/Delete
   const handleReviewAction = async (reviewId: string, action: 'approve' | 'delete') => {
+    if (action === 'delete' && !confirm('Bạn có chắc muốn xóa đánh giá này?')) return;
+
+    setUpdatingReviewId(reviewId);
     try {
       if (action === 'delete') {
-        if (!confirm('Bạn có chắc muốn xóa đánh giá này?')) return;
         await fetch(`/api/admin/reviews/${reviewId}`, {
           method: 'DELETE',
           headers: getHeaders(),
         });
+        showToast('Đã xóa đánh giá', 'success');
       } else {
         await fetch(`/api/admin/reviews/${reviewId}`, {
           method: 'PATCH',
           headers: getHeaders(),
           body: JSON.stringify({ isApproved: true }),
         });
+        showToast('Đã duyệt đánh giá', 'success');
       }
       await fetchReviews();
     } catch (err) {
       console.error('Error handling review:', err);
+      showToast('Có lỗi xảy ra', 'error');
+    } finally {
+      setUpdatingReviewId(null);
     }
   };
 
@@ -1809,14 +1826,18 @@ export default function AdminPage() {
                         <>
                           <button
                             onClick={() => handleOrderStatusUpdate(order.id, 'CONFIRMED')}
-                            className="px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-sm font-semibold hover:bg-emerald-100"
+                            disabled={updatingOrderId === order.id}
+                            className="px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-sm font-semibold hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
+                            {updatingOrderId === order.id && <Loader2 size={14} className="animate-spin" />}
                             Xác nhận
                           </button>
                           <button
                             onClick={() => handleOrderStatusUpdate(order.id, 'CANCELLED')}
-                            className="px-4 py-2 rounded-full bg-rose-50 text-rose-600 text-sm font-semibold hover:bg-rose-100"
+                            disabled={updatingOrderId === order.id}
+                            className="px-4 py-2 rounded-full bg-rose-50 text-rose-600 text-sm font-semibold hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                           >
+                            {updatingOrderId === order.id && <Loader2 size={14} className="animate-spin" />}
                             Hủy đơn
                           </button>
                         </>
@@ -1824,8 +1845,10 @@ export default function AdminPage() {
                       {order.status === 'CONFIRMED' && (
                         <button
                           onClick={() => handleOrderStatusUpdate(order.id, 'PREPARING')}
-                          className="px-4 py-2 rounded-full bg-purple-50 text-purple-600 text-sm font-semibold hover:bg-purple-100"
+                          disabled={updatingOrderId === order.id}
+                          className="px-4 py-2 rounded-full bg-purple-50 text-purple-600 text-sm font-semibold hover:bg-purple-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
+                          {updatingOrderId === order.id && <Loader2 size={14} className="animate-spin" />}
                           Chuẩn bị hàng
                         </button>
                       )}
@@ -1840,16 +1863,20 @@ export default function AdminPage() {
                       {order.status === 'SHIPPING' && (
                         <button
                           onClick={() => handleOrderStatusUpdate(order.id, 'DELIVERED')}
-                          className="px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-sm font-semibold hover:bg-emerald-100"
+                          disabled={updatingOrderId === order.id}
+                          className="px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-sm font-semibold hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
+                          {updatingOrderId === order.id && <Loader2 size={14} className="animate-spin" />}
                           Đã giao
                         </button>
                       )}
                       {order.status === 'DELIVERED' && (
                         <button
                           onClick={() => handleOrderStatusUpdate(order.id, 'COMPLETED')}
-                          className="px-4 py-2 rounded-full bg-green-50 text-green-600 text-sm font-semibold hover:bg-green-100"
+                          disabled={updatingOrderId === order.id}
+                          className="px-4 py-2 rounded-full bg-green-50 text-green-600 text-sm font-semibold hover:bg-green-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                         >
+                          {updatingOrderId === order.id && <Loader2 size={14} className="animate-spin" />}
                           Hoàn thành
                         </button>
                       )}
@@ -1970,15 +1997,19 @@ export default function AdminPage() {
                     {!review.isApproved && (
                       <button
                         onClick={() => handleReviewAction(review.id, 'approve')}
-                        className="px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-sm font-semibold hover:bg-emerald-100"
+                        disabled={updatingReviewId === review.id}
+                        className="px-4 py-2 rounded-full bg-emerald-50 text-emerald-600 text-sm font-semibold hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                       >
+                        {updatingReviewId === review.id && <Loader2 size={14} className="animate-spin" />}
                         Duyệt
                       </button>
                     )}
                     <button
                       onClick={() => handleReviewAction(review.id, 'delete')}
-                      className="px-4 py-2 rounded-full bg-rose-50 text-rose-600 text-sm font-semibold hover:bg-rose-100"
+                      disabled={updatingReviewId === review.id}
+                      className="px-4 py-2 rounded-full bg-rose-50 text-rose-600 text-sm font-semibold hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
+                      {updatingReviewId === review.id && <Loader2 size={14} className="animate-spin" />}
                       Xóa
                     </button>
                   </div>
@@ -2878,14 +2909,18 @@ export default function AdminPage() {
                   <>
                     <button
                       onClick={() => handleOrderStatusUpdate(selectedOrder.id, 'CONFIRMED', { adminNote: orderAdminNote || undefined })}
-                      className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-600 font-semibold hover:bg-emerald-100"
+                      disabled={updatingOrderId === selectedOrder.id}
+                      className="px-4 py-2 rounded-xl bg-emerald-50 text-emerald-600 font-semibold hover:bg-emerald-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
+                      {updatingOrderId === selectedOrder.id && <Loader2 size={16} className="animate-spin" />}
                       Xác nhận
                     </button>
                     <button
                       onClick={() => handleOrderStatusUpdate(selectedOrder.id, 'CANCELLED', { adminNote: orderAdminNote || undefined })}
-                      className="px-4 py-2 rounded-xl bg-rose-50 text-rose-600 font-semibold hover:bg-rose-100"
+                      disabled={updatingOrderId === selectedOrder.id}
+                      className="px-4 py-2 rounded-xl bg-rose-50 text-rose-600 font-semibold hover:bg-rose-100 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                     >
+                      {updatingOrderId === selectedOrder.id && <Loader2 size={16} className="animate-spin" />}
                       Hủy đơn
                     </button>
                   </>
@@ -2954,8 +2989,10 @@ export default function AdminPage() {
                 <button
                   type="button"
                   onClick={handleShippingSubmit}
-                  className="flex-1 py-3 rounded-2xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700"
+                  disabled={updatingOrderId === shippingOrderId}
+                  className="flex-1 py-3 rounded-2xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
+                  {updatingOrderId === shippingOrderId && <Loader2 size={18} className="animate-spin" />}
                   Xác nhận giao hàng
                 </button>
               </div>
