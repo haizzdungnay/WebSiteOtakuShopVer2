@@ -219,7 +219,7 @@ const initialProductForm: ProductFormState = {
 export default function AdminPage() {
   const { user } = useAuth();
   const csrfToken = Cookies.get('csrf-token') || '';
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === 'admin' || user?.role === 'staff';
 
   // States
   const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'reviews' | 'articles' | 'coupons'>('dashboard');
@@ -1126,7 +1126,7 @@ export default function AdminPage() {
   };
 
   // Auth check
-  if (!user || user.role !== 'admin') {
+  if (!user || (user.role !== 'admin' && user.role !== 'staff')) {
     return (
       <section className="min-h-screen bg-slate-50 flex items-center justify-center px-6 py-16">
         <div className="max-w-xl w-full text-center bg-white shadow-lg rounded-3xl p-10 border border-slate-100">
