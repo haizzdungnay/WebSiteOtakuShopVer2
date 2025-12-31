@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
         username: user.fullName, // for backward compatibility
         fullName: user.fullName,
         phone: user.phone,
-        role: user.role === 'ADMIN' ? 'admin' : 'user',
+        role: user.role === 'ADMIN' ? 'admin' : user.role === 'STAFF' ? 'staff' : 'user',
         avatar: user.avatar,
         gender: user.gender,
         dateOfBirth: user.dateOfBirth,

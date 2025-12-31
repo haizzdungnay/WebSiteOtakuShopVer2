@@ -196,6 +196,16 @@ export default function Header() {
                             <span className="font-medium">Khu vực quản trị</span>
                           </Link>
                         )}
+                        {(user.role === 'admin' || user.role === 'staff') && (
+                          <Link
+                            href="/admin"
+                            className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors text-gray-700"
+                            onClick={() => setShowUserDropdown(false)}
+                          >
+                            <ShieldCheck size={18} />
+                            <span className="font-medium">Trang quản trị</span>
+                          </Link>
+                        )}
                         <Link
                           href="/profile"
                           className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 rounded-lg transition-colors text-gray-700"

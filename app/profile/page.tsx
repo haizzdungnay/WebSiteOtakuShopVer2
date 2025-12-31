@@ -497,7 +497,7 @@ export default function ProfilePage() {
                         <div>
                           <p className="text-sm text-gray-500">Loại tài khoản</p>
                           <p className="font-semibold text-gray-900">
-                            {user.role === 'admin' ? 'Quản trị viên' : 'Khách hàng'}
+                            {user.role === 'admin' ? 'Quản trị viên' : user.role === 'staff' ? 'Nhân viên' : 'Khách hàng'}
                           </p>
                         </div>
                       </div>
