@@ -5,7 +5,7 @@ import { z } from 'zod'
 
 // Schema validate update user
 const updateUserSchema = z.object({
-  role: z.enum(['CUSTOMER', 'ADMIN'], {
+  role: z.enum(['CUSTOMER', 'STAFF', 'ADMIN'], {
     message: 'Role không hợp lệ'
   }).optional(),
 
@@ -236,6 +236,30 @@ export async function PUT(
     if (validatedData.role && admin.userId === id) {
       return NextResponse.json(
         { success: false, error: 'Không thể thay đổi quyền của chính mình' },
+        { status: 400 }
+      )
+    }
+
+    // 5.1. Only ADMIN (not STAFF) can change roles
+    if (validatedData.role && !admin.isOriginalAdmin) {
+      return NextResponse.json(
+        { success: false, error: 'Chỉ Admin gốc mới có quyền cấp/thu hồi quyền cho người dùng' },
+        { status: 403 }
+      )
+    }
+
+    // 5.2. Cannot promote to ADMIN (only to STAFF)
+    if (validatedData.role === 'ADMIN') {
+      return NextResponse.json(
+        { success: false, error: 'Không thể cấp quyền Admin gốc cho người dùng. Chỉ có thể cấp quyền Nhân viên (STAFF).' },
+        { status: 400 }
+      )
+    }
+
+    // 5.3. Cannot demote another ADMIN
+    if (validatedData.role && user.role === 'ADMIN') {
+      return NextResponse.json(
+        { success: false, error: 'Không thể thay đổi quyền của Admin gốc khác' },
         { status: 400 }
       )
     }

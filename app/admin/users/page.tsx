@@ -27,7 +27,11 @@ import {
   X,
   RefreshCw,
   AlertCircle,
-  Trash2
+  Trash2,
+  UserPlus,
+  UserMinus,
+  ShieldCheck,
+  ShieldOff
 } from 'lucide-react';
 
 interface User {
@@ -123,9 +127,13 @@ export default function AdminUsersPage() {
   // Delete user state
   const [deleting, setDeleting] = useState<string | null>(null);
 
-  // Check admin access
+  // Role change state
+  const [canPromoteUsers, setCanPromoteUsers] = useState(false);
+  const [changingRole, setChangingRole] = useState<string | null>(null);
+
+  // Check admin access (allow both ADMIN and STAFF)
   useEffect(() => {
-    if (!authLoading && (!user || user.role !== 'admin')) {
+    if (!authLoading && (!user || (user.role !== 'admin' && user.role !== 'staff'))) {
       router.push('/login');
     }
   }, [user, authLoading, router]);
@@ -157,6 +165,10 @@ export default function AdminUsersPage() {
           setTotal(pagination.total || 0);
           setTotalPages(pagination.totalPages || 1);
         }
+        // Lấy thông tin quyền cấp quyền cho admin hiện tại
+        if (data.data?.currentAdmin) {
+          setCanPromoteUsers(data.data.currentAdmin.canPromoteUsers || false);
+        }
       } else {
         setError('Không thể tải danh sách người dùng');
       }
@@ -169,7 +181,7 @@ export default function AdminUsersPage() {
   };
 
   useEffect(() => {
-    if (user?.role === 'admin') {
+    if (user?.role === 'admin' || user?.role === 'staff') {
       fetchUsers();
     }
   }, [page, roleFilter, verifiedFilter, user]);
@@ -274,6 +286,45 @@ export default function AdminUsersPage() {
     }
   };
 
+  // Change user role (promote to STAFF or demote to CUSTOMER)
+  const changeUserRole = async (userId: string, userName: string, newRole: 'STAFF' | 'CUSTOMER') => {
+    const action = newRole === 'STAFF' ? 'cấp quyền Nhân viên cho' : 'thu hồi quyền Nhân viên của';
+
+    if (!confirm(`Bạn có chắc chắn muốn ${action} "${userName}"?`)) {
+      return;
+    }
+
+    try {
+      setChangingRole(userId);
+      const response = await fetch(`/api/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+        },
+        credentials: 'include',
+        body: JSON.stringify({ role: newRole }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showToast('success', data.message || `Đã ${action} thành công`);
+        fetchUsers();
+        if (showUserModal && selectedUser?.user?.id === userId) {
+          fetchUserDetail(userId);
+        }
+      } else {
+        showToast('error', data.error || `Không thể ${action}`);
+      }
+    } catch (err) {
+      console.error('Error changing user role:', err);
+      showToast('error', 'Lỗi khi thay đổi quyền');
+    } finally {
+      setChangingRole(null);
+    }
+  };
+
   const showToast = (type: 'success' | 'error', message: string) => {
     setToast({ type, message });
     setTimeout(() => setToast(null), 3000);
@@ -337,8 +388,8 @@ export default function AdminUsersPage() {
           </Link>
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">Quản lý tài khoản khách hàng</h1>
-              <p className="text-slate-600 mt-1">Xem và quản lý thông tin tài khoản người dùng</p>
+              <h1 className="text-3xl font-bold text-slate-900">Quản lý tài khoản</h1>
+              <p className="text-slate-600 mt-1">Xem và quản lý tất cả tài khoản (Khách hàng, Nhân viên, Admin)</p>
             </div>
             <div className="flex items-center gap-4">
               <button
@@ -383,6 +434,7 @@ export default function AdminUsersPage() {
             >
               <option value="">Tất cả vai trò</option>
               <option value="CUSTOMER">Khách hàng</option>
+              <option value="STAFF">Nhân viên</option>
               <option value="ADMIN">Quản trị viên</option>
             </select>
 
@@ -471,7 +523,13 @@ export default function AdminUsersPage() {
                           {u.role === 'ADMIN' && (
                             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
                               <Shield size={12} />
-                              Admin
+                              Admin gốc
+                            </span>
+                          )}
+                          {u.role === 'STAFF' && (
+                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                              <ShieldCheck size={12} />
+                              Nhân viên
                             </span>
                           )}
                         </div>
@@ -503,6 +561,38 @@ export default function AdminUsersPage() {
                             >
                               <UserCheck size={18} />
                             </button>
+                          )}
+                          {/* Promote/Demote button - only show for original admin */}
+                          {canPromoteUsers && u.id !== user?.id && u.role !== 'ADMIN' && (
+                            <>
+                              {u.role === 'CUSTOMER' ? (
+                                <button
+                                  onClick={() => changeUserRole(u.id, u.fullName, 'STAFF')}
+                                  disabled={changingRole === u.id}
+                                  className="p-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors disabled:opacity-50"
+                                  title="Cấp quyền Nhân viên"
+                                >
+                                  {changingRole === u.id ? (
+                                    <Loader2 size={18} className="animate-spin" />
+                                  ) : (
+                                    <ShieldCheck size={18} />
+                                  )}
+                                </button>
+                              ) : u.role === 'STAFF' && (
+                                <button
+                                  onClick={() => changeUserRole(u.id, u.fullName, 'CUSTOMER')}
+                                  disabled={changingRole === u.id}
+                                  className="p-2 text-orange-600 hover:text-orange-700 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-50"
+                                  title="Thu hồi quyền Nhân viên"
+                                >
+                                  {changingRole === u.id ? (
+                                    <Loader2 size={18} className="animate-spin" />
+                                  ) : (
+                                    <ShieldOff size={18} />
+                                  )}
+                                </button>
+                              )}
+                            </>
                           )}
                           {/* Delete button - only show if not current admin */}
                           {u.id !== user?.id && (
@@ -606,7 +696,13 @@ export default function AdminUsersPage() {
                     {selectedUser.user.role === 'ADMIN' && (
                       <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
                         <Shield size={12} />
-                        Admin
+                        Admin gốc
+                      </span>
+                    )}
+                    {selectedUser.user.role === 'STAFF' && (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                        <ShieldCheck size={12} />
+                        Nhân viên
                       </span>
                     )}
                   </div>

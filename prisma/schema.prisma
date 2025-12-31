@@ -148,7 +148,8 @@ enum Gender {
 
 enum Role {
   CUSTOMER
-  ADMIN
+  STAFF    // Admin nhân viên - có quyền admin nhưng không thể cấp quyền cho người khác
+  ADMIN    // Admin gốc - có toàn quyền kể cả cấp quyền
 }
 
 // ==========================================
