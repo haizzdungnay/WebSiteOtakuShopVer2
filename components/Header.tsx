@@ -273,36 +273,37 @@ export default function Header() {
       <nav className="bg-black text-white relative">
         <div className="container-custom">
           <div className="flex items-center">
-            {/* Menu Button - hiện trên mọi màn hình */}
-            <div className="w-full lg:w-[280px] flex-shrink-0">
+            {/* Menu Button */}
+            <div className="flex-shrink-0">
               <button
                 onClick={() => setShowMenuSidebar(true)}
-                className="flex w-full items-center justify-center gap-2 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
+                className="flex items-center justify-center gap-2 px-3 lg:px-4 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
+                title="Menu"
               >
                 <Grid3x3 size={18} />
-                <span>MENU</span>
+                <span className="hidden lg:inline">MENU</span>
               </button>
             </div>
 
-            {/* Navigation Items - ẩn trên mobile */}
-            <div className="hidden lg:flex flex-1 pl-4">
-              <div className="flex items-center justify-between w-full">
-                <NavLink href="/in-stock" icon={<Package size={18} />}>
+            {/* Navigation Items - hiện trên mọi màn hình, mobile chỉ icon */}
+            <div className="flex flex-1">
+              <div className="flex items-center justify-around lg:justify-between w-full">
+                <NavLink href="/in-stock" icon={<Package size={18} />} title="Hàng sẵn có">
                   Hàng sẵn có
                 </NavLink>
-                <NavLink href="/giao-hang" icon={<Truck size={18} />}>
+                <NavLink href="/giao-hang" icon={<Truck size={18} />} title="Giao hàng & bảo hành">
                   Giao hàng & bảo hành
                 </NavLink>
-                <NavLink href="/tra-cuu" icon={<Search size={18} />}>
+                <NavLink href="/tra-cuu" icon={<Search size={18} />} title="Tra cứu đơn đặt trước">
                   Tra cứu đơn đặt trước
                 </NavLink>
-                <NavLink href="/tinh-gia" icon={<Calculator size={18} />}>
+                <NavLink href="/tinh-gia" icon={<Calculator size={18} />} title="Tính giá gom hàng">
                   Tính giá gom hàng
                 </NavLink>
-                <NavLink href="/faq" icon={<HelpCircle size={18} />}>
+                <NavLink href="/faq" icon={<HelpCircle size={18} />} title="FAQ">
                   FAQ
                 </NavLink>
-                <NavLink href="/tin-tuc" icon={<Newspaper size={18} />}>
+                <NavLink href="/tin-tuc" icon={<Newspaper size={18} />} title="Tin tức">
                   Tin tức
                 </NavLink>
               </div>
@@ -321,18 +322,21 @@ function NavLink({
   href,
   icon,
   children,
+  title,
 }: {
   href: string;
   icon: React.ReactNode;
   children: React.ReactNode;
+  title?: string;
 }) {
   return (
     <Link
       href={href}
-      className="flex items-center gap-1.5 px-2 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap text-sm"
+      className="flex items-center gap-1.5 px-2 lg:px-3 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap text-sm"
+      title={title}
     >
       {icon}
-      <span>{children}</span>
+      <span className="hidden lg:inline">{children}</span>
     </Link>
   );
 }
