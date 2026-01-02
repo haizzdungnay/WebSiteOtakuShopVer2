@@ -28,7 +28,7 @@ export async function middleware(request: NextRequest) {
         url.pathname = '/'
         return NextResponse.redirect(url)
       }
-    } catch (error) {
+    } catch (_error) {
       // Invalid token, redirect to login
       const url = request.nextUrl.clone()
       url.pathname = '/login'

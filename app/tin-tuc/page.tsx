@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Calendar, ChevronRight, ChevronLeft, Tag, Loader2 } from 'lucide-react';
+import { Calendar, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 
 interface Announcement {
   id: string;

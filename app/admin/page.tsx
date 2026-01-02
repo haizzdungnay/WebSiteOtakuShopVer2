@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, FormEvent, Suspense } from 'react';
+import { useState, useEffect, useMemo, FormEvent } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import Cookies from 'js-cookie';
 import {
@@ -10,7 +10,6 @@ import {
   FilePlus,
   FileText,
   FolderPlus,
-  Image,
   ListChecks,
   Loader2,
   MessageSquare,
@@ -20,7 +19,6 @@ import {
   Trash2,
   Users,
   X,
-  Newspaper,
   Ticket,
   Plus,
   Percent,
@@ -250,9 +248,6 @@ export default function AdminPage() {
   // Loading states for actions
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
   const [updatingReviewId, setUpdatingReviewId] = useState<string | null>(null);
-  const [savingProduct, setSavingProduct] = useState(false);
-  const [savingArticle, setSavingArticle] = useState(false);
-  const [savingCoupon, setSavingCoupon] = useState(false);
 
   // Toast notifications
   const [toast, setToast] = useState<{ type: 'success' | 'error' | 'info'; message: string } | null>(null);
@@ -816,28 +811,6 @@ export default function AdminPage() {
     }
   };
 
-  // Handle Toggle Article Status
-  const handleToggleArticleStatus = async (article: Announcement) => {
-    try {
-      const response = await fetch(`/api/admin/announcements/${article.id}`, {
-        method: 'PATCH',
-        headers: getHeaders(),
-        body: JSON.stringify({ isActive: !article.isActive }),
-      });
-
-      if (response.ok) {
-        await fetchAnnouncements();
-        showToast(`Đã ${!article.isActive ? 'xuất bản' : 'ẩn'} tin tức`, 'success');
-      } else {
-        const data = await response.json();
-        showToast(data.error || 'Có lỗi xảy ra', 'error');
-      }
-    } catch (err) {
-      console.error('Error toggling article status:', err);
-      showToast('Có lỗi xảy ra khi cập nhật trạng thái', 'error');
-    }
-  };
-
   // Handle Delete Article
   const handleDeleteArticle = async (id: string) => {
     if (!confirm('Bạn có chắc muốn xóa tin tức này?')) return;
@@ -1053,7 +1026,7 @@ export default function AdminPage() {
 
       await fetchCoupons();
       showToast(`Đã ${coupon.isActive ? 'vô hiệu hóa' : 'kích hoạt'} mã giảm giá`, 'success');
-    } catch (err) {
+    } catch (_err) {
       showToast('Lỗi khi cập nhật trạng thái', 'error');
     }
   };

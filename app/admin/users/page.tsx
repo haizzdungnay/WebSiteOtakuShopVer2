@@ -6,9 +6,7 @@ import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import {
-  Users,
   Search,
-  Filter,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -28,8 +26,6 @@ import {
   RefreshCw,
   AlertCircle,
   Trash2,
-  UserPlus,
-  UserMinus,
   ShieldCheck,
   ShieldOff
 } from 'lucide-react';
@@ -118,7 +114,6 @@ export default function AdminUsersPage() {
   // User detail modal
   const [showUserModal, setShowUserModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserDetail | null>(null);
-  const [loadingUser, setLoadingUser] = useState(false);
   const [verifying, setVerifying] = useState(false);
 
   // Toast

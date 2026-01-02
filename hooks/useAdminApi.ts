@@ -88,6 +88,7 @@ export interface CreateProductData {
   featured?: boolean
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface UpdateProductData extends Partial<CreateProductData> {}
 
 export function useAdminProducts() {

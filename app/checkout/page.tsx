@@ -158,7 +158,6 @@ function CheckoutContent() {
 
   const [promoLoading, setPromoLoading] = useState(false);
   const [promoError, setPromoError] = useState<string | null>(null);
-  const [appliedCouponId, setAppliedCouponId] = useState<string | null>(null);
 
   const handleApplyPromo = async () => {
     if (!promoCode.trim()) {

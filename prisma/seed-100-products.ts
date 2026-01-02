@@ -2,16 +2,10 @@ import { PrismaClient } from '../app/generated/prisma'
 
 const prisma = new PrismaClient()
 
-// Ảnh mẫu cho figures/anime products
-const figureImages = [
-    'https://images.unsplash.com/photo-1608889825103-eb5ed706fc64?w=500',
-    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500',
-    'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?w=500',
-    'https://images.unsplash.com/photo-1594787318286-3d835c1d207f?w=500',
-    'https://images.unsplash.com/photo-1560393464-5c69a73c5770?w=500',
-    'https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=500',
-    'https://images.unsplash.com/photo-1531525645387-7f14be1bdbbd?w=500',
-]
+// Unused arrays are commented to avoid lint warnings
+// const figureImages = [...]
+// const mangaSets = [...] 
+// const gamingProducts = [...]
 
 // Anime series để tạo sản phẩm
 const animeSeries = [
@@ -213,7 +207,7 @@ async function main() {
     await prisma.product.deleteMany()
     console.log('✅ Đã xóa tất cả sản phẩm cũ\n')
 
-    let productCount = 0
+    const productCount = 0
     const products: Array<{
         name: string;
         slug: string;

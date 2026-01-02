@@ -1,5 +1,5 @@
 import { Metadata } from 'next';
-import { Shield, CheckCircle, Clock, Phone } from 'lucide-react';
+import { Shield, Clock, Phone } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Chính sách bảo hành | DN Figure',

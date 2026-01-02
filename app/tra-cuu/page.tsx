@@ -54,7 +54,6 @@ function OrderTrackingContent() {
   
   const [activeTab, setActiveTab] = useState('profile');
   const [searchQuery, setSearchQuery] = useState(orderNumberParam || '');
-  const [, setStatusFilter] = useState('all');
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);

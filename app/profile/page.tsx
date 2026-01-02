@@ -92,7 +92,7 @@ export default function ProfilePage() {
       } else {
         setVerifyError(data.error || 'Không thể gửi mã OTP');
       }
-    } catch (err) {
+    } catch (_err) {
       setVerifyError('Không thể kết nối đến máy chủ');
     } finally {
       setSendingOtp(false);
@@ -126,7 +126,7 @@ export default function ProfilePage() {
       } else {
         setVerifyError(data.error || 'Mã OTP không chính xác');
       }
-    } catch (err) {
+    } catch (_err) {
       setVerifyError('Không thể kết nối đến máy chủ');
     } finally {
       setVerifyingOtp(false);
@@ -173,7 +173,7 @@ export default function ProfilePage() {
       } else {
         setError(data.error || 'Cập nhật thất bại');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Không thể kết nối đến máy chủ');
     } finally {
       setSavingAvatar(false);
@@ -204,7 +204,7 @@ export default function ProfilePage() {
       } else {
         setError(data.error || 'Cập nhật thất bại');
       }
-    } catch (err) {
+    } catch (_err) {
       setError('Không thể kết nối đến máy chủ');
     } finally {
       setSaving(false);

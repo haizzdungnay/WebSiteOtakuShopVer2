@@ -36,7 +36,7 @@ export default function ArticleEditor({
   };
 
   const renderMarkdown = (markdown: string) => {
-    let html = markdown
+    const html = markdown
       .replace(/^### (.*?)$/gm, '<h3 style="font-size: 1.25rem; font-weight: bold; margin: 1rem 0; color: #1f2937;">$1</h3>')
       .replace(/^## (.*?)$/gm, '<h2 style="font-size: 1.5rem; font-weight: bold; margin: 1rem 0; color: #1f2937;">$1</h2>')
       .replace(/^# (.*?)$/gm, '<h1 style="font-size: 1.875rem; font-weight: bold; margin: 1rem 0; color: #1f2937;">$1</h1>')
