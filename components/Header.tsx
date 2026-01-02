@@ -101,13 +101,16 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50" suppressHydrationWarning>
-      {/* Top Pink Header - slides up completely when hidden */}
+    <header 
+      className={`sticky top-0 z-50 transition-transform duration-300 ease-out ${
+        hideHeader ? '-translate-y-[60px] lg:-translate-y-[72px]' : 'translate-y-0'
+      }`} 
+      suppressHydrationWarning
+    >
+      {/* Top Pink Header */}
       <div 
         ref={headerRef}
-        className={`bg-primary py-2 lg:py-3 shadow-md transition-transform duration-300 ease-out ${
-          hideHeader ? '-translate-y-full' : 'translate-y-0'
-        }`} 
+        className="bg-primary py-2 lg:py-3 shadow-md" 
         suppressHydrationWarning
       >
         <div className="container-custom" suppressHydrationWarning>
