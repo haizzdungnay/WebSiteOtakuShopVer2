@@ -184,7 +184,6 @@ export default function AdminUsersPage() {
   // Fetch user detail
   const fetchUserDetail = async (userId: string) => {
     try {
-      setLoadingUser(true);
       const response = await fetch(`/api/admin/users/${userId}`, {
         headers: {
           'Content-Type': 'application/json',
@@ -201,8 +200,6 @@ export default function AdminUsersPage() {
     } catch (err) {
       console.error('Error fetching user detail:', err);
       showToast('error', 'Không thể tải thông tin người dùng');
-    } finally {
-      setLoadingUser(false);
     }
   };
 

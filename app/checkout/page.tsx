@@ -186,7 +186,6 @@ function CheckoutContent() {
       if (data.success) {
         setDiscount(data.data.calculation.discountAmount);
         setPromoApplied(true);
-        setAppliedCouponId(data.data.coupon.id);
         setPromoError(null);
       } else {
         setPromoError(data.error || 'Mã khuyến mãi không hợp lệ');
