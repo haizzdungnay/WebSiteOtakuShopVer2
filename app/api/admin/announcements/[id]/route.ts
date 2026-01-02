@@ -16,7 +16,13 @@ const updateAnnouncementSchema = z.object({
     .max(5000, 'Nội dung quá dài')
     .optional()
     .nullable(),
+  imageUrl: z.string()
+    .url('URL hình ảnh không hợp lệ')
+    .optional()
+    .nullable(),
   isActive: z.boolean()
+    .optional(),
+  isHot: z.boolean()
     .optional()
 })
 
@@ -97,7 +103,9 @@ export async function PATCH(
         ...(validatedData.title && { title: validatedData.title }),
         ...(validatedData.summary && { summary: validatedData.summary }),
         ...(validatedData.content !== undefined && { content: validatedData.content }),
-        ...(validatedData.isActive !== undefined && { isActive: validatedData.isActive })
+        ...(validatedData.imageUrl !== undefined && { imageUrl: validatedData.imageUrl }),
+        ...(validatedData.isActive !== undefined && { isActive: validatedData.isActive }),
+        ...(validatedData.isHot !== undefined && { isHot: validatedData.isHot })
       }
     })
 

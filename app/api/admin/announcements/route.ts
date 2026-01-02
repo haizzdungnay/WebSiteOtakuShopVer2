@@ -14,9 +14,16 @@ const createAnnouncementSchema = z.object({
     .max(5000, 'Nội dung quá dài')
     .optional()
     .nullable(),
+  imageUrl: z.string()
+    .url('URL hình ảnh không hợp lệ')
+    .optional()
+    .nullable(),
   isActive: z.boolean()
     .optional()
-    .default(true)
+    .default(true),
+  isHot: z.boolean()
+    .optional()
+    .default(false)
 })
 
 // GET /api/admin/announcements - Danh sách thông báo
@@ -95,7 +102,9 @@ export async function POST(request: NextRequest) {
         title: validatedData.title,
         summary: validatedData.summary,
         content: validatedData.content,
-        isActive: validatedData.isActive
+        imageUrl: validatedData.imageUrl,
+        isActive: validatedData.isActive,
+        isHot: validatedData.isHot
       }
     })
 
