@@ -139,15 +139,6 @@ export default function Header() {
                 </div>
               </Link>
 
-              {/* Tin tức */}
-              <Link
-                href="/tin-tuc"
-                className="hidden lg:flex items-center gap-2 text-gray-800 hover:text-accent-red transition-colors"
-              >
-                <Newspaper size={20} />
-                <div className="text-sm font-semibold">Tin tức</div>
-              </Link>
-
               {/* Đăng nhập / Đăng ký */}
               {user ? (
                 <div className="relative" ref={dropdownRef}>
