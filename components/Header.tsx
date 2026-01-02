@@ -284,10 +284,9 @@ export default function Header() {
               </button>
             </div>
 
-            {/* CỘT GIỮA: Navigation Items (thêm px-6 để khớp khoảng cách `gap-6` của trang chủ) */}
-            <div className="flex-1 px-0 overflow-hidden">
-              {/* Giảm khoảng cách theo responsive để tránh tràn ra ngoài */}
-              <div className="flex items-center justify-center gap-2 md:gap-4 lg:gap-6 xl:gap-8">
+            {/* CỘT GIỮA: Navigation Items */}
+            <div className="flex-1 px-0">
+              <div className="flex items-center justify-center gap-4 lg:gap-6 xl:gap-8">
                 <NavLink href="/in-stock" icon={<Package size={18} />}>
                   Hàng sẵn có
                 </NavLink>
@@ -309,7 +308,7 @@ export default function Header() {
               </div>
             </div>
 
-            {/* CỘT PHẢI: spacer để cân đối với cột MENU (280px) */}
+            {/* CỘT PHẢI: spacer để cân đối với cột MENU */}
             <div className="w-[280px] flex-shrink-0" />
           </div>
         </div>
@@ -333,7 +332,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className="flex items-center gap-2 px-4 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap text-sm"
+      className="flex items-center gap-1.5 px-2 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap text-sm"
     >
       {icon}
       <span>{children}</span>
