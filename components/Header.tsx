@@ -321,7 +321,7 @@ export default function Header() {
         <div className="container-custom">
           <div className="flex items-center">
             {/* Menu Button */}
-            <div className="flex-shrink-0 mr-2 lg:mr-4">
+            <div className="flex-shrink-0 mr-12">
               <button
                 onClick={() => setShowMenuSidebar(true)}
                 className="flex items-center justify-center gap-2 px-3 lg:px-4 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
