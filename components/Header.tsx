@@ -31,26 +31,39 @@ export default function Header() {
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const [hideHeader, setHideHeader] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const headerRef = useRef<HTMLDivElement>(null);
   const { user, logout } = useAuth();
   const { getTotalItems } = useCart();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const cartDropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Handle scroll to hide/show pink header
+  // Handle scroll to hide/show pink header with debounce
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolling down & past threshold - hide header
-        setHideHeader(true);
-      } else if (currentScrollY < lastScrollY) {
-        // Scrolling up - show header
-        setHideHeader(false);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          const scrollDiff = currentScrollY - lastScrollY;
+          
+          // Only trigger if scroll difference is significant (> 5px) to avoid jitter
+          if (Math.abs(scrollDiff) > 5) {
+            if (scrollDiff > 0 && currentScrollY > 80) {
+              // Scrolling down & past threshold - hide header
+              setHideHeader(true);
+            } else if (scrollDiff < 0) {
+              // Scrolling up - show header
+              setHideHeader(false);
+            }
+            setLastScrollY(currentScrollY);
+          }
+          
+          ticking = false;
+        });
+        ticking = true;
       }
-      
-      setLastScrollY(currentScrollY);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -88,11 +101,12 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 shadow-md" suppressHydrationWarning>
-      {/* Top Pink Header - hides on scroll down, shows on scroll up */}
+    <header className="sticky top-0 z-50" suppressHydrationWarning>
+      {/* Top Pink Header - slides up completely when hidden */}
       <div 
-        className={`bg-primary py-2 lg:py-3 transition-all duration-300 overflow-hidden ${
-          hideHeader ? 'max-h-0 py-0' : 'max-h-40'
+        ref={headerRef}
+        className={`bg-primary py-2 lg:py-3 shadow-md transition-transform duration-300 ease-out ${
+          hideHeader ? '-translate-y-full' : 'translate-y-0'
         }`} 
         suppressHydrationWarning
       >
