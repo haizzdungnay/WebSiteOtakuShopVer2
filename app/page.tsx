@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import ProductCard from '@/components/ProductCard';
+import NewsCarousel from '@/components/NewsCarousel';
 import { ChevronRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -106,69 +107,9 @@ export default function Home() {
               />
             </div>
 
-            {/* JOIN US – banner hồng, cao bằng Sidebar + min-height để luôn đẹp */}
+            {/* News Carousel Banner - Tin tức hot */}
             <div className="flex-1">
-              <div className="relative w-full min-h-[420px] overflow-hidden rounded-[32px] bg-[#ffc1c9] px-16 py-12 flex items-center justify-between gap-10 shadow-[0_18px_40px_rgba(0,0,0,0.08)]">
-                {/* Decor */}
-                <div className="pointer-events-none">
-                  {/* chấm tròn góc trên trái */}
-                  <div className="absolute left-12 top-10 grid grid-cols-4 gap-2 opacity-40">
-                    {Array.from({ length: 16 }).map((_, i) => (
-                      <span
-                        key={i}
-                        className="w-2 h-2 border border-white rounded-full"
-                      />
-                    ))}
-                  </div>
-                  {/* hình tròn đỏ góc dưới trái */}
-                  <div className="absolute -left-32 bottom-[-140px] w-[340px] h-[340px] bg-[#ff4b4b] rounded-full opacity-90" />
-                  {/* dải đỏ cong bên phải */}
-                  <div className="absolute -right-24 -top-10 w-[220px] h-[220px] rounded-full border-[24px] border-[#ff7070] border-t-transparent border-l-transparent" />
-                </div>
-
-                {/* Nội dung bên trái */}
-                <div className="relative z-10 flex-1">
-                  <h2 className="text-[56px] leading-tight font-extrabold tracking-[0.25em] text-[#3b3f4a] mb-6 uppercase">
-                    JOIN US
-                  </h2>
-
-                  <p className="text-lg text-[#3b3f4a] mb-4">
-                    Cộng đồng yêu thích Figure &amp; Anime
-                  </p>
-
-                  <ul className="text-base text-[#3b3f4a] space-y-2 mb-8">
-                    <li>✨ Sản phẩm chính hãng 100%</li>
-                    <li>🎁 Ưu đãi độc quyền cho thành viên</li>
-                    <li>🚀 Cập nhật sản phẩm mới hàng tuần</li>
-                  </ul>
-
-                  <div className="flex flex-wrap gap-4">
-                    <Link
-                      href="/products"
-                      className="bg-[#ff4b4b] text-white px-8 py-3 rounded-2xl text-sm font-semibold shadow-md hover:bg-[#ff3333] transition-transform hover:scale-[1.02]"
-                    >
-                      Khám phá ngay
-                    </Link>
-                    <Link
-                      href="/register"
-                      className="bg-white text-[#3b3f4a] px-8 py-3 rounded-2xl text-sm font-semibold shadow-md hover:bg-gray-50 transition-transform hover:scale-[1.02]"
-                    >
-                      Đăng ký thành viên
-                    </Link>
-                  </div>
-                </div>
-
-                {/* QR bên phải */}
-                <div className="relative z-10 flex items-center justify-center">
-                  <div className="w-[260px] h-[260px] bg-white rounded-[32px] shadow-[0_18px_40px_rgba(0,0,0,0.15)] flex items-center justify-center">
-                    <div className="w-[210px] h-[210px] bg-[#f4f5f7] rounded-[24px] border border-[#e0e2e7] flex items-center justify-center">
-                      <span className="text-3xl font-semibold text-[#a0a4b0]">
-                        QR
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <NewsCarousel />
             </div>
           </div>
 

@@ -137,7 +137,9 @@ interface Announcement {
   title: string;
   summary: string;
   content?: string;
+  imageUrl?: string | null;
   isActive: boolean;
+  isHot: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -281,7 +283,7 @@ export default function AdminPage() {
   // Articles states
   const [showArticleModal, setShowArticleModal] = useState(false);
   const [editingArticle, setEditingArticle] = useState<Announcement | null>(null);
-  const [articleForm, setArticleForm] = useState({ title: '', summary: '', content: '', isActive: true });
+  const [articleForm, setArticleForm] = useState({ title: '', summary: '', content: '', imageUrl: '', isActive: true, isHot: false });
   const [articlePage, setArticlePage] = useState(1);
   const [articleTotalPages, setArticleTotalPages] = useState(1);
   const [articleTotal, setArticleTotal] = useState(0);
@@ -862,11 +864,13 @@ export default function AdminPage() {
   // Handle Edit Article
   const handleEditArticle = async (article: Announcement) => {
     setEditingArticle(article);
-    setArticleForm({ 
-      title: article.title, 
-      summary: article.summary, 
-      content: article.content || '', 
-      isActive: article.isActive 
+    setArticleForm({
+      title: article.title,
+      summary: article.summary,
+      content: article.content || '',
+      imageUrl: article.imageUrl || '',
+      isActive: article.isActive,
+      isHot: article.isHot
     });
     setShowArticleModal(true);
   };
@@ -2136,7 +2140,7 @@ export default function AdminPage() {
                 <button
                   onClick={() => {
                     setEditingArticle(null);
-                    setArticleForm({ title: '', summary: '', content: '', isActive: true });
+                    setArticleForm({ title: '', summary: '', content: '', imageUrl: '', isActive: true, isHot: false });
                     setShowArticleModal(true);
                   }}
                   className="flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 text-white font-semibold hover:from-indigo-700 hover:to-indigo-800 transition-all shadow-lg"
@@ -2192,14 +2196,21 @@ export default function AdminPage() {
                             })}
                           </td>
                           <td className="px-6 py-4 text-center">
-                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
-                              article.isActive
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-slate-100 text-slate-700 border border-slate-200'
-                            }`}>
-                              <span className={`w-2 h-2 rounded-full ${article.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
-                              {article.isActive ? 'Công khai' : 'Ẩn'}
-                            </span>
+                            <div className="flex flex-col items-center gap-1">
+                              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold ${
+                                article.isActive
+                                  ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                                  : 'bg-slate-100 text-slate-700 border border-slate-200'
+                              }`}>
+                                <span className={`w-2 h-2 rounded-full ${article.isActive ? 'bg-emerald-500' : 'bg-slate-400'}`}></span>
+                                {article.isActive ? 'Công khai' : 'Ẩn'}
+                              </span>
+                              {article.isHot && (
+                                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200">
+                                  🔥 Hot
+                                </span>
+                              )}
+                            </div>
                           </td>
                           <td className="px-6 py-4 text-center">
                             <div className="flex items-center justify-center gap-2">
@@ -3119,7 +3130,7 @@ export default function AdminPage() {
                   onClick={() => {
                     setShowArticleModal(false);
                     setEditingArticle(null);
-                    setArticleForm({ title: '', summary: '', content: '', isActive: true });
+                    setArticleForm({ title: '', summary: '', content: '', imageUrl: '', isActive: true, isHot: false });
                   }}
                   className="p-2 rounded-full hover:bg-slate-100 transition-colors"
                   title="Đóng"
@@ -3188,24 +3199,74 @@ export default function AdminPage() {
                   <p className="text-xs text-slate-500 mt-1">Hỗ trợ: định dạng chữ, danh sách, liên kết, hình ảnh...</p>
                 </div>
 
-                {/* Trạng thái */}
-                <div className="bg-slate-50 p-4 rounded-xl">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <div className="relative">
-                      <input
-                        type="checkbox"
-                        checked={articleForm.isActive}
-                        onChange={(e) => setArticleForm({ ...articleForm, isActive: e.target.checked })}
-                        className="w-5 h-5 rounded border-slate-300 cursor-pointer accent-indigo-600"
+                {/* Hình minh họa */}
+                <div>
+                  <label className="block text-sm font-semibold text-slate-900 mb-2">
+                    Hình minh họa (URL)
+                  </label>
+                  <input
+                    type="url"
+                    value={articleForm.imageUrl}
+                    onChange={(e) => setArticleForm({ ...articleForm, imageUrl: e.target.value })}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">URL hình ảnh sẽ hiển thị trên banner tin tức hot</p>
+                  {articleForm.imageUrl && (
+                    <div className="mt-3 relative w-40 h-24 rounded-lg overflow-hidden border border-slate-200">
+                      <img
+                        src={articleForm.imageUrl}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
                       />
                     </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">Công khai bài viết</p>
-                      <p className="text-xs text-slate-600">
-                        {articleForm.isActive ? '✅ Bài viết sẽ hiển thị trên trang tin tức' : '🔒 Bài viết ẩn, chỉ admin thấy'}
-                      </p>
-                    </div>
-                  </label>
+                  )}
+                </div>
+
+                {/* Trạng thái & Tin hot */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Trạng thái */}
+                  <div className="bg-slate-50 p-4 rounded-xl">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={articleForm.isActive}
+                          onChange={(e) => setArticleForm({ ...articleForm, isActive: e.target.checked })}
+                          className="w-5 h-5 rounded border-slate-300 cursor-pointer accent-indigo-600"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">Công khai bài viết</p>
+                        <p className="text-xs text-slate-600">
+                          {articleForm.isActive ? '✅ Hiển thị trên trang tin tức' : '🔒 Ẩn, chỉ admin thấy'}
+                        </p>
+                      </div>
+                    </label>
+                  </div>
+
+                  {/* Tin hot */}
+                  <div className="bg-rose-50 p-4 rounded-xl">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <div className="relative">
+                        <input
+                          type="checkbox"
+                          checked={articleForm.isHot}
+                          onChange={(e) => setArticleForm({ ...articleForm, isHot: e.target.checked })}
+                          className="w-5 h-5 rounded border-rose-300 cursor-pointer accent-rose-600"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-sm font-semibold text-slate-900">Tin tức hot</p>
+                        <p className="text-xs text-slate-600">
+                          {articleForm.isHot ? '🔥 Hiển thị trên banner trang chủ' : '📰 Tin tức thường'}
+                        </p>
+                      </div>
+                    </label>
+                  </div>
                 </div>
 
                 {/* Buttons */}
@@ -3215,7 +3276,7 @@ export default function AdminPage() {
                     onClick={() => {
                       setShowArticleModal(false);
                       setEditingArticle(null);
-                      setArticleForm({ title: '', summary: '', content: '', isActive: true });
+                      setArticleForm({ title: '', summary: '', content: '', imageUrl: '', isActive: true, isHot: false });
                     }}
                     className="flex-1 py-3 rounded-xl border border-slate-300 text-slate-700 font-semibold hover:bg-slate-50 transition-colors"
                   >
