@@ -931,7 +931,7 @@ export default function AdminPage() {
 
       await fetchAnnouncements();
       setShowArticleModal(false);
-      setArticleForm({ title: '', summary: '', content: '', isActive: true });
+      setArticleForm({ title: '', summary: '', content: '', imageUrl: '', isActive: true, isHot: false });
       setEditingArticle(null);
       setToast({
         type: 'success',
