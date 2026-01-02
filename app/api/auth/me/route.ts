@@ -4,13 +4,48 @@ import { getUserFromRequest } from '@/lib/auth'
 
 export async function GET(request: NextRequest) {
   try {
-    const payload = getUserFromRequest(request)
+    const payload = getUserFromRequest(request) as { userId: string; email: string; role: string; isAdmin?: boolean } | null
 
     if (!payload) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
       )
+    }
+
+    // If the token indicates an admin user (from admins table), query that table
+    if (payload.isAdmin || payload.role === 'admin') {
+      const admin = await prisma.admin.findUnique({
+        where: { id: payload.userId },
+        select: {
+          id: true,
+          email: true,
+          fullName: true,
+          isActive: true,
+          createdAt: true
+        }
+      })
+
+      if (admin && admin.isActive) {
+        return NextResponse.json({
+          success: true,
+          user: {
+            id: admin.id,
+            email: admin.email,
+            username: admin.fullName,
+            fullName: admin.fullName,
+            phone: null,
+            role: 'admin',
+            avatar: null,
+            gender: null,
+            dateOfBirth: null,
+            emailVerified: true,
+            createdAt: admin.createdAt
+          },
+        })
+      }
+
+      // If not found in admins table, fall through to check users table
     }
 
     // Fetch user from database to get latest info
