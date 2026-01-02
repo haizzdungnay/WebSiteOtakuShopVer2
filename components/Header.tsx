@@ -294,7 +294,7 @@ export default function Header() {
             </div>
 
             {/* CỘT GIỮA: Navigation Items */}
-            <div className="flex-1 px-4">
+            <div className="flex-1 pl-4">
               <div className="flex items-center justify-between">
                 <NavLink href="/in-stock" icon={<Package size={18} />}>
                   Hàng sẵn có
@@ -316,9 +316,6 @@ export default function Header() {
                 </NavLink>
               </div>
             </div>
-
-            {/* CỘT PHẢI: spacer để cân đối với cột MENU */}
-            <div className="w-[280px] flex-shrink-0" />
           </div>
         </div>
       </nav>
