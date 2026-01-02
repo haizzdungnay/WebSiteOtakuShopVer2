@@ -311,6 +311,9 @@ export default function Header() {
                 <NavLink href="/faq" icon={<HelpCircle size={18} />}>
                   FAQ
                 </NavLink>
+                <NavLink href="/tin-tuc" icon={<Newspaper size={18} />}>
+                  Tin tức
+                </NavLink>
               </div>
             </div>
 
