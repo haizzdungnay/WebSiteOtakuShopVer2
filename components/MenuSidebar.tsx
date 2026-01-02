@@ -86,14 +86,14 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity"
+        className="fixed inset-0 bg-black bg-opacity-50 z-[100] transition-opacity"
         onClick={onClose}
       />
 
       {/* Sidebar */}
-      <aside className="fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-50 overflow-y-auto transform transition-transform">
+      <aside className="fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-[100] overflow-y-auto transform transition-transform">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between z-10">
           <div className="flex items-center gap-2">
             <Package size={24} className="text-accent-red" />
             <h2 className="text-lg font-bold">MENU</h2>
