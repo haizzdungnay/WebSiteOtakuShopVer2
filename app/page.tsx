@@ -95,12 +95,12 @@ export default function Home() {
 
   return (
     <div className="bg-background-light">
-      <section className="py-8">
-        <div className="container-custom space-y-10">
-          {/* HÀNG TRÊN: Sidebar + JOIN US (cao bằng nhau) */}
+      <section className="py-4 sm:py-6 lg:py-8">
+        <div className="container-custom space-y-6 sm:space-y-8 lg:space-y-10">
+          {/* HÀNG TRÊN: Sidebar + News Carousel */}
           <div className="flex gap-6 items-stretch">
-            {/* SIDEBAR */}
-            <div className="w-[320px]">
+            {/* SIDEBAR - ẩn trên mobile */}
+            <div className="hidden lg:block w-[320px] flex-shrink-0">
               <Sidebar
                 isOpen={sidebarOpen}
                 onClose={() => setSidebarOpen(false)}
@@ -108,7 +108,7 @@ export default function Home() {
             </div>
 
             {/* News Carousel Banner - Tin tức hot */}
-            <div className="flex-1">
+            <div className="flex-1 min-w-0">
               <NewsCarousel />
             </div>
           </div>
@@ -124,20 +124,20 @@ export default function Home() {
               <>
                 {/* SẢN PHẨM HOT */}
                 {hotProducts.length > 0 && (
-                  <div className="mb-12">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <span className="w-1 h-8 bg-accent-red" />
+                  <div className="mb-8 sm:mb-10 lg:mb-12">
+                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <span className="w-1 h-6 sm:h-8 bg-accent-red" />
                         SẢN PHẨM HOT
                       </h2>
                       <Link
                         href="/products?featured=true"
-                        className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
+                        className="text-accent-red hover:underline flex items-center gap-1 font-semibold text-sm sm:text-base"
                       >
                         Xem tất cả <ChevronRight size={16} />
                       </Link>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
                       {hotProducts.map((product) => (
                         <ProductCard key={product.id} {...transformProduct(product)} />
                       ))}
@@ -147,20 +147,20 @@ export default function Home() {
 
                 {/* HÀNG MỚI VỀ */}
                 {newProducts.length > 0 && (
-                  <div className="mb-12">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <span className="w-1 h-8 bg-green-500" />
+                  <div className="mb-8 sm:mb-10 lg:mb-12">
+                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <span className="w-1 h-6 sm:h-8 bg-green-500" />
                         HÀNG MỚI VỀ
                       </h2>
                       <Link
                         href="/products?sort=createdAt&order=desc"
-                        className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
+                        className="text-accent-red hover:underline flex items-center gap-1 font-semibold text-sm sm:text-base"
                       >
                         Xem tất cả <ChevronRight size={16} />
                       </Link>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
                       {newProducts.map((product) => (
                         <ProductCard key={product.id} {...transformProduct(product)} />
                       ))}
@@ -170,20 +170,20 @@ export default function Home() {
 
                 {/* ĐANG GIẢM GIÁ */}
                 {saleProducts.length > 0 && (
-                  <div className="mb-12">
-                    <div className="flex items-center justify-between mb-6">
-                      <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                        <span className="w-1 h-8 bg-orange-500" />
+                  <div className="mb-8 sm:mb-10 lg:mb-12">
+                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                      <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <span className="w-1 h-6 sm:h-8 bg-orange-500" />
                         ĐANG GIẢM GIÁ
                       </h2>
                       <Link
                         href="/products"
-                        className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
+                        className="text-accent-red hover:underline flex items-center gap-1 font-semibold text-sm sm:text-base"
                       >
                         Xem tất cả <ChevronRight size={16} />
                       </Link>
                     </div>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
                       {saleProducts.map((product) => (
                         <ProductCard key={product.id} {...transformProduct(product)} />
                       ))}
@@ -193,19 +193,19 @@ export default function Home() {
 
                 {/* TẤT CẢ SẢN PHẨM */}
                 <div className="mb-4">
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                      <span className="w-1 h-8 bg-primary" />
+                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                      <span className="w-1 h-6 sm:h-8 bg-primary" />
                       TẤT CẢ SẢN PHẨM
                     </h2>
                     <Link
                       href="/products"
-                      className="text-accent-red hover:underline flex items-center gap-1 font-semibold"
+                      className="text-accent-red hover:underline flex items-center gap-1 font-semibold text-sm sm:text-base"
                     >
                       Xem tất cả <ChevronRight size={16} />
                     </Link>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
                     {allProducts.map((product) => (
                       <ProductCard key={product.id} {...transformProduct(product)} />
                     ))}

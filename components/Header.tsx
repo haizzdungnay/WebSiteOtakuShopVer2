@@ -71,17 +71,17 @@ export default function Header() {
       {/* Use only container padding to keep alignment consistent with nav */}
       <div className="bg-primary py-3" suppressHydrationWarning>
         <div className="container-custom" suppressHydrationWarning>
-          <div className="flex items-center justify-between gap-4 flex-wrap lg:flex-nowrap" suppressHydrationWarning>
+          <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap lg:flex-nowrap" suppressHydrationWarning>
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               <div className="flex items-center gap-1">
-                <span className="text-3xl font-bold text-accent-red">DN</span>
-                <span className="text-2xl font-bold text-gray-800">FIGURE</span>
+                <span className="text-2xl sm:text-3xl font-bold text-accent-red">DN</span>
+                <span className="text-xl sm:text-2xl font-bold text-gray-800">FIGURE</span>
               </div>
             </Link>
 
             {/* Search Bar */}
-            <div ref={searchRef} className="flex-1 max-w-xl order-3 lg:order-2 w-full relative">
+            <div ref={searchRef} className="flex-1 max-w-xl order-3 lg:order-2 w-full mt-2 lg:mt-0 relative">
               <form onSubmit={handleSearch}>
                 <div className="flex bg-white rounded-lg overflow-hidden border-2 border-white">
                   <input
@@ -245,7 +245,7 @@ export default function Header() {
                 onClick={() => setShowCartDropdown(!showCartDropdown)}
                 title="Giỏ hàng"
                 aria-label="Giỏ hàng"
-                className="relative flex items-center gap-2 bg-white px-4 py-2 rounded-full hover:bg-gray-50 transition-colors"
+                className="relative flex items-center gap-1 sm:gap-2 bg-white px-2 sm:px-4 py-2 rounded-full hover:bg-gray-50 transition-colors"
               >
                 <div className="relative">
                   <ShoppingCart size={20} className="text-accent-red" />
@@ -255,7 +255,7 @@ export default function Header() {
                     </span>
                   )}
                 </div>
-                <span className="hidden lg:block text-sm font-semibold text-gray-800">
+                <span className="hidden sm:block text-sm font-semibold text-gray-800">
                   Giỏ hàng
                 </span>
               </button>
@@ -273,8 +273,8 @@ export default function Header() {
       <nav className="bg-black text-white relative">
         <div className="container-custom">
           <div className="flex items-center">
-            {/* CỘT TRÁI: Menu Button (khớp chiều rộng sidebar = 280px) */}
-            <div className="w-[280px] flex-shrink-0">
+            {/* Menu Button - hiện trên mọi màn hình */}
+            <div className="w-full lg:w-[280px] flex-shrink-0">
               <button
                 onClick={() => setShowMenuSidebar(true)}
                 className="flex w-full items-center justify-center gap-2 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
@@ -284,9 +284,9 @@ export default function Header() {
               </button>
             </div>
 
-            {/* CỘT GIỮA: Navigation Items */}
-            <div className="flex-1 pl-4">
-              <div className="flex items-center justify-between">
+            {/* Navigation Items - ẩn trên mobile */}
+            <div className="hidden lg:flex flex-1 pl-4">
+              <div className="flex items-center justify-between w-full">
                 <NavLink href="/in-stock" icon={<Package size={18} />}>
                   Hàng sẵn có
                 </NavLink>

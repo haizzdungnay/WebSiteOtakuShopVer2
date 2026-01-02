@@ -14,20 +14,20 @@
   /* Container */
   .container-custom {
     /* Mở rộng container để tránh tràn navbar ở 100% zoom */
-    @apply w-full max-w-[1440px] mx-auto px-4;
+    @apply w-full max-w-[1440px] mx-auto px-3 sm:px-4 lg:px-4;
   }
 
   /* Buttons */
   .btn-primary {
-    @apply bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-all duration-300 active:scale-95;
+    @apply bg-black text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold hover:bg-gray-800 transition-all duration-300 active:scale-95 text-sm sm:text-base;
   }
 
   .btn-secondary {
-    @apply border-2 border-primary text-primary px-6 py-3 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300;
+    @apply border-2 border-primary text-primary px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300 text-sm sm:text-base;
   }
 
   .btn-accent {
-    @apply bg-accent-red text-white px-6 py-3 rounded-lg font-semibold hover:bg-red-600 transition-all duration-300;
+    @apply bg-accent-red text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold hover:bg-red-600 transition-all duration-300 text-sm sm:text-base;
   }
 
   /* Product Card */

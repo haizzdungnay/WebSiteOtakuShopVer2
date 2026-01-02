@@ -193,23 +193,23 @@ export default function ProductDetailPage() {
     : 0;
 
   return (
-    <div className="bg-gray-50 py-8">
+    <div className="bg-gray-50 py-4 sm:py-6 lg:py-8">
       <div className="container-custom">
         {/* Breadcrumb */}
-        <div className="mb-6 text-sm text-gray-600">
+        <div className="mb-4 sm:mb-6 text-xs sm:text-sm text-gray-600">
           <Link href="/" className="hover:text-accent-red">Trang chủ</Link>
-          <span className="mx-2">/</span>
+          <span className="mx-1 sm:mx-2">/</span>
           <Link href="/products" className="hover:text-accent-red">Sản phẩm</Link>
-          <span className="mx-2">/</span>
-          <span className="text-gray-900">{product.name}</span>
+          <span className="mx-1 sm:mx-2">/</span>
+          <span className="text-gray-900 line-clamp-1">{product.name}</span>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {/* Left: Image Gallery */}
           <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg p-6">
+            <div className="bg-white rounded-lg p-3 sm:p-4 lg:p-6">
               {/* Main Image */}
-              <div className="relative w-full aspect-square mb-4 bg-gray-100 rounded-lg overflow-hidden">
+              <div className="relative w-full aspect-square mb-3 sm:mb-4 bg-gray-100 rounded-lg overflow-hidden">
                 <Image
                   src={product.images?.[selectedImage] || '/images/placeholder.jpg'}
                   alt={product.name}
@@ -225,7 +225,7 @@ export default function ProductDetailPage() {
 
               {/* Thumbnails */}
               {product.images && product.images.length > 1 && (
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-4 sm:grid-cols-5 lg:grid-cols-4 gap-2 sm:gap-3">
                   {product.images.map((img, idx) => (
                     <button
                       key={idx}
@@ -346,22 +346,22 @@ export default function ProductDetailPage() {
 
           {/* Right: Product Info & Actions */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg p-6 sticky top-24">
-              <h1 className="text-2xl font-bold text-gray-900 mb-3">{product.name}</h1>
+            <div className="bg-white rounded-lg p-4 sm:p-5 lg:p-6 lg:sticky lg:top-24">
+              <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">{product.name}</h1>
 
               {/* Price */}
-              <div className="mb-4">
+              <div className="mb-3 sm:mb-4">
                 {originalPrice ? (
-                  <div className="flex items-center gap-3">
-                    <span className="text-3xl font-bold text-accent-red">
+                  <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
+                    <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-accent-red">
                       {formatPrice(currentPrice)}
                     </span>
-                    <span className="text-lg text-gray-400 line-through">
+                    <span className="text-sm sm:text-base lg:text-lg text-gray-400 line-through">
                       {formatPrice(originalPrice)}
                     </span>
                   </div>
                 ) : (
-                  <span className="text-3xl font-bold text-accent-red">
+                  <span className="text-xl sm:text-2xl lg:text-3xl font-bold text-accent-red">
                     {formatPrice(currentPrice)}
                   </span>
                 )}
