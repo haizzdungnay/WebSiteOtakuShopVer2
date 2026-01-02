@@ -139,6 +139,15 @@ export default function Header() {
                 </div>
               </Link>
 
+              {/* Tin tức */}
+              <Link
+                href="/tin-tuc"
+                className="hidden lg:flex items-center gap-2 text-gray-800 hover:text-accent-red transition-colors"
+              >
+                <Newspaper size={20} />
+                <div className="text-sm font-semibold">Tin tức</div>
+              </Link>
+
               {/* Đăng nhập / Đăng ký */}
               {user ? (
                 <div className="relative" ref={dropdownRef}>
@@ -285,8 +294,8 @@ export default function Header() {
             </div>
 
             {/* CỘT GIỮA: Navigation Items */}
-            <div className="flex-1 px-0">
-              <div className="flex items-center justify-center gap-4 lg:gap-6 xl:gap-8">
+            <div className="flex-1 px-4">
+              <div className="flex items-center justify-between">
                 <NavLink href="/in-stock" icon={<Package size={18} />}>
                   Hàng sẵn có
                 </NavLink>
@@ -301,9 +310,6 @@ export default function Header() {
                 </NavLink>
                 <NavLink href="/faq" icon={<HelpCircle size={18} />}>
                   FAQ
-                </NavLink>
-                <NavLink href="/tin-tuc" icon={<Newspaper size={18} />}>
-                  Tin tức
                 </NavLink>
               </div>
             </div>
