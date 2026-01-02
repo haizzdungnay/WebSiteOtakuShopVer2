@@ -98,7 +98,7 @@ export default function Home() {
       <section className="py-4 sm:py-6 lg:py-8">
         <div className="container-custom space-y-6 sm:space-y-8 lg:space-y-10">
           {/* HÀNG TRÊN: Sidebar + News Carousel */}
-          <div className="flex gap-6 items-stretch">
+          <div className="flex gap-4 items-stretch">
             {/* SIDEBAR - ẩn trên mobile */}
             <div className="hidden lg:block w-[320px] flex-shrink-0">
               <Sidebar
