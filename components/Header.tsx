@@ -106,7 +106,7 @@ export default function Header() {
       <MenuSidebar isOpen={showMenuSidebar} onClose={() => setShowMenuSidebar(false)} />
       
       <header 
-        className={`sticky top-0 z-50 transition-transform duration-300 ease-out ${
+        className={`sticky top-0 z-[100] transition-transform duration-300 ease-out ${
           hideHeader ? '-translate-y-[60px] lg:-translate-y-[72px]' : 'translate-y-0'
         }`} 
         suppressHydrationWarning
