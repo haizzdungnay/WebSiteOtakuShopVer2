@@ -29,11 +29,33 @@ export default function Header() {
   const [showCartDropdown, setShowCartDropdown] = useState(false);
   const [showMenuSidebar, setShowMenuSidebar] = useState(false);
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
+  const [hideHeader, setHideHeader] = useState(false);
+  const [lastScrollY, setLastScrollY] = useState(0);
   const { user, logout } = useAuth();
   const { getTotalItems } = useCart();
   const dropdownRef = useRef<HTMLDivElement>(null);
   const cartDropdownRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Handle scroll to hide/show pink header
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down & past threshold - hide header
+        setHideHeader(true);
+      } else if (currentScrollY < lastScrollY) {
+        // Scrolling up - show header
+        setHideHeader(false);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -67,41 +89,45 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 shadow-md" suppressHydrationWarning>
-      {/* Top Pink Header */}
-      {/* Use only container padding to keep alignment consistent with nav */}
-      <div className="bg-primary py-3" suppressHydrationWarning>
+      {/* Top Pink Header - hides on scroll down, shows on scroll up */}
+      <div 
+        className={`bg-primary py-2 lg:py-3 transition-all duration-300 overflow-hidden ${
+          hideHeader ? 'max-h-0 py-0' : 'max-h-40'
+        }`} 
+        suppressHydrationWarning
+      >
         <div className="container-custom" suppressHydrationWarning>
-          <div className="flex items-center justify-between gap-2 sm:gap-4 flex-wrap lg:flex-nowrap" suppressHydrationWarning>
+          <div className="flex items-center justify-between gap-2 lg:gap-4" suppressHydrationWarning>
             {/* Logo */}
             <Link href="/" className="flex-shrink-0">
               <div className="flex items-center gap-1">
-                <span className="text-2xl sm:text-3xl font-bold text-accent-red">DN</span>
-                <span className="text-xl sm:text-2xl font-bold text-gray-800">FIGURE</span>
+                <span className="text-xl lg:text-3xl font-bold text-accent-red">DN</span>
+                <span className="text-lg lg:text-2xl font-bold text-gray-800">FIGURE</span>
               </div>
             </Link>
 
-            {/* Search Bar */}
-            <div ref={searchRef} className="flex-1 max-w-xl order-3 lg:order-2 w-full mt-2 lg:mt-0 relative">
+            {/* Search Bar - compact on mobile */}
+            <div ref={searchRef} className="flex-1 min-w-0 max-w-[140px] lg:max-w-xl order-2 relative">
               <form onSubmit={handleSearch}>
                 <div className="flex bg-white rounded-lg overflow-hidden border-2 border-white">
                   <input
                     type="text"
-                    placeholder="Bạn đang tìm gì..."
+                    placeholder="Tìm kiếm..."
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
                       setShowSearchSuggestions(true);
                     }}
                     onFocus={() => setShowSearchSuggestions(true)}
-                    className="flex-1 px-4 py-2.5 outline-none text-sm text-gray-700"
+                    className="flex-1 w-full min-w-0 px-2 lg:px-4 py-2 lg:py-2.5 outline-none text-sm text-gray-700"
                   />
                   <button
                     type="submit"
                     title="Tìm kiếm"
                     aria-label="Tìm kiếm"
-                    className="bg-primary-light px-6 hover:bg-primary-dark transition-colors"
+                    className="bg-primary-light px-3 lg:px-6 hover:bg-primary-dark transition-colors"
                   >
-                    <Search size={20} className="text-white" />
+                    <Search size={18} className="text-white lg:w-5 lg:h-5" />
                   </button>
                 </div>
               </form>
@@ -117,7 +143,7 @@ export default function Header() {
             </div>
 
             {/* Right Section */}
-            <div className="flex items-center gap-4 order-2 lg:order-3 flex-wrap lg:flex-nowrap">
+            <div className="flex items-center gap-2 lg:gap-4 order-3 flex-shrink-0">
               {/* Hotline */}
               <div className="hidden lg:flex items-center gap-2 text-gray-800">
                 <Phone size={20} className="text-accent-red" />
@@ -245,17 +271,17 @@ export default function Header() {
                 onClick={() => setShowCartDropdown(!showCartDropdown)}
                 title="Giỏ hàng"
                 aria-label="Giỏ hàng"
-                className="relative flex items-center gap-1 sm:gap-2 bg-white px-2 sm:px-4 py-2 rounded-full hover:bg-gray-50 transition-colors"
+                className="relative flex items-center gap-1 lg:gap-2 bg-white px-2 lg:px-4 py-1.5 lg:py-2 rounded-full hover:bg-gray-50 transition-colors"
               >
                 <div className="relative">
-                  <ShoppingCart size={20} className="text-accent-red" />
+                  <ShoppingCart size={18} className="text-accent-red lg:w-5 lg:h-5" />
                   {getTotalItems() > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-accent-red text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                    <span className="absolute -top-2 -right-2 bg-accent-red text-white text-xs rounded-full w-4 h-4 lg:w-5 lg:h-5 flex items-center justify-center font-bold text-[10px] lg:text-xs">
                       {getTotalItems()}
                     </span>
                   )}
                 </div>
-                <span className="hidden sm:block text-sm font-semibold text-gray-800">
+                <span className="hidden lg:block text-sm font-semibold text-gray-800">
                   Giỏ hàng
                 </span>
               </button>
