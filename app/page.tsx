@@ -100,7 +100,7 @@ export default function Home() {
           {/* HÀNG TRÊN: Sidebar + News Carousel */}
           <div className="flex gap-4 items-stretch">
             {/* SIDEBAR - ẩn trên mobile */}
-            <div className="hidden lg:block w-[240px] flex-shrink-0">
+            <div className="hidden lg:block w-[280px] flex-shrink-0">
               <Sidebar
                 isOpen={sidebarOpen}
                 onClose={() => setSidebarOpen(false)}
