@@ -316,8 +316,8 @@ export default function Header() {
         </div>
       </div>
 
-      {/* Black Navigation Bar */}
-      <nav className="bg-black text-white relative">
+      {/* Black Navigation Bar - hidden when menu sidebar is open */}
+      <nav className={`bg-black text-white relative transition-opacity duration-200 ${showMenuSidebar ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
         <div className="container-custom">
           <div className="flex items-center">
             {/* Menu Button */}
