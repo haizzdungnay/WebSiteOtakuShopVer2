@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 // Xử lý redirect từ MoMo sau khi thanh toán
 export async function GET(request: NextRequest) {
@@ -24,12 +24,12 @@ export async function GET(request: NextRequest) {
     // Lấy order để redirect về checkout
     const order = await prisma.order.findUnique({
       where: { id: orderId },
-      select: { orderCode: true },
+      select: { orderNumber: true },
     });
 
     const errorMessage = encodeURIComponent(message || 'Payment failed');
     return NextResponse.redirect(
-      `${baseUrl}/checkout?error=payment_failed&message=${errorMessage}&orderCode=${order?.orderCode || ''}`
+      `${baseUrl}/checkout?error=payment_failed&message=${errorMessage}&orderCode=${order?.orderNumber || ''}`
     );
   }
 }
