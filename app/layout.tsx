@@ -6,6 +6,7 @@ import FloatingButtons from '@/components/FloatingButtons';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
+import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLd';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://otakushop.vn';
 
@@ -81,6 +82,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/favicon.png" sizes="32x32" />
         <link rel="icon" href="/favicon.png" sizes="192x192" />
         <link rel="apple-touch-icon" href="/favicon.png" />
+        
+        {/* Structured Data - JSON-LD */}
+        <OrganizationJsonLd
+          name="Otaku Shop"
+          url="https://otakushop.vn"
+          logo="https://otakushop.vn/logo.png"
+          description="Cửa hàng figure anime, manga và collectibles chính hãng tại Việt Nam"
+          sameAs={[
+            'https://facebook.com/otakushop.vn',
+            'https://instagram.com/otakushop.vn',
+            'https://tiktok.com/@otakushop.vn',
+          ]}
+          contactPoint={{
+            telephone: '+84-xxx-xxx-xxx',
+            contactType: 'customer service',
+            email: 'contact@otakushop.vn',
+          }}
+        />
+        <WebSiteJsonLd
+          name="Otaku Shop"
+          url="https://otakushop.vn"
+          searchUrl="https://otakushop.vn/search?q={search_term_string}"
+        />
       </head>
       <body suppressHydrationWarning>
         <AuthProvider>

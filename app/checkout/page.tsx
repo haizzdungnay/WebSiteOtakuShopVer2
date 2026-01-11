@@ -31,7 +31,7 @@ interface SavedAddress {
   isDefault: boolean;
 }
 
-type PaymentMethod = 'cod' | 'bank-transfer' | 'qr' | 'store-pickup' | 'vnpay';
+type PaymentMethod = 'cod' | 'bank-transfer' | 'qr' | 'store-pickup' | 'vnpay' | 'momo';
 type ShippingMethod = 'standard' | 'express' | 'store-pickup';
 
 function CheckoutContent() {
@@ -101,7 +101,7 @@ function CheckoutContent() {
     if (user) {
       fetchSavedAddresses();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
   const fetchSavedAddresses = async () => {
@@ -233,14 +233,15 @@ function CheckoutContent() {
       if (paymentMethod === 'cod') apiPaymentMethod = 'COD';
       else if (paymentMethod === 'bank-transfer') apiPaymentMethod = 'BANK_TRANSFER';
       else if (paymentMethod === 'vnpay') apiPaymentMethod = 'VNPAY';
+      else if (paymentMethod === 'momo') apiPaymentMethod = 'MOMO';
       else apiPaymentMethod = 'COD';
 
       // Xác định email cho đơn hàng
       // - Nếu user đã verified: customerEmail = user.email, notificationEmail = email nhập (nếu khác)
       // - Nếu guest hoặc chưa verified: customerEmail = email nhập
       const customerEmail = user?.emailVerified ? user.email : (shippingInfo.email || '');
-      const notificationEmail = user?.emailVerified && shippingInfo.email && shippingInfo.email !== user.email 
-        ? shippingInfo.email 
+      const notificationEmail = user?.emailVerified && shippingInfo.email && shippingInfo.email !== user.email
+        ? shippingInfo.email
         : null;
 
       // Gọi API tạo đơn hàng
@@ -310,7 +311,40 @@ function CheckoutContent() {
           }
         }
 
-        // For non-VNPAY payments
+        // Handle MoMo payment
+        if (paymentMethod === 'momo') {
+          try {
+            // Call MoMo API to create payment URL
+            const momoResponse = await fetch('/api/payment/momo/create', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                orderId: orderId,
+              }),
+            });
+
+            const momoData = await momoResponse.json();
+
+            if (momoData.success && momoData.payUrl) {
+              // Clear cart and redirect to MoMo
+              clearCart();
+              window.location.href = momoData.payUrl;
+              return; // Don't set isProcessing to false
+            } else {
+              // MoMo failed
+              alert(momoData.error || 'Không thể tạo thanh toán MoMo. Vui lòng thử lại.');
+              return;
+            }
+          } catch (error) {
+            console.error('MoMo payment error:', error);
+            alert('Lỗi thanh toán MoMo. Vui lòng thử lại.');
+            return;
+          }
+        }
+
+        // For non-online payments (COD, bank transfer, etc.)
         clearCart();
         alert(`Đặt hàng thành công! Mã đơn hàng: ${orderNumber}`);
         router.push('/');
@@ -409,9 +443,8 @@ function CheckoutContent() {
                               key={address.id}
                               type="button"
                               onClick={() => selectAddress(address)}
-                              className={`w-full px-4 py-3 text-left hover:bg-gray-50 border-b last:border-b-0 ${
-                                selectedAddressId === address.id ? 'bg-red-50' : ''
-                              }`}
+                              className={`w-full px-4 py-3 text-left hover:bg-gray-50 border-b last:border-b-0 ${selectedAddressId === address.id ? 'bg-red-50' : ''
+                                }`}
                             >
                               <div className="flex items-start justify-between">
                                 <div className="flex-1">
@@ -522,7 +555,7 @@ function CheckoutContent() {
                     />
                     {user?.emailVerified && (
                       <p className="text-sm text-gray-500 mt-1">
-                        {shippingInfo.email && shippingInfo.email !== user.email 
+                        {shippingInfo.email && shippingInfo.email !== user.email
                           ? `Thông báo sẽ được gửi đến cả ${user.email} và ${shippingInfo.email}`
                           : `Thông báo sẽ được gửi đến ${user.email}`
                         }
@@ -703,6 +736,22 @@ function CheckoutContent() {
                     <div className="flex-1">
                       <div className="font-semibold">Thanh toán qua VNPAY</div>
                       <div className="text-sm text-gray-600">Thanh toán an toàn qua cổng VNPAY với nhiều phương thức</div>
+                    </div>
+                  </label>
+                  <label className="flex items-start gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-accent-red transition-colors">
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="momo"
+                      checked={paymentMethod === 'momo'}
+                      onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
+                      className="mt-1"
+                    />
+                    <div className="flex-1">
+                      <div className="font-semibold flex items-center gap-2">
+                        <span className="text-pink-500">●</span> Ví MoMo
+                      </div>
+                      <div className="text-sm text-gray-600">Thanh toán nhanh chóng qua ví điện tử MoMo</div>
                     </div>
                   </label>
                   <label className="flex items-start gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-accent-red transition-colors">
