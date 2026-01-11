@@ -2,17 +2,12 @@
 const nextConfig = {
   output: 'standalone',
   reactStrictMode: true,
-  
-  // Bỏ qua ESLint errors khi build
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  
-  // Bỏ qua TypeScript errors khi build
+
+  // TypeScript: Kiểm tra lỗi khi build
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
-  
+
   images: {
     remotePatterns: [
       {

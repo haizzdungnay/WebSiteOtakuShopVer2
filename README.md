@@ -601,6 +601,7 @@ vercel link
 
 # Push schema lên database production
 vercel env pull .env.production.local
+
 npx prisma db push
 
 # (Tùy chọn) Seed data
