@@ -7,9 +7,72 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
 
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://otakushop.vn';
+
 export const metadata: Metadata = {
-  title: 'Otaku Shop - Cửa hàng Figure Anime',
-  description: 'Cửa hàng figure anime, manga và collectibles chính hãng tại Việt Nam.',
+  metadataBase: new URL(BASE_URL),
+  title: {
+    default: 'Otaku Shop - Cửa hàng Figure Anime Chính Hãng',
+    template: '%s | Otaku Shop',
+  },
+  description: 'Cửa hàng figure anime, manga và collectibles chính hãng tại Việt Nam. Nendoroid, Scale Figure, Figma với giá tốt nhất.',
+  keywords: [
+    'figure anime',
+    'mô hình anime',
+    'nendoroid',
+    'scale figure',
+    'figma',
+    'otaku shop',
+    'figure chính hãng',
+    'anime figure vietnam',
+    'mua figure anime',
+  ],
+  authors: [{ name: 'Otaku Shop' }],
+  creator: 'Otaku Shop',
+  publisher: 'Otaku Shop',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'vi_VN',
+    url: BASE_URL,
+    siteName: 'Otaku Shop',
+    title: 'Otaku Shop - Cửa hàng Figure Anime Chính Hãng',
+    description: 'Cửa hàng figure anime, manga và collectibles chính hãng tại Việt Nam.',
+    images: [
+      {
+        url: `${BASE_URL}/images/og-image.jpg`,
+        width: 1200,
+        height: 630,
+        alt: 'Otaku Shop - Figure Anime Chính Hãng',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Otaku Shop - Cửa hàng Figure Anime Chính Hãng',
+    description: 'Cửa hàng figure anime, manga và collectibles chính hãng tại Việt Nam.',
+    images: [`${BASE_URL}/images/og-image.jpg`],
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    // Add your verification codes here
+    // google: 'your-google-verification-code',
+    // yandex: 'your-yandex-verification-code',
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

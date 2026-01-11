@@ -3,6 +3,7 @@ import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken'
 import { z } from 'zod'
+import { checkRateLimit, getClientIP, RATE_LIMITS, getRateLimitHeaders } from '@/lib/rate-limit'
 
 // Schema để validate input với zod
 const loginSchema = z.object({
@@ -21,6 +22,23 @@ const COOKIE_OPTIONS = {
 
 export async function POST(request: NextRequest) {
     try {
+        // Rate limiting check
+        const clientIP = getClientIP(request)
+        const rateLimitResult = checkRateLimit(`login:${clientIP}`, RATE_LIMITS.AUTH)
+        
+        if (!rateLimitResult.success) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: `Quá nhiều lần thử đăng nhập. Vui lòng thử lại sau ${rateLimitResult.retryAfter} giây.`
+                },
+                { 
+                    status: 429,
+                    headers: getRateLimitHeaders(rateLimitResult)
+                }
+            )
+        }
+
         // Parse body từ request
         const body = await request.json()
 

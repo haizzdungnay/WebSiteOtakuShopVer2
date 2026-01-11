@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { sendEmail, generateVerificationToken, getVerificationEmailTemplate } from '@/lib/email'
+import { checkRateLimit, getClientIP, RATE_LIMITS, getRateLimitHeaders } from '@/lib/rate-limit'
 
 // Định nghĩa schema để validate với zod
 const registerSchema = z.object({
@@ -29,8 +30,25 @@ const registerSchema = z.object({
         .or(z.literal('')), // cho phép để trống
 })
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     try {
+        // Rate limiting check
+        const clientIP = getClientIP(request)
+        const rateLimitResult = checkRateLimit(`register:${clientIP}`, RATE_LIMITS.AUTH)
+        
+        if (!rateLimitResult.success) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    error: `Quá nhiều lần thử đăng ký. Vui lòng thử lại sau ${rateLimitResult.retryAfter} giây.`
+                },
+                { 
+                    status: 429,
+                    headers: getRateLimitHeaders(rateLimitResult)
+                }
+            )
+        }
+
         // parse body từ request
         const body = await request.json()
 

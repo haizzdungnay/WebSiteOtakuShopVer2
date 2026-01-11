@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getUserFromRequest } from '@/lib/auth';
 import { sendEmail, getOtpEmailTemplate } from '@/lib/email';
+import { checkRateLimit, getClientIP, RATE_LIMITS, getRateLimitHeaders } from '@/lib/rate-limit';
 
 // Generate 6-digit OTP
 function generateOTP(): string {
@@ -10,6 +11,23 @@ function generateOTP(): string {
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check
+    const clientIP = getClientIP(request);
+    const rateLimitResult = checkRateLimit(`otp:${clientIP}`, RATE_LIMITS.OTP);
+    
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Quá nhiều lần gửi OTP. Vui lòng thử lại sau ${rateLimitResult.retryAfter} giây.`
+        },
+        { 
+          status: 429,
+          headers: getRateLimitHeaders(rateLimitResult)
+        }
+      );
+    }
+
     // Get user from token
     const user = await getUserFromRequest(request);
     

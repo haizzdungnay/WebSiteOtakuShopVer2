@@ -1,9 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { generateVerificationToken, sendEmail, getResetPasswordEmailTemplate } from '@/lib/email';
+import { checkRateLimit, getClientIP, RATE_LIMITS, getRateLimitHeaders } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limiting check
+    const clientIP = getClientIP(request);
+    const rateLimitResult = checkRateLimit(`forgot-password:${clientIP}`, RATE_LIMITS.OTP);
+    
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Quá nhiều yêu cầu. Vui lòng thử lại sau ${rateLimitResult.retryAfter} giây.`
+        },
+        { 
+          status: 429,
+          headers: getRateLimitHeaders(rateLimitResult)
+        }
+      );
+    }
+
     const { email } = await request.json();
 
     if (!email) {
