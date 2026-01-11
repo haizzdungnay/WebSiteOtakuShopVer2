@@ -149,7 +149,7 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
             {/* Đang giảm giá (On Sale) */}
             <li>
               <Link
-                href="/products?onSale=true"
+                href="/sale"
                 className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
                 onClick={onClose}
               >

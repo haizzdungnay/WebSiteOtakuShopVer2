@@ -137,7 +137,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose
               {/* Đang giảm giá (On Sale) */}
               <li>
                 <Link
-                  href="/products?onSale=true"
+                  href="/sale"
                   className="sidebar-link group"
                   onClick={onClose}
                 >
