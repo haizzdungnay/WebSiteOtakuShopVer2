@@ -15,10 +15,10 @@ Cửa hàng figure anime chính hãng - Next.js E-commerce Platform với Prisma
 ## 📸 Demo Screenshots
 
 ### Trang Chủ
-![Homepage](public/demo/homepage.png)
+![Homepage](./public/demo/homepage.png)
 
 ### Danh Sách Sản Phẩm
-![Products](public/demo/products.png)
+![Products](./public/demo/products.png)
 
 ---
 
