@@ -71,13 +71,14 @@ export async function middleware(request: NextRequest) {
     [
       "default-src 'self'",
       "img-src 'self' data: https: http: blob:",
-      "style-src 'self' 'unsafe-inline'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline' https://unpkg.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com",
       "connect-src 'self' ws: wss: http: https:",
       "font-src 'self' data: https:",
       "frame-ancestors 'self'",
     ].join('; ')
   )
+
 
   // Add rate limit headers for API routes
   if (pathname.startsWith('/api/')) {
