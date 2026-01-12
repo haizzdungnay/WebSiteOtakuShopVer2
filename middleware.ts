@@ -1,11 +1,24 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { verifyTokenEdge } from '@/lib/jwt-edge'
+import { applyApiRateLimit, addRateLimitHeadersToResponse } from '@/lib/api-rate-limit'
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Check if the request is for admin routes
+  // ============================================
+  // API Rate Limiting
+  // ============================================
+  if (pathname.startsWith('/api/')) {
+    const rateLimitResponse = applyApiRateLimit(request)
+    if (rateLimitResponse) {
+      return rateLimitResponse
+    }
+  }
+
+  // ============================================
+  // Admin Route Protection
+  // ============================================
   if (pathname.startsWith('/admin')) {
     const token = request.cookies.get('token')?.value
 
@@ -39,13 +52,18 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  const response = NextResponse.next()
+  // ============================================
+  // Create Response with Security Headers
+  // ============================================
+  let response = NextResponse.next()
 
   // Add security headers
   response.headers.set('X-DNS-Prefetch-Control', 'on')
   response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
   response.headers.set('X-Frame-Options', 'SAMEORIGIN')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+
   // CSP relaxed for development - Next.js requires 'unsafe-eval' for hot reload
   // In production, consider tightening these policies
   response.headers.set(
@@ -61,6 +79,11 @@ export async function middleware(request: NextRequest) {
     ].join('; ')
   )
 
+  // Add rate limit headers for API routes
+  if (pathname.startsWith('/api/')) {
+    response = addRateLimitHeadersToResponse(response, request)
+  }
+
   return response
 }
 
@@ -71,8 +94,7 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * - api (API routes)
      */
-    '/((?!api|_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 }
