@@ -1,6 +1,7 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
+  darkMode: 'class', // Enable dark mode with class strategy
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -31,6 +32,14 @@ const config: Config = {
           light: '#F5F5F5',
           white: '#FFFFFF',
         },
+        // Dark mode specific colors
+        dark: {
+          bg: '#0f172a',        // slate-900
+          card: '#1e293b',      // slate-800
+          border: '#334155',    // slate-700
+          text: '#f1f5f9',      // slate-100
+          muted: '#94a3b8',     // slate-400
+        },
       },
       container: {
         center: true,
@@ -40,6 +49,10 @@ const config: Config = {
           lg: '1.5rem',
           xl: '2rem',
         },
+      },
+      // Animation for dark mode transition
+      transitionProperty: {
+        'colors-shadow': 'color, background-color, border-color, box-shadow',
       },
     },
   },

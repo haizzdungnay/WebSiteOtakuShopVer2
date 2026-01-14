@@ -8,6 +8,32 @@
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     overflow-x: hidden; /* Prevent horizontal scroll */
   }
+
+  /* Dark mode base styles */
+  html {
+    @apply bg-white text-gray-900 transition-colors duration-200;
+  }
+
+  html.dark {
+    @apply bg-dark-bg text-dark-text;
+  }
+
+  /* Focus visible for accessibility */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary-dark;
+  }
+
+  /* Reduced motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 @layer components {
@@ -20,10 +46,12 @@
   /* Buttons */
   .btn-primary {
     @apply bg-black text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold hover:bg-gray-800 transition-all duration-300 active:scale-95 text-sm sm:text-base;
+    @apply dark:bg-white dark:text-gray-900 dark:hover:bg-gray-200;
   }
 
   .btn-secondary {
     @apply border-2 border-primary text-primary px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold hover:bg-primary hover:text-white transition-all duration-300 text-sm sm:text-base;
+    @apply dark:border-primary-light dark:text-primary-light dark:hover:bg-primary-light dark:hover:text-gray-900;
   }
 
   .btn-accent {
@@ -33,6 +61,7 @@
   /* Product Card */
   .product-card {
     @apply bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-100 relative;
+    @apply dark:bg-dark-card dark:border-dark-border dark:hover:border-primary;
   }
 
   .product-card:hover {
@@ -59,6 +88,7 @@
   /* Price */
   .price-original {
     @apply text-gray-400 line-through text-sm;
+    @apply dark:text-gray-500;
   }
 
   .price-sale {
@@ -67,15 +97,18 @@
 
   .price-regular {
     @apply text-gray-800 font-bold text-lg;
+    @apply dark:text-gray-200;
   }
 
   /* Sidebar */
   .sidebar-link {
     @apply flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-primary-50 hover:text-primary-dark transition-colors cursor-pointer rounded;
+    @apply dark:text-gray-300 dark:hover:bg-dark-card dark:hover:text-primary-light;
   }
 
   .sidebar-link.active {
     @apply bg-primary-50 text-primary-dark font-semibold;
+    @apply dark:bg-dark-card dark:text-primary-light;
   }
 
   /* Nav Link */
@@ -85,16 +118,58 @@
 
   /* Form Inputs */
   .input-field {
-    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+    @apply w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-colors;
+    @apply dark:bg-dark-card dark:border-dark-border dark:text-dark-text dark:placeholder-dark-muted dark:focus:ring-primary-light;
+  }
+
+  /* Form Label */
+  .form-label {
+    @apply block text-sm font-medium text-gray-700 mb-1.5;
+    @apply dark:text-gray-300;
+  }
+
+  /* Form Error */
+  .form-error {
+    @apply text-sm text-red-500 mt-1;
+    @apply dark:text-red-400;
   }
 
   /* Section Title */
   .section-title {
     @apply text-2xl font-bold text-gray-800 flex items-center gap-2 mb-6;
+    @apply dark:text-gray-100;
   }
 
   .section-title-bar {
     @apply w-1 h-8 bg-accent-red;
+  }
+
+  /* Card component */
+  .card {
+    @apply bg-white rounded-lg border border-gray-200 shadow-sm;
+    @apply dark:bg-dark-card dark:border-dark-border;
+  }
+
+  /* Dropdown */
+  .dropdown {
+    @apply bg-white rounded-lg shadow-xl border border-gray-200;
+    @apply dark:bg-dark-card dark:border-dark-border;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 z-50;
+    @apply dark:bg-black/70;
+  }
+
+  .modal-content {
+    @apply bg-white rounded-lg shadow-2xl;
+    @apply dark:bg-dark-card;
+  }
+
+  /* Skip to content link for accessibility */
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-accent-red focus:text-white focus:rounded-lg focus:font-semibold;
   }
 }
 
@@ -102,6 +177,11 @@
   /* Custom utilities */
   .text-gradient {
     @apply bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent;
+  }
+
+  /* Screen reader only */
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    @apply sr-only;
   }
 }
 
@@ -115,10 +195,28 @@
   @apply bg-gray-100;
 }
 
+.dark ::-webkit-scrollbar-track {
+  @apply bg-dark-bg;
+}
+
 ::-webkit-scrollbar-thumb {
   @apply bg-primary rounded;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-primary-dark;
+}
+
+/* Dark mode specific overrides */
+.dark {
+  color-scheme: dark;
+}
+
+/* Selection color */
+::selection {
+  @apply bg-primary/30 text-gray-900;
+}
+
+.dark ::selection {
+  @apply bg-primary/40 text-white;
 }

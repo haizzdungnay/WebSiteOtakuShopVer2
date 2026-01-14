@@ -6,6 +6,7 @@ import FloatingButtons from '@/components/FloatingButtons';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { CartProvider } from '@/contexts/CartContext';
 import { WishlistProvider } from '@/contexts/WishlistContext';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { OrganizationJsonLd, WebSiteJsonLd } from '@/components/JsonLd';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://otakushop.vn';
@@ -107,16 +108,24 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body suppressHydrationWarning>
-        <AuthProvider>
-          <CartProvider>
-            <WishlistProvider>
-              <Header />
-              <main className="min-h-screen">{children}</main>
-              <Footer />
-              <FloatingButtons />
-            </WishlistProvider>
-          </CartProvider>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <CartProvider>
+              <WishlistProvider>
+                {/* Skip to main content - Accessibility */}
+                <a href="#main-content" className="skip-link">
+                  Chuyển đến nội dung chính
+                </a>
+                <Header />
+                <main id="main-content" className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-200">
+                  {children}
+                </main>
+                <Footer />
+                <FloatingButtons />
+              </WishlistProvider>
+            </CartProvider>
+          </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

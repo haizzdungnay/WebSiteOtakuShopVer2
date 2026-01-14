@@ -27,7 +27,7 @@ import { prisma } from '@/lib/prisma'
 import { checkRateLimit } from '@/lib/rate-limit'
 
 // Type the mocked prisma
-const mockPrismaUser = prisma.user as {
+const mockPrismaUser = prisma.user as unknown as {
   findUnique: ReturnType<typeof vi.fn>
 }
 
