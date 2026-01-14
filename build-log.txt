@@ -1,0 +1,262 @@
+
+> otakushop@1.0.0 build
+> node ./scripts/prebuild.js && next build
+
+> npx prisma generate
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.19.1) to .\app\generated\prisma in 174ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Interested in query caching in just a few lines of code? Try Accelerate today! https://pris.ly/tip-3-accelerate
+
+Skipping prisma db push because DATABASE_URL is not set
+▲ Next.js 16.1.1 (Turbopack)
+- Environments: .env.local, .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 13.2s
+  Running TypeScript ...
+  Collecting page data using 11 workers ...
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."slug" FROM "public"."products" WHERE ("public"."products"."isActive" = $1 AND "public"."products"."featured" = $2) ORDER BY "public"."products"."id" ASC LIMIT $3 OFFSET $4
+  Generating static pages using 11 workers (0/143) ...
+  Generating static pages using 11 workers (35/143) 
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+  Generating static pages using 11 workers (71/143) 
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+  Generating static pages using 11 workers (107/143) 
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."name", "public"."products"."shortDescription", "public"."products"."description", "public"."products"."price", "public"."products"."comparePrice", "public"."products"."images", "public"."products"."categoryId", "public"."products"."brandId" FROM "public"."products" WHERE ("public"."products"."slug" = $1 AND "public"."products"."isActive" = $2) LIMIT $3 OFFSET $4
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."name" FROM "public"."categories" WHERE "public"."categories"."id" IN ($1) OFFSET $2
+[34mprisma:query[39m SELECT "public"."products"."id", "public"."products"."slug", "public"."products"."updatedAt" FROM "public"."products" WHERE "public"."products"."isActive" = $1 ORDER BY "public"."products"."updatedAt" DESC LIMIT $2 OFFSET $3
+[34mprisma:query[39m SELECT "public"."categories"."id", "public"."categories"."slug", "public"."categories"."updatedAt" FROM "public"."categories" WHERE 1=1 OFFSET $1
+✓ Generating static pages using 11 workers (143/143) in 1965.1ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ○ /admin
+├ ○ /admin/orders
+├ ○ /admin/users
+├ ○ /api-docs
+├ ƒ /api/addresses
+├ ƒ /api/addresses/[id]
+├ ƒ /api/admin/accounts
+├ ƒ /api/admin/accounts/[id]
+├ ƒ /api/admin/accounts/password
+├ ƒ /api/admin/announcements
+├ ƒ /api/admin/announcements/[id]
+├ ƒ /api/admin/categories
+├ ƒ /api/admin/categories/[id]
+├ ƒ /api/admin/coupons
+├ ƒ /api/admin/coupons/[id]
+├ ƒ /api/admin/dashboard/customers
+├ ƒ /api/admin/dashboard/products
+├ ƒ /api/admin/dashboard/revenue
+├ ƒ /api/admin/dashboard/stats
+├ ƒ /api/admin/login
+├ ƒ /api/admin/orders
+├ ƒ /api/admin/orders/[id]
+├ ƒ /api/admin/orders/[id]/status
+├ ƒ /api/admin/products
+├ ƒ /api/admin/products/[id]
+├ ƒ /api/admin/reviews
+├ ƒ /api/admin/reviews/[id]
+├ ƒ /api/admin/users
+├ ƒ /api/admin/users/[id]
+├ ƒ /api/admin/users/[id]/verify
+├ ƒ /api/announcements
+├ ƒ /api/announcements/[id]
+├ ƒ /api/announcements/hot
+├ ƒ /api/auth/change-password
+├ ƒ /api/auth/forgot-password
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/me
+├ ƒ /api/auth/profile
+├ ƒ /api/auth/refresh
+├ ƒ /api/auth/register
+├ ƒ /api/auth/resend-verification
+├ ƒ /api/auth/reset-password
+├ ƒ /api/auth/send-otp
+├ ƒ /api/auth/upload-avatar
+├ ƒ /api/auth/verify-email
+├ ƒ /api/auth/verify-otp
+├ ƒ /api/cart
+├ ƒ /api/cart/[id]
+├ ƒ /api/categories
+├ ƒ /api/coupons/validate
+├ ƒ /api/csrf
+├ ƒ /api/docs
+├ ƒ /api/health
+├ ƒ /api/location
+├ ƒ /api/orders
+├ ƒ /api/orders/[id]
+├ ƒ /api/orders/[id]/cancel
+├ ƒ /api/orders/by-number/[orderNumber]
+├ ƒ /api/orders/guest
+├ ƒ /api/payment/momo/callback
+├ ƒ /api/payment/momo/create
+├ ƒ /api/payment/momo/ipn
+├ ƒ /api/payment/vnpay
+├ ƒ /api/payment/vnpay/ipn
+├ ƒ /api/payment/vnpay/return
+├ ƒ /api/products
+├ ƒ /api/products/[slug]
+├ ƒ /api/products/[slug]/reviews
+├ ƒ /api/public-stats
+├ ƒ /api/reviews
+├ ƒ /api/reviews/[id]
+├ ƒ /api/reviews/[id]/vote
+├ ƒ /api/reviews/can-review
+├ ƒ /api/search/suggestions
+├ ƒ /api/shipping/calculate
+├ ƒ /api/shipping/track
+├ ƒ /api/uploadthing
+├ ƒ /api/wishlist
+├ ƒ /api/wishlist/[productId]
+├ ○ /cart
+├ ƒ /characters/[character]
+├ ○ /checkout
+├ ○ /checkout/success
+├ ○ /chinh-sach-bao-hanh
+├ ○ /chinh-sach-bao-mat
+├ ○ /chinh-sach-doi-tra
+├ ○ /chinh-sach-van-chuyen
+├ ○ /faq
+├ ○ /forgot-password
+├ ○ /giao-hang
+├ ○ /gioi-thieu
+├ ○ /huong-dan-thanh-toan
+├ ○ /in-stock
+├ ○ /lien-he
+├ ○ /login
+├ ○ /new-releases
+├ ○ /products
+├ ● /products/[slug]
+│ ├ /products/nendoroid-one-piece-luffy-gear-5-id-1-1
+│ ├ /products/prize-figure-attack-on-titan-hange-id-6-6
+│ ├ /products/nendoroid-naruto-naruto-sage-mode-id-11-11
+│ └ [+47 more paths]
+├ ○ /profile
+├ ○ /profile/addresses
+├ ○ /profile/orders
+├ ○ /profile/preorders
+├ ○ /profile/wishlist
+├ ○ /register
+├ ○ /reset-password
+├ ○ /robots.txt
+├ ○ /sale
+├ ○ /search
+├ ○ /sitemap.xml
+├ ○ /stores
+├ ○ /tin-tuc
+├ ƒ /tin-tuc/[id]
+├ ○ /tinh-gia
+├ ○ /tra-cuu
+└ ○ /verify-email
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+●  (SSG)      prerendered as static HTML (uses generateStaticParams)
+ƒ  (Dynamic)  server-rendered on demand
+

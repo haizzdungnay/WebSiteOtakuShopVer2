@@ -1,16 +1,19 @@
 /**
- * Simple in-memory rate limiter for API routes
- * For production, consider using Redis or a dedicated rate limiting service
+ * Rate limiter with Redis support and in-memory fallback
+ * For production, Redis is recommended for distributed rate limiting
  */
+
+import { getRedisClient, isRedisConnected } from './redis'
 
 interface RateLimitEntry {
   count: number;
   resetTime: number;
 }
 
+// In-memory fallback store
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
-// Clean up expired entries every 5 minutes
+// Clean up expired entries every 5 minutes (for memory fallback)
 setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of rateLimitStore.entries()) {
@@ -33,12 +36,93 @@ interface RateLimitResult {
 }
 
 /**
- * Check rate limit for a given identifier
+ * Check rate limit using Redis (with memory fallback)
  * @param identifier - Unique identifier (IP, user ID, etc.)
  * @param config - Rate limit configuration
  * @returns RateLimitResult
  */
-export function checkRateLimit(
+export async function checkRateLimitAsync(
+  identifier: string,
+  config: RateLimitConfig
+): Promise<RateLimitResult> {
+  const redis = getRedisClient()
+
+  // Try Redis first
+  if (redis && isRedisConnected()) {
+    try {
+      return await checkRateLimitRedis(identifier, config, redis)
+    } catch (error) {
+      console.warn('[RateLimit] Redis failed, falling back to memory:', error)
+    }
+  }
+
+  // Fallback to memory
+  return checkRateLimitMemory(identifier, config)
+}
+
+/**
+ * Check rate limit using Redis
+ */
+async function checkRateLimitRedis(
+  identifier: string,
+  config: RateLimitConfig,
+  redis: ReturnType<typeof getRedisClient>
+): Promise<RateLimitResult> {
+  if (!redis) {
+    return checkRateLimitMemory(identifier, config)
+  }
+
+  const key = `ratelimit:${identifier}`
+  const now = Date.now()
+  const windowSeconds = Math.ceil(config.windowMs / 1000)
+
+  // Use Redis MULTI for atomic operations
+  const pipeline = redis.pipeline()
+  pipeline.incr(key)
+  pipeline.pttl(key) // Get TTL in milliseconds
+
+  const results = await pipeline.exec()
+
+  if (!results) {
+    return checkRateLimitMemory(identifier, config)
+  }
+
+  const [incrResult, ttlResult] = results
+  const count = (incrResult?.[1] as number) || 1
+  const ttl = (ttlResult?.[1] as number) || -1
+
+  // If this is a new key (count === 1 or no TTL), set expiration
+  if (count === 1 || ttl === -1 || ttl === -2) {
+    await redis.expire(key, windowSeconds)
+  }
+
+  const resetTime = ttl > 0 ? now + ttl : now + config.windowMs
+
+  // Check if over limit
+  if (count > config.maxRequests) {
+    const retryAfter = Math.ceil((resetTime - now) / 1000)
+    return {
+      success: false,
+      remaining: 0,
+      resetTime,
+      retryAfter: Math.max(1, retryAfter),
+    }
+  }
+
+  return {
+    success: true,
+    remaining: Math.max(0, config.maxRequests - count),
+    resetTime,
+  }
+}
+
+/**
+ * Check rate limit using in-memory store (fallback)
+ * @param identifier - Unique identifier (IP, user ID, etc.)
+ * @param config - Rate limit configuration
+ * @returns RateLimitResult
+ */
+function checkRateLimitMemory(
   identifier: string,
   config: RateLimitConfig
 ): RateLimitResult {
@@ -81,6 +165,18 @@ export function checkRateLimit(
 }
 
 /**
+ * Synchronous rate limit check (uses memory only)
+ * For backwards compatibility with existing code
+ * @deprecated Use checkRateLimitAsync for Redis support
+ */
+export function checkRateLimit(
+  identifier: string,
+  config: RateLimitConfig
+): RateLimitResult {
+  return checkRateLimitMemory(identifier, config)
+}
+
+/**
  * Get client IP from request headers
  */
 export function getClientIP(request: Request): string {
@@ -99,6 +195,12 @@ export function getClientIP(request: Request): string {
   const vercelForwardedFor = request.headers.get('x-vercel-forwarded-for');
   if (vercelForwardedFor) {
     return vercelForwardedFor.split(',')[0].trim();
+  }
+
+  // Cloudflare-specific header
+  const cfConnectingIP = request.headers.get('cf-connecting-ip');
+  if (cfConnectingIP) {
+    return cfConnectingIP;
   }
 
   return 'unknown';
@@ -131,6 +233,11 @@ export const RATE_LIMITS = {
     maxRequests: 20,
     windowMs: 60 * 1000, // 20 requests per minute
   },
+  // Limit for sensitive operations (password reset, etc.)
+  SENSITIVE: {
+    maxRequests: 3,
+    windowMs: 10 * 60 * 1000, // 3 requests per 10 minutes
+  },
 };
 
 /**
@@ -142,4 +249,66 @@ export function getRateLimitHeaders(result: RateLimitResult): Record<string, str
     'X-RateLimit-Reset': new Date(result.resetTime).toISOString(),
     ...(result.retryAfter && { 'Retry-After': result.retryAfter.toString() }),
   };
+}
+
+/**
+ * Reset rate limit for a specific identifier (useful for testing)
+ */
+export async function resetRateLimit(identifier: string): Promise<void> {
+  // Clear from memory
+  rateLimitStore.delete(identifier)
+
+  // Clear from Redis
+  const redis = getRedisClient()
+  if (redis && isRedisConnected()) {
+    try {
+      await redis.del(`ratelimit:${identifier}`)
+    } catch (error) {
+      console.warn('[RateLimit] Failed to reset in Redis:', error)
+    }
+  }
+}
+
+/**
+ * Get current rate limit status without incrementing counter
+ */
+export async function getRateLimitStatus(
+  identifier: string,
+  config: RateLimitConfig
+): Promise<{ count: number; remaining: number; resetTime: number } | null> {
+  const redis = getRedisClient()
+
+  if (redis && isRedisConnected()) {
+    try {
+      const key = `ratelimit:${identifier}`
+      const [countStr, ttl] = await Promise.all([
+        redis.get(key),
+        redis.pttl(key),
+      ])
+
+      if (countStr) {
+        const count = parseInt(countStr, 10)
+        const resetTime = ttl > 0 ? Date.now() + ttl : Date.now() + config.windowMs
+        return {
+          count,
+          remaining: Math.max(0, config.maxRequests - count),
+          resetTime,
+        }
+      }
+    } catch (error) {
+      console.warn('[RateLimit] Failed to get status from Redis:', error)
+    }
+  }
+
+  // Fallback to memory
+  const entry = rateLimitStore.get(identifier)
+  if (entry && Date.now() < entry.resetTime) {
+    return {
+      count: entry.count,
+      remaining: Math.max(0, config.maxRequests - entry.count),
+      resetTime: entry.resetTime,
+    }
+  }
+
+  return null
 }
