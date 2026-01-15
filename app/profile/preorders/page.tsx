@@ -109,7 +109,7 @@ export default function PreOrdersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
@@ -117,20 +117,20 @@ export default function PreOrdersPage() {
           <ChevronRight className="w-4 h-4" />
           <Link href="/profile" className="hover:text-red-500">Tài khoản</Link>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-gray-900">Đặt trước & Mua hộ</span>
+          <span className="text-gray-900 dark:text-gray-100">Đặt trước & Mua hộ</span>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <aside className="lg:w-64 flex-shrink-0">
-            <div className="bg-white rounded-xl shadow-sm p-4">
+            <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-4">
               <div className="flex items-center gap-3 pb-4 border-b">
                 <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
                   <User className="w-6 h-6 text-red-500" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{user?.fullName}</p>
-                  <p className="text-sm text-gray-500">{user?.email}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{user?.fullName}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
                 </div>
               </div>
               <nav className="mt-4 space-y-1">
@@ -154,7 +154,7 @@ export default function PreOrdersPage() {
 
           {/* Main Content */}
           <main className="flex-1">
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
               <h1 className="text-xl font-bold text-gray-900 mb-6">Đơn đặt trước & Mua hộ</h1>
 
               {/* Info Banner */}
@@ -164,7 +164,7 @@ export default function PreOrdersPage() {
                     <ShoppingBag className="w-5 h-5 text-red-500" />
                   </div>
                   <div>
-                    <h3 className="font-medium text-gray-900">Đơn hàng đang chờ xử lý</h3>
+                    <h3 className="font-medium text-gray-900 dark:text-gray-100">Đơn hàng đang chờ xử lý</h3>
                     <p className="text-sm text-gray-600 mt-1">
                       Các đơn hàng chờ xác nhận hoặc đang xử lý sẽ được hiển thị tại đây.
                       Bạn có thể theo dõi trạng thái đơn hàng realtime.
@@ -236,10 +236,10 @@ export default function PreOrdersPage() {
                         {/* Order Header */}
                         <div className="bg-gray-50 px-4 py-3 flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <span className="text-sm text-gray-500">
-                              Mã đơn: <span className="font-medium text-gray-900">{order.orderNumber}</span>
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
+                              Mã đơn: <span className="font-medium text-gray-900 dark:text-gray-100">{order.orderNumber}</span>
                             </span>
-                            <span className="text-sm text-gray-500">
+                            <span className="text-sm text-gray-500 dark:text-gray-400">
                               {new Date(order.createdAt).toLocaleDateString('vi-VN')}
                             </span>
                           </div>
@@ -275,14 +275,14 @@ export default function PreOrdersPage() {
                                 >
                                   {item.product.name}
                                 </Link>
-                                <p className="text-sm text-gray-500">
+                                <p className="text-sm text-gray-500 dark:text-gray-400">
                                   x{item.quantity} · {item.price.toLocaleString('vi-VN')}₫
                                 </p>
                               </div>
                             </div>
                           ))}
                           {order.items.length > 2 && (
-                            <p className="text-sm text-gray-500">
+                            <p className="text-sm text-gray-500 dark:text-gray-400">
                               +{order.items.length - 2} sản phẩm khác
                             </p>
                           )}
@@ -291,7 +291,7 @@ export default function PreOrdersPage() {
                         {/* Order Footer */}
                         <div className="bg-gray-50 px-4 py-3 flex items-center justify-between">
                           <div className="text-sm">
-                            <span className="text-gray-500">Tổng tiền: </span>
+                            <span className="text-gray-500 dark:text-gray-400">Tổng tiền: </span>
                             <span className="font-bold text-red-500">
                               {order.totalAmount.toLocaleString('vi-VN')}₫
                             </span>

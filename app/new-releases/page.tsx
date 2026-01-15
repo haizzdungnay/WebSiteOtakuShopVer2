@@ -151,7 +151,7 @@ export default function NewReleasesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
             {/* Hero Banner */}
             <div className="relative h-64 md:h-80 bg-gradient-to-r from-orange-500 to-red-500 overflow-hidden">
                 <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1578632767115-351597cf2477?w=1200')] bg-cover bg-center opacity-30"></div>
@@ -177,7 +177,7 @@ export default function NewReleasesPage() {
             </div>
 
             {/* Breadcrumb */}
-            <div className="bg-white border-b">
+            <div className="bg-white dark:bg-dark-card border-b dark:border-dark-border transition-colors">
                 <div className="container-custom py-4">
                     <nav className="flex items-center gap-2 text-sm">
                         <Link href="/" className="text-gray-600 hover:text-accent-red">Trang chủ</Link>
@@ -192,7 +192,7 @@ export default function NewReleasesPage() {
                 <div className="flex flex-col lg:flex-row gap-8">
                     {/* Sidebar Filters */}
                     <aside className="lg:w-72 flex-shrink-0">
-                        <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+                        <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6 sticky top-4">
                             <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
                                 <Sparkles className="w-5 h-5 text-orange-500" />
                                 Hàng mới phát hành
@@ -288,9 +288,9 @@ export default function NewReleasesPage() {
                     {/* Products Grid */}
                     <div className="flex-1">
                         {/* Toolbar */}
-                        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+                        <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-4 mb-6">
                             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                                <div className="text-gray-600">
+                                <div className="text-gray-600 dark:text-gray-400">
                                     {loading ? (
                                         <span className="flex items-center gap-2">
                                             <Loader2 className="w-4 h-4 animate-spin" />
@@ -298,7 +298,7 @@ export default function NewReleasesPage() {
                                         </span>
                                     ) : (
                                         <>
-                                            Hiển thị <span className="font-semibold text-gray-900">{products.length}</span> / {total} sản phẩm
+                                            Hiển thị <span className="font-semibold text-gray-900 dark:text-gray-100">{products.length}</span> / {total} sản phẩm
                                         </>
                                     )}
                                 </div>

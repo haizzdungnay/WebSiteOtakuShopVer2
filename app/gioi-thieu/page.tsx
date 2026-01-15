@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 py-12">
       <div className="container-custom">
         {/* Hero Section */}
         <div className="text-center mb-12">
@@ -53,7 +53,7 @@ export default function AboutPage() {
         {/* Story */}
         <div className="bg-white rounded-3xl p-8 md:p-12 shadow-lg mb-16">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Câu chuyện của chúng tôi</h2>
-          <div className="prose prose-lg max-w-none text-gray-600">
+          <div className="prose prose-lg max-w-none text-gray-600 dark:text-gray-400">
             <p>
               DN Figure được thành lập với sứ mệnh mang đến cho cộng đồng yêu thích anime tại Việt Nam những sản phẩm figure, mô hình chất lượng cao với giá cả hợp lý.
             </p>

@@ -133,7 +133,7 @@ function InStockContent() {
     const totalPages = Math.ceil(totalProducts / limit);
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
             {/* Header */}
             <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
                 <div className="container-custom py-8">
@@ -199,9 +199,9 @@ function InStockContent() {
                 <div className="flex flex-col md:flex-row gap-8">
                     {/* Sidebar Filters */}
                     <aside className={`md:w-64 flex-shrink-0 ${showFilters ? 'block' : 'hidden md:block'}`}>
-                        <div className="bg-white rounded-lg p-6 shadow-sm sticky top-24">
+                        <div className="bg-white dark:bg-dark-card rounded-lg dark:border dark:border-dark-border transition-colors p-6 shadow-sm sticky top-24">
                             <div className="flex items-center justify-between mb-4 md:mb-6">
-                                <h3 className="font-bold text-lg text-gray-900">Bộ lọc</h3>
+                                <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">Bộ lọc</h3>
                                 <button
                                     onClick={() => setShowFilters(false)}
                                     className="md:hidden p-1"
@@ -270,7 +270,7 @@ function InStockContent() {
                             )}
 
                             {/* Other pages link */}
-                            <div className="mt-6 pt-6 border-t border-gray-200">
+                            <div className="mt-6 pt-6 border-t border-gray-200 dark:border-dark-border">
                                 <p className="text-sm text-gray-600 mb-3">Xem thêm:</p>
                                 <div className="space-y-2">
                                     <Link
@@ -295,7 +295,7 @@ function InStockContent() {
                         {loading ? (
                             <div className="flex items-center justify-center py-20">
                                 <Loader2 className="w-8 h-8 animate-spin text-green-500" />
-                                <span className="ml-3 text-gray-500">Đang tải sản phẩm...</span>
+                                <span className="ml-3 text-gray-500 dark:text-gray-400">Đang tải sản phẩm...</span>
                             </div>
                         ) : products.length === 0 ? (
                             <div className="text-center py-20 bg-white rounded-lg">
@@ -334,7 +334,7 @@ function InStockContent() {
                                         <button
                                             onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                                             disabled={currentPage === 1}
-                                            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background-light dark:bg-dark-bg transition-colors duration-200"
                                         >
                                             Trước
                                         </button>
@@ -369,7 +369,7 @@ function InStockContent() {
                                         <button
                                             onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                                             disabled={currentPage === totalPages}
-                                            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                                            className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-background-light dark:bg-dark-bg transition-colors duration-200"
                                         >
                                             Sau
                                         </button>
@@ -387,9 +387,9 @@ function InStockContent() {
 export default function InStockPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+            <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 flex items-center justify-center">
                 <Loader2 className="w-8 h-8 animate-spin text-green-500" />
-                <span className="ml-3 text-gray-500">Đang tải...</span>
+                <span className="ml-3 text-gray-500 dark:text-gray-400">Đang tải...</span>
             </div>
         }>
             <InStockContent />

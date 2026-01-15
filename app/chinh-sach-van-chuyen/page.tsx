@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function ShippingPolicyPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 py-12">
       <div className="container-custom max-w-4xl">
         <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">Chính sách vận chuyển</h1>
 

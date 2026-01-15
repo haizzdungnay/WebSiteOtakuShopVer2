@@ -3,19 +3,31 @@
 @tailwind utilities;
 
 @layer base {
+
   /* Body defaults */
-  html, body {
+  html,
+  body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    overflow-x: hidden; /* Prevent horizontal scroll */
+    overflow-x: hidden;
+    /* Prevent horizontal scroll */
+  }
+
+  /* Light mode base styles - pastel pink background */
+  html {
+    @apply bg-background-light text-gray-900 transition-colors duration-200;
+  }
+
+  body {
+    @apply bg-background-light transition-colors duration-200;
   }
 
   /* Dark mode base styles */
-  html {
-    @apply bg-white text-gray-900 transition-colors duration-200;
-  }
-
   html.dark {
     @apply bg-dark-bg text-dark-text;
+  }
+
+  html.dark body {
+    @apply bg-dark-bg;
   }
 
   /* Focus visible for accessibility */
@@ -25,6 +37,7 @@
 
   /* Reduced motion preference */
   @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {
@@ -37,6 +50,7 @@
 }
 
 @layer components {
+
   /* Container */
   .container-custom {
     /* Mở rộng container để tránh tràn navbar ở 100% zoom */
@@ -171,9 +185,31 @@
   .skip-link {
     @apply sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-accent-red focus:text-white focus:rounded-lg focus:font-semibold;
   }
+
+  /* Page wrapper - use this for all page backgrounds */
+  .page-wrapper {
+    @apply bg-background-light dark:bg-dark-bg transition-colors duration-200;
+  }
+
+  /* Content box - use this for white content areas */
+  .content-box {
+    @apply bg-white dark:bg-dark-card rounded-lg shadow-sm transition-colors duration-200;
+    @apply border border-gray-100 dark:border-dark-border;
+  }
+
+  /* Section wrapper - for bg-gray-50 sections */
+  .section-wrapper {
+    @apply bg-background-light dark:bg-dark-bg transition-colors duration-200;
+  }
+
+  /* Inner box - for nested bg-gray-50 areas */
+  .inner-box {
+    @apply bg-gray-50 dark:bg-dark-card/50 rounded-lg transition-colors duration-200;
+  }
 }
 
 @layer utilities {
+
   /* Custom utilities */
   .text-gradient {
     @apply bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent;

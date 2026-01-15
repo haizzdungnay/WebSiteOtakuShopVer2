@@ -109,7 +109,7 @@ export default async function Home() {
   const transformedAllProducts = allProducts.map(transformProduct);
 
   return (
-    <div className="bg-background-light">
+    <div className="bg-background-light dark:bg-dark-bg transition-colors duration-200">
       <section className="py-4 sm:py-6 lg:py-8">
         <div className="container-custom space-y-6 sm:space-y-8 lg:space-y-10">
           {/* HÀNG TRÊN: Sidebar + News Carousel */}
@@ -131,7 +131,7 @@ export default async function Home() {
             {transformedHotProducts.length > 0 && (
               <div className="mb-8 sm:mb-10 lg:mb-12">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                     <span className="w-1 h-6 sm:h-8 bg-accent-red" />
                     SẢN PHẨM HOT
                   </h2>
@@ -154,7 +154,7 @@ export default async function Home() {
             {transformedNewProducts.length > 0 && (
               <div className="mb-8 sm:mb-10 lg:mb-12">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                     <span className="w-1 h-6 sm:h-8 bg-green-500" />
                     HÀNG MỚI VỀ
                   </h2>
@@ -177,7 +177,7 @@ export default async function Home() {
             {transformedSaleProducts.length > 0 && (
               <div className="mb-8 sm:mb-10 lg:mb-12">
                 <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                  <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                     <span className="w-1 h-6 sm:h-8 bg-orange-500" />
                     ĐANG GIẢM GIÁ
                   </h2>
@@ -199,7 +199,7 @@ export default async function Home() {
             {/* TẤT CẢ SẢN PHẨM */}
             <div className="mb-4">
               <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                <h2 className="text-lg sm:text-xl lg:text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
                   <span className="w-1 h-6 sm:h-8 bg-primary" />
                   TẤT CẢ SẢN PHẨM
                 </h2>
@@ -216,7 +216,7 @@ export default async function Home() {
                 ))}
               </div>
               {products.length === 0 && (
-                <div className="text-center py-10 text-gray-500">
+                <div className="text-center py-10 text-gray-500 dark:text-gray-400">
                   Chưa có sản phẩm nào. Vui lòng thêm sản phẩm từ trang quản trị.
                 </div>
               )}

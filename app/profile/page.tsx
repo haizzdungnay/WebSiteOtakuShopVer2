@@ -40,7 +40,7 @@ export default function ProfilePage() {
     dateOfBirth: '',
     avatar: ''
   });
-  
+
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState('');
   const [savingAvatar, setSavingAvatar] = useState(false);
@@ -213,7 +213,7 @@ export default function ProfilePage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const submitData = {
       ...formData,
       dateOfBirth: formData.dateOfBirth ? new Date(formData.dateOfBirth).toISOString() : undefined
@@ -245,7 +245,7 @@ export default function ProfilePage() {
   return (
     <div className="bg-background-light">
       {/* Breadcrumb */}
-      <div className="bg-white border-b">
+      <div className="bg-white dark:bg-dark-card border-b dark:border-dark-border transition-colors">
         <div className="container-custom py-3">
           <nav className="flex items-center gap-2 text-sm">
             <Link href="/" className="text-gray-500 hover:text-primary">
@@ -261,12 +261,12 @@ export default function ProfilePage() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-72 flex-shrink-0">
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border overflow-hidden transition-colors">
               {/* User Info Header */}
               <div className="bg-gradient-to-r from-primary to-accent-red p-4 text-white">
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <div 
+                    <div
                       onClick={handleAvatarClick}
                       className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-primary font-bold text-2xl overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
                       title="Click để thay đổi ảnh đại diện"
@@ -281,11 +281,11 @@ export default function ProfilePage() {
                         user.fullName?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || 'U'
                       )}
                     </div>
-                    <button 
+                    <button
                       onClick={handleAvatarClick}
-                      className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100"
+                      className="absolute bottom-0 right-0 w-6 h-6 bg-white rounded-full flex items-center justify-center shadow-md hover:bg-gray-100 dark:hover:bg-dark-border"
                     >
-                      <Camera size={12} className="text-gray-600" />
+                      <Camera size={12} className="text-gray-600 dark:text-gray-400" />
                     </button>
                   </div>
                   <div className="flex-1 min-w-0">
@@ -301,11 +301,10 @@ export default function ProfilePage() {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                      item.active
+                    className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${item.active
                         ? 'bg-primary text-white'
                         : 'text-gray-700 hover:bg-gray-50'
-                    }`}
+                      }`}
                   >
                     <item.icon size={20} />
                     <span className="font-medium text-sm">{item.label}</span>
@@ -318,13 +317,13 @@ export default function ProfilePage() {
 
           {/* Main Content */}
           <main className="flex-1">
-            <div className="bg-white rounded-lg shadow-sm">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors">
               {/* Header */}
-              <div className="p-6 border-b border-gray-200">
+              <div className="p-6 border-b border-gray-200 dark:border-dark-border">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Thông tin cá nhân</h1>
-                    <p className="text-gray-500 mt-1">Quản lý thông tin cá nhân của bạn</p>
+                    <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Thông tin cá nhân</h1>
+                    <p className="text-gray-500 dark:text-gray-400 mt-1">Quản lý thông tin cá nhân của bạn</p>
                   </div>
                   {!isEditing && (
                     <button
@@ -391,9 +390,9 @@ export default function ProfilePage() {
                           type="email"
                           value={user.email}
                           disabled
-                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500"
+                          className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-gray-50 text-gray-500 dark:text-gray-400"
                         />
-                        <p className="mt-1 text-xs text-gray-500">Email không thể thay đổi</p>
+                        <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">Email không thể thay đổi</p>
                       </div>
 
                       <div>
@@ -460,43 +459,43 @@ export default function ProfilePage() {
                 ) : (
                   <div className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-dark-border/50 rounded-lg transition-colors">
                         <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                          <User size={24} className="text-primary" />
+                          <User size={24} className="text-primary dark:text-primary-light" />
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Họ và tên</p>
-                          <p className="font-semibold text-gray-900">{user.fullName || 'Chưa cập nhật'}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Họ và tên</p>
+                          <p className="font-semibold text-gray-900 dark:text-gray-100">{user.fullName || 'Chưa cập nhật'}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-dark-border/50 rounded-lg transition-colors">
                         <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
                           <Mail size={24} className="text-blue-600" />
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Email</p>
-                          <p className="font-semibold text-gray-900">{user.email}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                          <p className="font-semibold text-gray-900 dark:text-gray-100">{user.email}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-dark-border/50 rounded-lg transition-colors">
                         <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
                           <Phone size={24} className="text-green-600" />
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Số điện thoại</p>
-                          <p className="font-semibold text-gray-900">{user.phone || 'Chưa cập nhật'}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Số điện thoại</p>
+                          <p className="font-semibold text-gray-900 dark:text-gray-100">{user.phone || 'Chưa cập nhật'}</p>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-4 p-4 bg-gray-50 dark:bg-dark-border/50 rounded-lg transition-colors">
                         <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
                           <Shield size={24} className="text-purple-600" />
                         </div>
                         <div>
-                          <p className="text-sm text-gray-500">Loại tài khoản</p>
-                          <p className="font-semibold text-gray-900">
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Loại tài khoản</p>
+                          <p className="font-semibold text-gray-900 dark:text-gray-100">
                             {user.role === 'admin' ? 'Quản trị viên' : user.role === 'staff' ? 'Nhân viên' : 'Khách hàng'}
                           </p>
                         </div>
@@ -544,29 +543,29 @@ export default function ProfilePage() {
                     )}
 
                     {/* Quick Links */}
-                    <div className="pt-6 border-t">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Truy cập nhanh</h3>
+                    <div className="pt-6 border-t dark:border-dark-border">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-4">Truy cập nhanh</h3>
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <Link
                           href="/profile/orders"
-                          className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-lg hover:bg-primary/10 transition-colors group"
+                          className="flex flex-col items-center gap-2 p-4 bg-gray-50 dark:bg-dark-border/50 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors group"
                         >
-                          <Package size={32} className="text-gray-400 group-hover:text-primary" />
-                          <span className="text-sm font-medium text-gray-700 group-hover:text-primary">Đơn hàng</span>
+                          <Package size={32} className="text-gray-400 group-hover:text-primary dark:group-hover:text-primary-light" />
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-primary-light">Đơn hàng</span>
                         </Link>
                         <Link
                           href="/profile/wishlist"
-                          className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-lg hover:bg-primary/10 transition-colors group"
+                          className="flex flex-col items-center gap-2 p-4 bg-gray-50 dark:bg-dark-border/50 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors group"
                         >
-                          <Heart size={32} className="text-gray-400 group-hover:text-primary" />
-                          <span className="text-sm font-medium text-gray-700 group-hover:text-primary">Yêu thích</span>
+                          <Heart size={32} className="text-gray-400 group-hover:text-primary dark:group-hover:text-primary-light" />
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-primary-light">Yêu thích</span>
                         </Link>
                         <Link
                           href="/profile/addresses"
-                          className="flex flex-col items-center gap-2 p-4 bg-gray-50 rounded-lg hover:bg-primary/10 transition-colors group"
+                          className="flex flex-col items-center gap-2 p-4 bg-gray-50 dark:bg-dark-border/50 rounded-lg hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors group"
                         >
-                          <MapPin size={32} className="text-gray-400 group-hover:text-primary" />
-                          <span className="text-sm font-medium text-gray-700 group-hover:text-primary">Địa chỉ</span>
+                          <MapPin size={32} className="text-gray-400 group-hover:text-primary dark:group-hover:text-primary-light" />
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-primary-light">Địa chỉ</span>
                         </Link>
                       </div>
                     </div>
@@ -581,7 +580,7 @@ export default function ProfilePage() {
       {/* Avatar URL Modal */}
       {showAvatarModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+          <div className="bg-white dark:bg-dark-card rounded-xl shadow-2xl w-full max-w-md transition-colors">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -592,7 +591,7 @@ export default function ProfilePage() {
                   onClick={() => setShowAvatarModal(false)}
                   className="p-1 hover:bg-gray-100 rounded-full transition-colors"
                 >
-                  <X size={20} className="text-gray-500" />
+                  <X size={20} className="text-gray-500 dark:text-gray-400" />
                 </button>
               </div>
 
@@ -626,7 +625,7 @@ export default function ProfilePage() {
                   placeholder="https://example.com/avatar.jpg"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                 />
-                <p className="mt-2 text-xs text-gray-500">
+                <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
                   Bạn có thể sử dụng link ảnh từ Google, Imgur, hoặc bất kỳ nguồn nào khác.
                 </p>
               </div>
@@ -665,7 +664,7 @@ export default function ProfilePage() {
       {/* Email Verification Modal */}
       {showVerifyModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
+          <div className="bg-white dark:bg-dark-card rounded-xl shadow-2xl w-full max-w-md transition-colors">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -676,7 +675,7 @@ export default function ProfilePage() {
                   onClick={() => setShowVerifyModal(false)}
                   className="p-1 hover:bg-gray-100 rounded-full transition-colors"
                 >
-                  <X size={20} className="text-gray-500" />
+                  <X size={20} className="text-gray-500 dark:text-gray-400" />
                 </button>
               </div>
 

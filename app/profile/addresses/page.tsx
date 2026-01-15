@@ -190,7 +190,7 @@ export default function AddressesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-6">
@@ -198,20 +198,20 @@ export default function AddressesPage() {
           <ChevronRight className="w-4 h-4" />
           <Link href="/profile" className="hover:text-red-500">Tài khoản</Link>
           <ChevronRight className="w-4 h-4" />
-          <span className="text-gray-900">Sổ địa chỉ</span>
+          <span className="text-gray-900 dark:text-gray-100">Sổ địa chỉ</span>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar */}
           <aside className="lg:w-64 flex-shrink-0">
-            <div className="bg-white rounded-xl shadow-sm p-4">
+            <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-4">
               <div className="flex items-center gap-3 pb-4 border-b">
                 <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
                   <User className="w-6 h-6 text-red-500" />
                 </div>
                 <div>
-                  <p className="font-medium text-gray-900">{user?.fullName}</p>
-                  <p className="text-sm text-gray-500">{user?.email}</p>
+                  <p className="font-medium text-gray-900 dark:text-gray-100">{user?.fullName}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{user?.email}</p>
                 </div>
               </div>
               <nav className="mt-4 space-y-1">
@@ -235,9 +235,9 @@ export default function AddressesPage() {
 
           {/* Main Content */}
           <main className="flex-1">
-            <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
               <div className="flex items-center justify-between mb-6">
-                <h1 className="text-xl font-bold text-gray-900">Sổ địa chỉ</h1>
+                <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Sổ địa chỉ</h1>
                 {!showForm && (
                   <button
                     onClick={() => setShowForm(true)}
@@ -251,7 +251,7 @@ export default function AddressesPage() {
 
               {/* Form */}
               {showForm && (
-                <form onSubmit={handleSubmit} className="mb-6 p-4 border rounded-lg bg-gray-50">
+                <form onSubmit={handleSubmit} className="mb-6 p-4 border rounded-lg bg-background-light dark:bg-dark-bg transition-colors duration-200">
                   <h3 className="font-medium mb-4">
                     {editingAddress ? 'Cập nhật địa chỉ' : 'Thêm địa chỉ mới'}
                   </h3>
@@ -357,7 +357,7 @@ export default function AddressesPage() {
                           onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
                           className="w-4 h-4 text-red-500 border-gray-300 rounded focus:ring-red-500"
                         />
-                        <span className="text-sm text-gray-700">Đặt làm địa chỉ mặc định</span>
+                        <span className="text-sm text-gray-700 dark:text-gray-300">Đặt làm địa chỉ mặc định</span>
                       </label>
                     </div>
                   </div>
@@ -373,7 +373,7 @@ export default function AddressesPage() {
                     <button
                       type="button"
                       onClick={resetForm}
-                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                      className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-background-light dark:bg-dark-bg transition-colors duration-200"
                     >
                       Hủy
                     </button>
@@ -407,15 +407,15 @@ export default function AddressesPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="font-medium text-gray-900">{address.label}</span>
+                            <span className="font-medium text-gray-900 dark:text-gray-100">{address.label}</span>
                             {address.isDefault && (
                               <span className="px-2 py-0.5 text-xs bg-red-500 text-white rounded">
                                 Mặc định
                               </span>
                             )}
                           </div>
-                          <p className="text-gray-900">{address.fullName}</p>
-                          <p className="text-gray-600">{address.phone}</p>
+                          <p className="text-gray-900 dark:text-gray-100">{address.fullName}</p>
+                          <p className="text-gray-600 dark:text-gray-400">{address.phone}</p>
                           <p className="text-gray-600 text-sm mt-1">
                             {address.address}{address.ward ? `, ${address.ward}` : ''}, {address.district}, {address.city}
                           </p>

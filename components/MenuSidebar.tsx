@@ -91,16 +91,16 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
       />
 
       {/* Sidebar */}
-      <aside className="fixed top-0 left-0 h-full w-80 bg-white shadow-2xl z-[100] overflow-y-auto transform transition-transform">
+      <aside className="fixed top-0 left-0 h-full w-80 bg-white dark:bg-dark-card shadow-2xl z-[100] overflow-y-auto transform transition-all duration-200">
         {/* Header */}
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-4 flex items-center justify-between z-10">
+        <div className="sticky top-0 bg-white dark:bg-dark-card border-b border-gray-200 dark:border-dark-border p-4 flex items-center justify-between z-10">
           <div className="flex items-center gap-2">
             <Package size={24} className="text-accent-red" />
-            <h2 className="text-lg font-bold">MENU</h2>
+            <h2 className="text-lg font-bold text-gray-900 dark:text-dark-text">MENU</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-dark-border rounded-full transition-colors text-gray-600 dark:text-dark-text"
           >
             <X size={20} />
           </button>
@@ -113,7 +113,7 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
             <li>
               <Link
                 href="/new-releases"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-border transition-colors text-gray-700 dark:text-dark-text"
                 onClick={onClose}
               >
                 <Gift size={20} className="text-accent-red" />
@@ -126,10 +126,10 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
             <li>
               <Link
                 href="/in-stock"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-border transition-colors text-gray-700 dark:text-dark-text"
                 onClick={onClose}
               >
-                <Package size={20} className="text-green-600" />
+                <Package size={20} className="text-green-600 dark:text-green-400" />
                 <span className="flex-1 font-medium text-sm">NOW In Stock!</span>
               </Link>
             </li>
@@ -138,10 +138,10 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
             <li>
               <Link
                 href="/products"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-border transition-colors text-gray-700 dark:text-dark-text"
                 onClick={onClose}
               >
-                <ShoppingBag size={20} className="text-blue-600" />
+                <ShoppingBag size={20} className="text-blue-600 dark:text-blue-400" />
                 <span className="flex-1 font-medium text-sm">ALL PRODUCTS</span>
               </Link>
             </li>
@@ -150,10 +150,10 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
             <li>
               <Link
                 href="/sale"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-border transition-colors text-gray-700 dark:text-dark-text"
                 onClick={onClose}
               >
-                <Percent size={20} className="text-orange-500" />
+                <Percent size={20} className="text-orange-500 dark:text-orange-400" />
                 <span className="flex-1 font-medium text-sm">Đang giảm giá</span>
                 <span className="bg-orange-500 text-white text-xs px-2 py-1 rounded-full font-bold">SALE</span>
               </Link>
@@ -163,10 +163,10 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
             <li>
               <Link
                 href="/profile/wishlist"
-                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-border transition-colors text-gray-700 dark:text-dark-text"
                 onClick={onClose}
               >
-                <Heart size={20} className="text-pink-500" />
+                <Heart size={20} className="text-pink-500 dark:text-pink-400" />
                 <span className="flex-1 font-medium text-sm">Sản phẩm yêu thích</span>
               </Link>
             </li>
@@ -175,14 +175,14 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
             <li>
               <div>
                 <button
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-border transition-colors text-gray-700 dark:text-dark-text"
                   onClick={() => setExpandedItem(expandedItem === 'categories' ? null : 'categories')}
                 >
-                  <FolderOpen size={20} className="text-purple-600" />
+                  <FolderOpen size={20} className="text-purple-600 dark:text-purple-400" />
                   <span className="flex-1 font-medium text-sm text-left">Danh mục</span>
                   <ChevronRight
                     size={16}
-                    className={`text-gray-400 transition-transform ${
+                    className={`text-gray-400 dark:text-dark-muted transition-transform ${
                       expandedItem === 'categories' ? 'rotate-90' : ''
                     }`}
                   />
@@ -192,22 +192,22 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
                 {expandedItem === 'categories' && (
                   <ul className="ml-10 mt-2 space-y-1">
                     {loadingCategories ? (
-                      <li className="px-3 py-2 text-sm text-gray-500">Đang tải...</li>
+                      <li className="px-3 py-2 text-sm text-gray-500 dark:text-dark-muted">Đang tải...</li>
                     ) : categories.length === 0 ? (
-                      <li className="px-3 py-2 text-sm text-gray-500">Chưa có danh mục</li>
+                      <li className="px-3 py-2 text-sm text-gray-500 dark:text-dark-muted">Chưa có danh mục</li>
                     ) : (
                       categories.map((category) => (
                         <li key={category.id}>
                           <Link
                             href={`/products?category=${category.slug}`}
-                            className="flex items-center justify-between px-3 py-2 rounded hover:bg-gray-50 transition-colors group/sub"
+                            className="flex items-center justify-between px-3 py-2 rounded hover:bg-gray-50 dark:hover:bg-dark-border transition-colors group/sub"
                             onClick={onClose}
                           >
-                            <span className="text-sm text-gray-700 group-hover/sub:text-accent-red transition-colors">
+                            <span className="text-sm text-gray-700 dark:text-dark-text group-hover/sub:text-accent-red transition-colors">
                               {category.name}
                             </span>
                             {category._count?.products !== undefined && (
-                              <span className="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+                              <span className="text-xs text-gray-400 dark:text-dark-muted bg-gray-100 dark:bg-dark-border px-2 py-0.5 rounded-full">
                                 {category._count.products}
                               </span>
                             )}
@@ -224,14 +224,14 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
             <li>
               <div>
                 <button
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 transition-colors text-gray-700"
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-50 dark:hover:bg-dark-border transition-colors text-gray-700 dark:text-dark-text"
                   onClick={() => setExpandedItem(expandedItem === 'profile' ? null : 'profile')}
                 >
-                  <User size={20} className="text-blue-500" />
+                  <User size={20} className="text-blue-500 dark:text-blue-400" />
                   <span className="flex-1 font-medium text-sm text-left">Trang cá nhân</span>
                   <ChevronRight
                     size={16}
-                    className={`text-gray-400 transition-transform ${
+                    className={`text-gray-400 dark:text-dark-muted transition-transform ${
                       expandedItem === 'profile' ? 'rotate-90' : ''
                     }`}
                   />
@@ -239,16 +239,16 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
 
                 {/* Profile Submenu */}
                 {expandedItem === 'profile' && (
-                  <div className="ml-4 mt-2 bg-blue-50 rounded-lg p-4">
+                  <div className="ml-4 mt-2 bg-blue-50 dark:bg-slate-800 rounded-lg p-4">
                     {user ? (
                       <>
                         {/* User Info */}
-                        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-blue-200">
+                        <div className="flex items-center gap-3 mb-4 pb-3 border-b border-blue-200 dark:border-dark-border">
                           {user.avatar ? (
-                            <img 
-                              src={user.avatar} 
-                              alt={user.fullName || 'User'} 
-                              className="w-12 h-12 rounded-full object-cover border border-blue-200"
+                            <img
+                              src={user.avatar}
+                              alt={user.fullName || 'User'}
+                              className="w-12 h-12 rounded-full object-cover border border-blue-200 dark:border-dark-border"
                             />
                           ) : (
                             <div className="w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
@@ -256,8 +256,8 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
                             </div>
                           )}
                           <div>
-                            <p className="font-semibold text-gray-800">{user.fullName || 'Người dùng'}</p>
-                            <p className="text-xs text-gray-500">{user.email}</p>
+                            <p className="font-semibold text-gray-800 dark:text-dark-text">{user.fullName || 'Người dùng'}</p>
+                            <p className="text-xs text-gray-500 dark:text-dark-muted">{user.email}</p>
                           </div>
                         </div>
 
@@ -266,7 +266,7 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
                           <li>
                             <Link
                               href="/profile"
-                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-dark-border transition-colors text-gray-700 dark:text-dark-text"
                               onClick={onClose}
                             >
                               <User size={18} className="text-accent-red" />
@@ -276,37 +276,37 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
                           <li>
                             <Link
                               href="/profile/orders"
-                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-dark-border transition-colors text-gray-700 dark:text-dark-text"
                               onClick={onClose}
                             >
-                              <Package size={18} />
+                              <Package size={18} className="dark:text-dark-muted" />
                               <span className="text-sm">Đơn hàng của tôi</span>
                             </Link>
                           </li>
                           <li>
                             <Link
                               href="/profile/wishlist"
-                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-dark-border transition-colors text-gray-700 dark:text-dark-text"
                               onClick={onClose}
                             >
-                              <Heart size={18} className="text-pink-500" />
+                              <Heart size={18} className="text-pink-500 dark:text-pink-400" />
                               <span className="text-sm">Sản phẩm yêu thích</span>
                             </Link>
                           </li>
                           <li>
                             <Link
                               href="/profile/addresses"
-                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-gray-700"
+                              className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-blue-100 dark:hover:bg-dark-border transition-colors text-gray-700 dark:text-dark-text"
                               onClick={onClose}
                             >
-                              <MapPin size={18} className="text-green-600" />
+                              <MapPin size={18} className="text-green-600 dark:text-green-400" />
                               <span className="text-sm">Địa chỉ giao hàng</span>
                             </Link>
                           </li>
                           <li>
                             <button
                               onClick={handleLogout}
-                              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-100 transition-colors text-red-600"
+                              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors text-red-600 dark:text-red-400"
                             >
                               <LogOut size={18} />
                               <span className="text-sm">Đăng xuất</span>
@@ -317,8 +317,8 @@ export default function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
                     ) : (
                       /* Not Logged In */
                       <div className="text-center py-4">
-                        <User size={40} className="mx-auto text-gray-400 mb-3" />
-                        <p className="text-sm text-gray-600 mb-4">Đăng nhập để xem thông tin cá nhân</p>
+                        <User size={40} className="mx-auto text-gray-400 dark:text-dark-muted mb-3" />
+                        <p className="text-sm text-gray-600 dark:text-dark-muted mb-4">Đăng nhập để xem thông tin cá nhân</p>
                         <Link
                           href="/login"
                           className="inline-flex items-center gap-2 bg-accent-red text-white px-6 py-2 rounded-lg font-medium hover:bg-red-600 transition-colors"

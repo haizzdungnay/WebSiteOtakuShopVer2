@@ -180,7 +180,7 @@ export default function OrdersPage() {
   ];
 
   return (
-    <div className="bg-gray-50 py-6">
+    <div className="bg-background-light dark:bg-dark-bg transition-colors duration-200 py-6">
       {/* Breadcrumb */}
       <div className="container-custom mb-6">
         <nav className="flex items-center gap-2 text-sm">
@@ -200,7 +200,7 @@ export default function OrdersPage() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Sidebar */}
           <aside className="w-full lg:w-72 flex-shrink-0">
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border overflow-hidden transition-colors">
               {/* User Info Header */}
               <div className="bg-gradient-to-r from-primary to-accent-red p-4 text-white">
                 <div className="flex items-center gap-3">
@@ -277,11 +277,11 @@ export default function OrdersPage() {
 
           {/* Main Content */}
           <div className="flex-1">
-            <div className="bg-white rounded-lg shadow-sm">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors">
               {/* Header */}
-              <div className="p-6 border-b border-gray-200">
+              <div className="p-6 border-b border-gray-200 dark:border-dark-border">
                 <div className="flex items-center justify-between mb-4">
-                  <h1 className="text-xl font-bold text-gray-900">Đơn hàng của tôi</h1>
+                  <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Đơn hàng của tôi</h1>
                   <button
                     onClick={fetchOrders}
                     className="text-sm text-gray-600 hover:text-accent-red flex items-center gap-1"
@@ -352,7 +352,7 @@ export default function OrdersPage() {
                               <div className="flex items-center gap-4">
                                 <div>
                                   <div className="flex items-center gap-2">
-                                    <span className="font-semibold text-gray-900">
+                                    <span className="font-semibold text-gray-900 dark:text-gray-100">
                                       #{order.orderNumber}
                                     </span>
                                     <span className={`px-2 py-1 text-xs font-medium rounded-full flex items-center gap-1 ${statusInfo.color}`}>
@@ -368,7 +368,7 @@ export default function OrdersPage() {
                               </div>
                               <div className="flex items-center gap-4">
                                 <div className="text-right">
-                                  <div className="text-sm text-gray-500">Tổng tiền</div>
+                                  <div className="text-sm text-gray-500 dark:text-gray-400">Tổng tiền</div>
                                   <div className="font-bold text-accent-red">
                                     {formatPrice(Number(order.totalAmount))}
                                   </div>
@@ -384,7 +384,7 @@ export default function OrdersPage() {
 
                           {/* Order Details (Expanded) */}
                           {isExpanded && (
-                            <div className="p-4 border-t border-gray-200">
+                            <div className="p-4 border-t border-gray-200 dark:border-dark-border">
                               {/* Order Items */}
                               <div className="space-y-3 mb-4">
                                 {order.orderItems.map(item => (
@@ -406,7 +406,7 @@ export default function OrdersPage() {
                                         </h4>
                                       </Link>
                                       <div className="flex items-center justify-between mt-1">
-                                        <span className="text-sm text-gray-500">
+                                        <span className="text-sm text-gray-500 dark:text-gray-400">
                                           x{item.quantity}
                                         </span>
                                         <span className="text-sm font-medium text-accent-red">
@@ -423,10 +423,10 @@ export default function OrdersPage() {
                                 <div className="flex items-start gap-2">
                                   <MapPin size={16} className="text-gray-500 mt-0.5" />
                                   <div className="text-sm">
-                                    <div className="font-medium text-gray-900">
+                                    <div className="font-medium text-gray-900 dark:text-gray-100">
                                       {order.shippingFullName} - {order.shippingPhone}
                                     </div>
-                                    <div className="text-gray-600">
+                                    <div className="text-gray-600 dark:text-gray-400">
                                       {order.shippingAddress}
                                       {order.shippingWard && `, ${order.shippingWard}`}
                                       {`, ${order.shippingDistrict}, ${order.shippingCity}`}
@@ -464,7 +464,7 @@ export default function OrdersPage() {
                               )}
 
                               {/* Actions */}
-                              <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                              <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-dark-border">
                                 <Link
                                   href={`/tra-cuu?order=${order.orderNumber}`}
                                   className="text-sm text-accent-red hover:underline flex items-center gap-1"

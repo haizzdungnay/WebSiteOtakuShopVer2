@@ -3,7 +3,7 @@ import { Home, Search, ShoppingBag, ArrowLeft } from 'lucide-react';
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 flex items-center justify-center px-4">
       <div className="max-w-lg w-full text-center">
         {/* 404 Illustration */}
         <div className="mb-8">
@@ -36,28 +36,28 @@ export default function NotFound() {
           <div className="grid grid-cols-2 gap-3">
             <Link
               href="/"
-              className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-gray-700"
+              className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 dark:text-gray-300"
             >
               <Home size={18} className="text-accent-red" />
               <span className="text-sm font-medium">Trang chủ</span>
             </Link>
             <Link
               href="/products"
-              className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-gray-700"
+              className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 dark:text-gray-300"
             >
               <ShoppingBag size={18} className="text-accent-red" />
               <span className="text-sm font-medium">Sản phẩm</span>
             </Link>
             <Link
               href="/sale"
-              className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-gray-700"
+              className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 dark:text-gray-300"
             >
               <span className="text-accent-red font-bold">%</span>
               <span className="text-sm font-medium">Giảm giá</span>
             </Link>
             <Link
               href="/search"
-              className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-gray-700"
+              className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-gray-700 dark:text-gray-300"
             >
               <Search size={18} className="text-accent-red" />
               <span className="text-sm font-medium">Tìm kiếm</span>

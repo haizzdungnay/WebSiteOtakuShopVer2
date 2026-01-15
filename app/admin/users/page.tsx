@@ -358,7 +358,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 py-8">
       <div className="container-custom">
         {/* Toast */}
         {toast && (
@@ -401,7 +401,7 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Filters */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+        <div className="bg-white dark:bg-dark-card rounded-2xl shadow-lg dark:shadow-none dark:border dark:border-dark-border transition-colors p-6 mb-6">
           <div className="flex flex-wrap gap-4">
             {/* Search */}
             <div className="flex-1 min-w-[300px]">

@@ -1,8 +1,8 @@
 export default function ProductsLoading() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
       {/* Header Skeleton */}
-      <div className="bg-white border-b">
+      <div className="bg-white dark:bg-dark-card border-b dark:border-dark-border transition-colors">
         <div className="container mx-auto px-4 py-6">
           {/* Breadcrumb */}
           <div className="flex gap-2 mb-4">
@@ -19,7 +19,7 @@ export default function ProductsLoading() {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Skeleton */}
           <aside className="md:w-64 flex-shrink-0">
-            <div className="bg-white rounded-lg p-6 shadow-sm">
+            <div className="bg-white dark:bg-dark-card rounded-lg dark:border dark:border-dark-border transition-colors p-6 shadow-sm">
               <div className="h-6 bg-gray-200 rounded w-24 mb-6 animate-pulse"></div>
               <div className="space-y-3">
                 {Array.from({ length: 6 }).map((_, i) => (
@@ -33,7 +33,7 @@ export default function ProductsLoading() {
           <div className="flex-1">
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} className="bg-white rounded-lg overflow-hidden shadow-sm">
+                <div key={i} className="bg-white dark:bg-dark-card rounded-lg overflow-hidden shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors">
                   <div className="aspect-square bg-gray-200 animate-pulse"></div>
                   <div className="p-4 space-y-3">
                     <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>

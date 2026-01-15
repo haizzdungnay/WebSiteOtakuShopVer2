@@ -1,6 +1,6 @@
 export default function ProductDetailLoading() {
   return (
-    <div className="bg-gray-50 py-4 sm:py-6 lg:py-8">
+    <div className="bg-background-light dark:bg-dark-bg transition-colors duration-200 py-4 sm:py-6 lg:py-8">
       <div className="container mx-auto px-4">
         {/* Breadcrumb Skeleton */}
         <div className="flex gap-2 mb-6">

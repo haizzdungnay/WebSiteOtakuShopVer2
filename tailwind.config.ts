@@ -29,8 +29,9 @@ const config: Config = {
           gray: '#666666',
         },
         background: {
-          light: '#F5F5F5',
+          light: '#FFF5F7',     // Light pastel pink for light mode
           white: '#FFFFFF',
+          pink: '#FFF0F3',      // Slightly lighter pink
         },
         // Dark mode specific colors
         dark: {

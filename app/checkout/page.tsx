@@ -361,7 +361,7 @@ function CheckoutContent() {
 
   if (items.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
+      <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 py-12">
         <div className="container-custom">
           <div className="max-w-2xl mx-auto text-center">
             <h1 className="text-3xl font-bold mb-4">Giỏ hàng trống</h1>
@@ -379,7 +379,7 @@ function CheckoutContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 py-8">
       <div className="container-custom">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-2 text-sm mb-6">
@@ -409,7 +409,7 @@ function CheckoutContent() {
             {/* Left Column - Form */}
             <div className="lg:col-span-2 space-y-6">
               {/* Shipping Information */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <MapPin className="text-accent-red" />
                   Thông tin giao hàng
@@ -459,7 +459,7 @@ function CheckoutContent() {
                                   <p className="text-sm text-gray-600 mt-1">
                                     {address.fullName} - {address.phone}
                                   </p>
-                                  <p className="text-sm text-gray-500">
+                                  <p className="text-sm text-gray-500 dark:text-gray-400">
                                     {address.address}
                                     {address.ward && `, ${address.ward}`}
                                     , {address.district}, {address.city}
@@ -501,10 +501,10 @@ function CheckoutContent() {
                 {user && savedAddresses.length > 0 && (
                   <div className="relative mb-6">
                     <div className="absolute inset-0 flex items-center">
-                      <div className="w-full border-t border-gray-200"></div>
+                      <div className="w-full border-t border-gray-200 dark:border-dark-border"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                      <span className="px-2 bg-white text-gray-500">
+                      <span className="px-2 bg-white text-gray-500 dark:text-gray-400">
                         {selectedAddressId ? 'Thông tin địa chỉ đã chọn' : 'Hoặc nhập thông tin mới'}
                       </span>
                     </div>
@@ -619,7 +619,7 @@ function CheckoutContent() {
               </div>
 
               {/* Shipping Method */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <Truck className="text-accent-red" />
                   Phương thức giao hàng
@@ -636,7 +636,7 @@ function CheckoutContent() {
                     />
                     <div className="flex-1">
                       <div className="font-semibold">Giao hàng tiêu chuẩn</div>
-                      <div className="text-sm text-gray-600">Thời gian giao hàng: 3-5 ngày làm việc</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Thời gian giao hàng: 3-5 ngày làm việc</div>
                       <div className="text-sm font-semibold text-accent-red mt-1">30.000đ</div>
                     </div>
                   </label>
@@ -651,7 +651,7 @@ function CheckoutContent() {
                     />
                     <div className="flex-1">
                       <div className="font-semibold">Giao hàng nhanh</div>
-                      <div className="text-sm text-gray-600">Thời gian giao hàng: 1-2 ngày làm việc</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Thời gian giao hàng: 1-2 ngày làm việc</div>
                       <div className="text-sm font-semibold text-accent-red mt-1">50.000đ</div>
                     </div>
                   </label>
@@ -666,7 +666,7 @@ function CheckoutContent() {
                     />
                     <div className="flex-1">
                       <div className="font-semibold">Nhận tại cửa hàng</div>
-                      <div className="text-sm text-gray-600">Miễn phí - Nhận hàng tại cửa hàng</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Miễn phí - Nhận hàng tại cửa hàng</div>
                       <div className="text-sm font-semibold text-green-600 mt-1">Miễn phí</div>
                     </div>
                   </label>
@@ -674,7 +674,7 @@ function CheckoutContent() {
               </div>
 
               {/* Payment Method */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <CreditCard className="text-accent-red" />
                   Phương thức thanh toán
@@ -691,7 +691,7 @@ function CheckoutContent() {
                     />
                     <div className="flex-1">
                       <div className="font-semibold">Thanh toán khi nhận hàng (COD)</div>
-                      <div className="text-sm text-gray-600">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
                         Thanh toán COD khi sử dụng kèm sản phẩm Gọi Hàng. Tức Phí...
                       </div>
                     </div>
@@ -707,7 +707,7 @@ function CheckoutContent() {
                     />
                     <div className="flex-1">
                       <div className="font-semibold">Chuyển khoản ngân hàng</div>
-                      <div className="text-sm text-gray-600">Chuyển khoản trực tiếp vào tài khoản ngân hàng</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Chuyển khoản trực tiếp vào tài khoản ngân hàng</div>
                     </div>
                   </label>
                   <label className="flex items-start gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-accent-red transition-colors">
@@ -721,7 +721,7 @@ function CheckoutContent() {
                     />
                     <div className="flex-1">
                       <div className="font-semibold">Chuyển khoản qua QR - Techcombank</div>
-                      <div className="text-sm text-gray-600">Quét mã QR để thanh toán nhanh chóng</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Quét mã QR để thanh toán nhanh chóng</div>
                     </div>
                   </label>
                   <label className="flex items-start gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-accent-red transition-colors">
@@ -735,7 +735,7 @@ function CheckoutContent() {
                     />
                     <div className="flex-1">
                       <div className="font-semibold">Thanh toán qua VNPAY</div>
-                      <div className="text-sm text-gray-600">Thanh toán an toàn qua cổng VNPAY với nhiều phương thức</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Thanh toán an toàn qua cổng VNPAY với nhiều phương thức</div>
                     </div>
                   </label>
                   <label className="flex items-start gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-accent-red transition-colors">
@@ -751,7 +751,7 @@ function CheckoutContent() {
                       <div className="font-semibold flex items-center gap-2">
                         <span className="text-pink-500">●</span> Ví MoMo
                       </div>
-                      <div className="text-sm text-gray-600">Thanh toán nhanh chóng qua ví điện tử MoMo</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Thanh toán nhanh chóng qua ví điện tử MoMo</div>
                     </div>
                   </label>
                   <label className="flex items-start gap-3 p-4 border border-gray-300 rounded-lg cursor-pointer hover:border-accent-red transition-colors">
@@ -765,14 +765,14 @@ function CheckoutContent() {
                     />
                     <div className="flex-1">
                       <div className="font-semibold">Tại nhà lấy cửa hàng</div>
-                      <div className="text-sm text-gray-600">Thanh toán trực tiếp tại cửa hàng khi nhận hàng</div>
+                      <div className="text-sm text-gray-600 dark:text-gray-400">Thanh toán trực tiếp tại cửa hàng khi nhận hàng</div>
                     </div>
                   </label>
                 </div>
               </div>
 
               {/* Invoice */}
-              <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
                   <Receipt className="text-accent-red" />
                   Hóa đơn điện tử
@@ -805,7 +805,7 @@ function CheckoutContent() {
 
             {/* Right Column - Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+              <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6 sticky top-4">
                 <h2 className="text-xl font-bold mb-4">Giỏ hàng</h2>
 
                 {/* Cart Items */}
@@ -824,7 +824,7 @@ function CheckoutContent() {
                       <div className="flex-1 min-w-0">
                         <h3 className="text-sm font-medium line-clamp-2">{item.name}</h3>
                         <div className="flex items-center justify-between mt-1">
-                          <span className="text-sm text-gray-600">x{item.quantity}</span>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">x{item.quantity}</span>
                           <span className="text-sm font-semibold text-accent-red">
                             {(item.price * item.quantity).toLocaleString('vi-VN')}đ
                           </span>
@@ -874,16 +874,16 @@ function CheckoutContent() {
                 {/* Order Summary */}
                 <div className="border-t border-gray-200 pt-4 space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Tạm tính:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Tạm tính:</span>
                     <span className="font-semibold">{subtotal.toLocaleString('vi-VN')}đ</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-gray-600">Phí vận chuyển:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Phí vận chuyển:</span>
                     <span className="font-semibold">{shippingFee.toLocaleString('vi-VN')}đ</span>
                   </div>
                   {discount > 0 && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Giảm giá:</span>
+                      <span className="text-gray-600 dark:text-gray-400">Giảm giá:</span>
                       <span className="font-semibold text-green-600">-{discount.toLocaleString('vi-VN')}đ</span>
                     </div>
                   )}
@@ -915,10 +915,10 @@ function CheckoutContent() {
 // Loading fallback component
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-red mx-auto mb-4"></div>
-        <p className="text-gray-600">Đang tải trang thanh toán...</p>
+        <p className="text-gray-600 dark:text-gray-400">Đang tải trang thanh toán...</p>
       </div>
     </div>
   );

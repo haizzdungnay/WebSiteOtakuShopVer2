@@ -92,15 +92,15 @@ export default function NewsDetailPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
       <div className="container-custom py-8">
         {/* Breadcrumb */}
-        <div className="mb-6 text-sm text-gray-600">
+        <div className="mb-6 text-sm text-gray-600 dark:text-gray-400">
           <Link href="/" className="hover:text-accent-red">Trang chủ</Link>
           <span className="mx-2">/</span>
           <Link href="/tin-tuc" className="hover:text-accent-red">Tin tức</Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">{article.title}</span>
+          <span className="text-gray-900 dark:text-gray-100">{article.title}</span>
         </div>
 
         {/* Back Button */}
@@ -113,15 +113,15 @@ export default function NewsDetailPage() {
         </Link>
 
         {/* Main Article */}
-        <article className="bg-white rounded-lg overflow-hidden shadow-sm mb-8">
+        <article className="bg-white dark:bg-dark-card rounded-lg overflow-hidden shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors mb-8">
           {/* Header */}
-          <div className="p-8 border-b border-gray-200">
+          <div className="p-8 border-b border-gray-200 dark:border-dark-border">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 leading-tight">
               {article.title}
             </h1>
             
             {/* Meta Information */}
-            <div className="flex items-center gap-6 text-gray-600">
+            <div className="flex items-center gap-6 text-gray-600 dark:text-gray-400">
               <div className="flex items-center gap-2">
                 <Calendar size={18} />
                 <time dateTime={article.createdAt}>
@@ -158,26 +158,26 @@ export default function NewsDetailPage() {
           )}
 
           {/* Article Content */}
-          <div className="prose prose-lg max-w-none px-8 py-8 text-gray-700">
+          <div className="prose prose-lg max-w-none px-8 py-8 text-gray-700 dark:text-gray-300">
             {article.content ? (
               <div 
                 dangerouslySetInnerHTML={{ __html: article.content }}
               />
             ) : (
-              <p className="text-gray-600">Không có nội dung chi tiết.</p>
+              <p className="text-gray-600 dark:text-gray-400">Không có nội dung chi tiết.</p>
             )}
           </div>
 
           {/* Footer */}
-          <div className="bg-gray-50 px-8 py-6 border-t border-gray-200">
-            <div className="text-sm text-gray-600">
+          <div className="bg-gray-50 px-8 py-6 border-t border-gray-200 dark:border-dark-border">
+            <div className="text-sm text-gray-600 dark:text-gray-400">
               <p>Cập nhật lần cuối: {updatedDate}</p>
             </div>
           </div>
         </article>
 
         {/* Related Articles */}
-        <div className="bg-white rounded-lg p-8 shadow-sm">
+        <div className="bg-white dark:bg-dark-card rounded-lg dark:border dark:border-dark-border transition-colors p-8 shadow-sm">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Tin tức khác</h2>
           <Link
             href="/tin-tuc"

@@ -20,13 +20,13 @@ export default function CartDropdown({ onClose }: CartDropdownProps) {
   };
 
   return (
-    <div className="absolute right-0 top-full mt-2 w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[600px] flex flex-col">
+    <div className="absolute right-0 top-full mt-2 w-96 bg-white dark:bg-dark-card rounded-lg shadow-xl border border-gray-200 dark:border-dark-border z-50 max-h-[600px] flex flex-col transition-colors duration-200">
       {/* Header */}
-      <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-        <h3 className="font-bold text-lg text-gray-900">Giỏ hàng của bạn</h3>
+      <div className="p-4 border-b border-gray-200 dark:border-dark-border flex items-center justify-between">
+        <h3 className="font-bold text-lg text-gray-900 dark:text-dark-text">Giỏ hàng của bạn</h3>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-gray-600 transition-colors"
+          className="text-gray-400 dark:text-dark-muted hover:text-gray-600 dark:hover:text-dark-text transition-colors"
         >
           <X size={20} />
         </button>
@@ -35,11 +35,11 @@ export default function CartDropdown({ onClose }: CartDropdownProps) {
       {/* Cart Items */}
       {items.length === 0 ? (
         <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <ShoppingBag size={32} className="text-gray-400" />
+          <div className="w-20 h-20 bg-gray-100 dark:bg-dark-border rounded-full flex items-center justify-center mb-4">
+            <ShoppingBag size={32} className="text-gray-400 dark:text-dark-muted" />
           </div>
-          <p className="text-gray-600 mb-2">Giỏ hàng trống</p>
-          <p className="text-sm text-gray-500">Thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
+          <p className="text-gray-600 dark:text-dark-text mb-2">Giỏ hàng trống</p>
+          <p className="text-sm text-gray-500 dark:text-dark-muted">Thêm sản phẩm vào giỏ hàng để tiếp tục mua sắm</p>
         </div>
       ) : (
         <>
@@ -47,10 +47,10 @@ export default function CartDropdown({ onClose }: CartDropdownProps) {
             {items.map((item) => {
               const displayPrice = item.discountPrice || item.price;
               return (
-                <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-100 last:border-0">
+                <div key={item.id} className="flex gap-3 pb-4 border-b border-gray-100 dark:border-dark-border last:border-0">
                   {/* Image */}
                   <Link href={`/products/${item.slug}`} onClick={onClose}>
-                    <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                    <div className="relative w-20 h-20 bg-gray-100 dark:bg-dark-border rounded-lg overflow-hidden flex-shrink-0">
                       <Image
                         src={item.image || '/images/placeholder.jpg'}
                         alt={item.name}
@@ -63,7 +63,7 @@ export default function CartDropdown({ onClose }: CartDropdownProps) {
                   {/* Info */}
                   <div className="flex-1 min-w-0">
                     <Link href={`/products/${item.slug}`} onClick={onClose}>
-                      <h4 className="text-sm font-medium text-gray-900 line-clamp-2 hover:text-accent-red transition-colors mb-1">
+                      <h4 className="text-sm font-medium text-gray-900 dark:text-dark-text line-clamp-2 hover:text-accent-red transition-colors mb-1">
                         {item.name}
                       </h4>
                     </Link>
@@ -73,7 +73,7 @@ export default function CartDropdown({ onClose }: CartDropdownProps) {
                       </span>
                       <button
                         onClick={() => removeFromCart(item.id)}
-                        className="text-gray-400 hover:text-accent-red transition-colors"
+                        className="text-gray-400 dark:text-dark-muted hover:text-accent-red transition-colors"
                       >
                         <X size={16} />
                       </button>
@@ -83,16 +83,16 @@ export default function CartDropdown({ onClose }: CartDropdownProps) {
                     <div className="flex items-center gap-2 mt-2">
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                        className="w-7 h-7 rounded-full border border-gray-300 dark:border-dark-border text-gray-600 dark:text-dark-text flex items-center justify-center hover:bg-gray-50 dark:hover:bg-dark-border transition-colors"
                       >
                         <Minus size={14} />
                       </button>
-                      <span className="text-sm font-medium w-8 text-center">
+                      <span className="text-sm font-medium w-8 text-center text-gray-900 dark:text-dark-text">
                         {item.quantity}
                       </span>
                       <button
                         onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                        className="w-7 h-7 rounded-full border border-gray-300 flex items-center justify-center hover:bg-gray-50 transition-colors"
+                        className="w-7 h-7 rounded-full border border-gray-300 dark:border-dark-border text-gray-600 dark:text-dark-text flex items-center justify-center hover:bg-gray-50 dark:hover:bg-dark-border transition-colors"
                       >
                         <Plus size={14} />
                       </button>
@@ -104,10 +104,10 @@ export default function CartDropdown({ onClose }: CartDropdownProps) {
           </div>
 
           {/* Footer */}
-          <div className="p-4 border-t border-gray-200 space-y-3">
+          <div className="p-4 border-t border-gray-200 dark:border-dark-border space-y-3">
             {/* Total */}
             <div className="flex items-center justify-between mb-4">
-              <span className="font-semibold text-gray-900">Tổng cộng:</span>
+              <span className="font-semibold text-gray-900 dark:text-dark-text">Tổng cộng:</span>
               <span className="text-xl font-bold text-accent-red">
                 {formatPrice(getTotalPrice())}
               </span>
@@ -118,7 +118,7 @@ export default function CartDropdown({ onClose }: CartDropdownProps) {
               <Link
                 href="/cart"
                 onClick={onClose}
-                className="block w-full py-3 text-center border-2 border-black text-black font-semibold rounded-lg hover:bg-gray-50 transition-colors"
+                className="block w-full py-3 text-center border-2 border-gray-900 dark:border-dark-text text-gray-900 dark:text-dark-text font-semibold rounded-lg hover:bg-gray-50 dark:hover:bg-dark-border transition-colors"
               >
                 XEM GIỎ HÀNG
               </Link>

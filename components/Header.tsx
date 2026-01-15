@@ -193,13 +193,13 @@ export default function Header() {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setShowUserDropdown(!showUserDropdown)}
-                    className="flex items-center gap-2 text-gray-800 hover:text-accent-red transition-colors"
+                    className="flex items-center gap-2 text-gray-800 dark:text-dark-text hover:text-accent-red transition-colors"
                   >
                     {user.avatar ? (
-                      <img 
-                        src={user.avatar} 
-                        alt={user.username || 'User'} 
-                        className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                      <img
+                        src={user.avatar}
+                        alt={user.username || 'User'}
+                        className="w-8 h-8 rounded-full object-cover border border-gray-200 dark:border-dark-border"
                       />
                     ) : (
                       <div className="w-8 h-8 bg-accent-red rounded-full flex items-center justify-center text-white font-semibold">
@@ -207,7 +207,7 @@ export default function Header() {
                       </div>
                     )}
                     <div className="hidden lg:block">
-                      <div className="text-xs text-gray-600">Xin chào</div>
+                      <div className="text-xs text-gray-600 dark:text-dark-muted">Xin chào</div>
                       <div className="text-sm font-semibold">{user.username}</div>
                     </div>
                   </button>
@@ -315,7 +315,7 @@ export default function Header() {
                     </span>
                   )}
                 </div>
-                <span className="hidden lg:block text-sm font-semibold text-gray-800">
+                <span className="hidden lg:block text-sm font-semibold text-gray-800 dark:text-dark-text">
                   Giỏ hàng
                 </span>
               </button>
@@ -341,7 +341,7 @@ export default function Header() {
             <div className="flex-shrink-0 mr-20">
               <button
                 onClick={() => setShowMenuSidebar(true)}
-                className="flex items-center justify-center gap-2 px-3 lg:px-4 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap font-semibold"
+                className="flex items-center justify-center gap-2 px-3 lg:px-4 py-3 hover:bg-gray-800 dark:hover:bg-slate-700 transition-colors whitespace-nowrap font-semibold"
                 title="Menu"
               >
                 <Grid3x3 size={18} />
@@ -394,7 +394,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className="flex items-center gap-1.5 px-2 lg:px-3 py-3 hover:bg-gray-800 transition-colors whitespace-nowrap text-sm"
+      className="flex items-center gap-1.5 px-2 lg:px-3 py-3 hover:bg-gray-800 dark:hover:bg-slate-700 transition-colors whitespace-nowrap text-sm"
       title={title}
     >
       {icon}

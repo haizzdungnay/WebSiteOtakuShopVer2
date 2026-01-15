@@ -71,8 +71,8 @@ function ResetPasswordForm() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Đặt lại mật khẩu thành công!</h2>
-            <p className="mt-2 text-gray-600">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Đặt lại mật khẩu thành công!</h2>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">
               Mật khẩu của bạn đã được cập nhật. Bạn sẽ được chuyển đến trang đăng nhập...
             </p>
             <Link
@@ -97,8 +97,8 @@ function ResetPasswordForm() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">Link không hợp lệ</h2>
-            <p className="mt-2 text-gray-600">
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Link không hợp lệ</h2>
+            <p className="mt-2 text-gray-600 dark:text-gray-400">
               Link đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.
             </p>
             <Link
@@ -117,10 +117,10 @@ function ResetPasswordForm() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
             Đặt lại mật khẩu
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             Nhập mật khẩu mới cho tài khoản của bạn
           </p>
         </div>
@@ -134,7 +134,7 @@ function ResetPasswordForm() {
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Mật khẩu mới
               </label>
               <input
@@ -150,7 +150,7 @@ function ResetPasswordForm() {
             </div>
 
             <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Xác nhận mật khẩu
               </label>
               <input

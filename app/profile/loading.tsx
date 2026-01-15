@@ -1,6 +1,6 @@
 export default function ProfileLoading() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb */}
         <div className="flex gap-2 mb-6">
@@ -12,7 +12,7 @@ export default function ProfileLoading() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Sidebar */}
           <aside className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
               {/* Avatar */}
               <div className="flex flex-col items-center mb-6">
                 <div className="w-24 h-24 bg-gray-200 rounded-full animate-pulse mb-4"></div>
@@ -34,7 +34,7 @@ export default function ProfileLoading() {
 
           {/* Main Content */}
           <main className="lg:col-span-3">
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
               <div className="h-6 bg-gray-200 rounded w-40 mb-6 animate-pulse"></div>
 
               {/* Profile Form Skeleton */}

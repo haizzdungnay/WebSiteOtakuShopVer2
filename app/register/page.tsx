@@ -160,7 +160,7 @@ export default function RegisterPage() {
 
               {/* Footer Links */}
               <div className="mt-6 text-center text-sm">
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-400">
                   Đã có tài khoản?{' '}
                   <Link
                     href="/login"

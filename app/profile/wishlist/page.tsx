@@ -22,7 +22,7 @@ export default function WishlistPage() {
         </div>
 
         {items.length === 0 ? (
-          <div className="bg-white rounded-lg p-12 text-center shadow-sm">
+          <div className="bg-white dark:bg-dark-card rounded-lg dark:border dark:border-dark-border transition-colors p-12 text-center shadow-sm">
             <Heart size={64} className="mx-auto text-gray-300 mb-4" />
             <h2 className="text-xl font-semibold text-gray-800 mb-2">Danh sách yêu thích trống</h2>
             <p className="text-gray-500 mb-6">Hãy thêm những sản phẩm bạn yêu thích vào đây nhé!</p>

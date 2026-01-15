@@ -274,13 +274,13 @@ Yes, within 7 days of receipt if products are unused with original packaging. Fr
   };
 
   return (
-    <div className="bg-gray-50 py-8">
+    <div className="bg-background-light dark:bg-dark-bg transition-colors duration-200 py-8">
       <div className="container-custom">
         {/* Breadcrumb */}
-        <div className="mb-6 text-sm text-gray-600">
+        <div className="mb-6 text-sm text-gray-600 dark:text-gray-400">
           <Link href="/" className="hover:text-accent-red">Trang chủ</Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">Câu hỏi thường gặp</span>
+          <span className="text-gray-900 dark:text-gray-100">Câu hỏi thường gặp</span>
         </div>
 
         {/* Header */}
@@ -317,7 +317,7 @@ Yes, within 7 days of receipt if products are unused with original packaging. Fr
             {filteredFAQs.map((faq) => (
               <div
                 key={faq.id}
-                className="bg-white rounded-lg shadow-sm overflow-hidden"
+                className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border overflow-hidden transition-colors"
               >
                 <button
                   onClick={() => toggleFAQ(faq.id)}

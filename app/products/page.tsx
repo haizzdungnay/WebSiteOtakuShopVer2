@@ -146,22 +146,22 @@ function ProductsContent() {
   const totalPages = Math.ceil(totalProducts / limit);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
       {/* Header */}
-      <div className="bg-white border-b">
+      <div className="bg-white dark:bg-dark-card border-b dark:border-dark-border transition-colors">
         <div className="container-custom py-6">
           {/* Breadcrumb */}
-          <div className="text-sm text-gray-600 mb-4">
-            <Link href="/" className="hover:text-accent-red">Trang chủ</Link>
+          <div className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+            <Link href="/" className="hover:text-accent-red dark:hover:text-primary-light">Trang chủ</Link>
             <span className="mx-2">/</span>
-            <span className="text-gray-900">{getPageTitle()}</span>
+            <span className="text-gray-900 dark:text-gray-100">{getPageTitle()}</span>
           </div>
 
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">
               {getPageTitle()}
               {totalProducts > 0 && (
-                <span className="text-lg font-normal text-gray-500 ml-2">
+                <span className="text-lg font-normal text-gray-500 dark:text-gray-400 ml-2">
                   ({totalProducts} sản phẩm)
                 </span>
               )}
@@ -170,7 +170,7 @@ function ProductsContent() {
             {/* Mobile filter toggle */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="md:hidden flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg"
+              className="md:hidden flex items-center gap-2 px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg text-gray-700 dark:text-gray-300"
             >
               <Filter size={18} />
               Bộ lọc
@@ -183,9 +183,9 @@ function ProductsContent() {
         <div className="flex flex-col md:flex-row gap-8">
           {/* Sidebar Filters */}
           <aside className={`md:w-64 flex-shrink-0 ${showFilters ? 'block' : 'hidden md:block'}`}>
-            <div className="bg-white rounded-lg p-6 shadow-sm sticky top-24">
+            <div className="bg-white dark:bg-dark-card rounded-lg p-6 shadow-sm dark:shadow-none dark:border dark:border-dark-border sticky top-24 transition-colors">
               <div className="flex items-center justify-between mb-4 md:mb-6">
-                <h3 className="font-bold text-lg text-gray-900">Bộ lọc</h3>
+                <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">Bộ lọc</h3>
                 <button
                   onClick={() => setShowFilters(false)}
                   className="md:hidden p-1"
@@ -197,11 +197,11 @@ function ProductsContent() {
 
               {/* Categories */}
               <div className="mb-6">
-                <h4 className="font-semibold text-gray-700 mb-3">Danh mục</h4>
+                <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">Danh mục</h4>
                 <div className="space-y-2">
                   <Link
                     href={buildUrl({ category: null, featured: null })}
-                    className={`block px-3 py-2 rounded-lg transition-colors ${!categorySlug && !featured ? 'bg-accent-red text-white' : 'hover:bg-gray-100'
+                    className={`block px-3 py-2 rounded-lg transition-colors ${!categorySlug && !featured ? 'bg-accent-red text-white' : 'hover:bg-gray-100 dark:hover:bg-dark-border text-gray-700 dark:text-gray-300'
                       }`}
                   >
                     Tất cả
@@ -210,7 +210,7 @@ function ProductsContent() {
                     <Link
                       key={cat.id}
                       href={buildUrl({ category: cat.slug, featured: null })}
-                      className={`block px-3 py-2 rounded-lg transition-colors ${categorySlug === cat.slug ? 'bg-accent-red text-white' : 'hover:bg-gray-100'
+                      className={`block px-3 py-2 rounded-lg transition-colors ${categorySlug === cat.slug ? 'bg-accent-red text-white' : 'hover:bg-gray-100 dark:hover:bg-dark-border text-gray-700 dark:text-gray-300'
                         }`}
                     >
                       {cat.name}
@@ -221,18 +221,18 @@ function ProductsContent() {
 
               {/* Quick Filters */}
               <div className="mb-6">
-                <h4 className="font-semibold text-gray-700 mb-3">Lọc nhanh</h4>
+                <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">Lọc nhanh</h4>
                 <div className="space-y-2">
                   <Link
                     href={buildUrl({ featured: 'true', category: null })}
-                    className={`block px-3 py-2 rounded-lg transition-colors ${featured ? 'bg-accent-red text-white' : 'hover:bg-gray-100'
+                    className={`block px-3 py-2 rounded-lg transition-colors ${featured ? 'bg-accent-red text-white' : 'hover:bg-gray-100 dark:hover:bg-dark-border text-gray-700 dark:text-gray-300'
                       }`}
                   >
                     🔥 Sản phẩm Hot
                   </Link>
                   <Link
                     href={buildUrl({ sort: 'createdAt', order: 'desc', featured: null })}
-                    className={`block px-3 py-2 rounded-lg transition-colors ${sortBy === 'createdAt' && order === 'desc' && !featured ? 'bg-accent-red text-white' : 'hover:bg-gray-100'
+                    className={`block px-3 py-2 rounded-lg transition-colors ${sortBy === 'createdAt' && order === 'desc' && !featured ? 'bg-accent-red text-white' : 'hover:bg-gray-100 dark:hover:bg-dark-border text-gray-700 dark:text-gray-300'
                       }`}
                   >
                     ✨ Mới nhất
@@ -242,7 +242,7 @@ function ProductsContent() {
 
               {/* Sort */}
               <div>
-                <h4 className="font-semibold text-gray-700 mb-3">Sắp xếp theo</h4>
+                <h4 className="font-semibold text-gray-700 dark:text-gray-300 mb-3">Sắp xếp theo</h4>
                 <div className="relative">
                   <select
                     value={`${sortBy}-${order}`}
@@ -251,7 +251,7 @@ function ProductsContent() {
                       window.location.href = buildUrl({ sort: newSort, order: newOrder });
                     }}
                     title="Sắp xếp sản phẩm"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg appearance-none bg-white pr-10"
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-dark-border rounded-lg appearance-none bg-white dark:bg-dark-card dark:text-gray-100 pr-10"
                   >
                     <option value="createdAt-desc">Mới nhất</option>
                     <option value="createdAt-asc">Cũ nhất</option>
@@ -281,15 +281,15 @@ function ProductsContent() {
             {loading ? (
               <div className="flex items-center justify-center py-20">
                 <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-                <span className="ml-3 text-gray-500">Đang tải sản phẩm...</span>
+                <span className="ml-3 text-gray-500 dark:text-gray-400">Đang tải sản phẩm...</span>
               </div>
             ) : products.length === 0 ? (
-              <div className="text-center py-20 bg-white rounded-lg">
+              <div className="text-center py-20 bg-white dark:bg-dark-card rounded-lg transition-colors">
                 <div className="text-6xl mb-4">📦</div>
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                   Không tìm thấy sản phẩm
                 </h3>
-                <p className="text-gray-600 mb-6">
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
                   {searchQuery
                     ? `Không có sản phẩm nào phù hợp với "${searchQuery}"`
                     : 'Chưa có sản phẩm nào trong danh mục này'}
@@ -315,7 +315,7 @@ function ProductsContent() {
                     <button
                       onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
                       disabled={currentPage === 1}
-                      className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                      className="px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-dark-border text-gray-700 dark:text-gray-300"
                     >
                       Trước
                     </button>
@@ -337,8 +337,8 @@ function ProductsContent() {
                             key={pageNum}
                             onClick={() => setCurrentPage(pageNum)}
                             className={`w-10 h-10 rounded-lg font-semibold transition-colors ${currentPage === pageNum
-                                ? 'bg-accent-red text-white'
-                                : 'border border-gray-300 hover:bg-gray-50'
+                              ? 'bg-accent-red text-white'
+                              : 'border border-gray-300 dark:border-dark-border hover:bg-gray-50 dark:hover:bg-dark-border text-gray-700 dark:text-gray-300'
                               }`}
                           >
                             {pageNum}
@@ -350,7 +350,7 @@ function ProductsContent() {
                     <button
                       onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
                       disabled={currentPage === totalPages}
-                      className="px-4 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+                      className="px-4 py-2 border border-gray-300 dark:border-dark-border rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-dark-border text-gray-700 dark:text-gray-300"
                     >
                       Sau
                     </button>
@@ -368,9 +368,9 @@ function ProductsContent() {
 export default function ProductsPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background-light dark:bg-dark-bg flex items-center justify-center transition-colors">
         <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
-        <span className="ml-3 text-gray-500">Đang tải...</span>
+        <span className="ml-3 text-gray-500 dark:text-gray-400">Đang tải...</span>
       </div>
     }>
       <ProductsContent />

@@ -5,13 +5,13 @@ import { Truck, RotateCcw, Shield, DollarSign, MapPin, Clock } from 'lucide-reac
 
 export default function ShippingPolicyPage() {
   return (
-    <div className="bg-gray-50 py-8">
+    <div className="bg-background-light dark:bg-dark-bg transition-colors duration-200 py-8">
       <div className="container-custom">
         {/* Breadcrumb */}
-        <div className="mb-6 text-sm text-gray-600">
+        <div className="mb-6 text-sm text-gray-600 dark:text-gray-400">
           <Link href="/" className="hover:text-accent-red">Trang chủ</Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">Chính sách giao hàng & bảo hành</span>
+          <span className="text-gray-900 dark:text-gray-100">Chính sách giao hàng & bảo hành</span>
         </div>
 
         {/* Page Header */}
@@ -26,15 +26,15 @@ export default function ShippingPolicyPage() {
 
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Shipping Policy */}
-          <section className="bg-white rounded-lg shadow-sm p-8">
+          <section className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <Truck size={24} className="text-green-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Chính sách giao hàng</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Chính sách giao hàng</h2>
             </div>
 
-            <div className="space-y-6 text-gray-700">
+            <div className="space-y-6 text-gray-700 dark:text-gray-300">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
                   1. Phạm vi giao hàng
@@ -71,7 +71,7 @@ export default function ShippingPolicyPage() {
                     <span className="text-accent-red font-semibold">5-7 ngày</span>
                   </div>
                 </div>
-                <p className="text-sm mt-2 text-gray-600">
+                <p className="text-sm mt-2 text-gray-600 dark:text-gray-400">
                   * Thời gian trên không bao gồm thứ 7, Chủ nhật và các ngày lễ
                 </p>
               </div>
@@ -120,15 +120,15 @@ export default function ShippingPolicyPage() {
           </section>
 
           {/* Return & Exchange Policy */}
-          <section className="bg-white rounded-lg shadow-sm p-8">
+          <section className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <RotateCcw size={24} className="text-blue-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Điều khoản đổi trả và bảo hành</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Điều khoản đổi trả và bảo hành</h2>
             </div>
 
-            <div className="space-y-6 text-gray-700">
+            <div className="space-y-6 text-gray-700 dark:text-gray-300">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
                   1. Điều kiện đổi trả
@@ -233,15 +233,15 @@ export default function ShippingPolicyPage() {
           </section>
 
           {/* Warranty Policy */}
-          <section className="bg-white rounded-lg shadow-sm p-8">
+          <section className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-8">
             <div className="flex items-center gap-3 mb-6">
               <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
                 <Shield size={24} className="text-purple-600" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Chính sách bảo hành</h2>
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Chính sách bảo hành</h2>
             </div>
 
-            <div className="space-y-6 text-gray-700">
+            <div className="space-y-6 text-gray-700 dark:text-gray-300">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-3">
                   1. Chính sách bảo hành theo hãng

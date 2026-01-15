@@ -38,10 +38,10 @@ function SearchContent() {
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [showSearchSuggestions, setShowSearchSuggestions] = useState(false);
   const searchRef = useRef<HTMLDivElement>(null);
-  
+
   // Price filter state
   const [priceFilter, setPriceFilter] = useState<string>(''); // '', 'under1m', '1m-3m', '3m-5m', 'over5m'
-  
+
   // Status filter state
   const [statusFilters, setStatusFilters] = useState({
     inStock: false,
@@ -111,8 +111,8 @@ function SearchContent() {
 
   // Perform real search via API
   const performSearch = useCallback(async (
-    query: string, 
-    page: number = 1, 
+    query: string,
+    page: number = 1,
     category: string = '',
     priceRange: string = '',
     status: typeof statusFilters = { inStock: false, preorder: false, onSale: false }
@@ -211,9 +211,9 @@ function SearchContent() {
   const totalPages = Math.ceil(totalResults / 20);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
       {/* Breadcrumb */}
-      <div className="bg-white border-b">
+      <div className="bg-white dark:bg-dark-card border-b dark:border-dark-border transition-colors">
         <div className="container-custom py-4">
           <nav className="flex items-center gap-2 text-sm">
             <Link href="/" className="text-gray-600 hover:text-accent-red">
@@ -224,7 +224,7 @@ function SearchContent() {
             {queryParam && (
               <>
                 <ChevronRight size={16} className="text-gray-400" />
-                <span className="text-gray-600">{queryParam}</span>
+                <span className="text-gray-600 dark:text-gray-400">{queryParam}</span>
               </>
             )}
           </nav>
@@ -235,9 +235,9 @@ function SearchContent() {
         {!hasSearched ? (
           /* Empty Search State */
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-4xl font-bold mb-4">Tìm kiếm</h1>
-            <h2 className="text-2xl font-semibold mb-4">Nhập từ khóa tìm kiếm</h2>
-            <p className="text-gray-600 mb-8">
+            <h1 className="text-4xl font-bold mb-4 dark:text-gray-100">Tìm kiếm</h1>
+            <h2 className="text-2xl font-semibold mb-4 dark:text-gray-200">Nhập từ khóa tìm kiếm</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-8">
               Vui lòng nhập từ khóa vào ô tìm kiếm để bắt đầu. Bạn có thể sử dụng các từ khóa tổng quát để dễ tìm hơn.
             </p>
 
@@ -253,7 +253,7 @@ function SearchContent() {
                       setShowSearchSuggestions(true);
                     }}
                     placeholder="Tìm kiếm sản phẩm..."
-                    className="flex-1 px-6 py-4 text-lg border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-red focus:border-transparent outline-none"
+                    className="flex-1 px-6 py-4 text-lg border-2 border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-accent-red focus:border-transparent outline-none bg-white dark:bg-dark-card dark:text-gray-100"
                   />
                   <button
                     type="submit"
@@ -278,7 +278,7 @@ function SearchContent() {
           /* Search Results */
           <div>
             <div className="mb-8">
-              <h1 className="text-3xl font-bold mb-4">Tìm kiếm</h1>
+              <h1 className="text-3xl font-bold mb-4 dark:text-gray-100">Tìm kiếm</h1>
 
               {/* Search Bar */}
               <form onSubmit={handleSearch} className="max-w-2xl">
@@ -288,7 +288,7 @@ function SearchContent() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Tìm kiếm sản phẩm..."
-                    className="flex-1 px-6 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-accent-red focus:border-transparent outline-none"
+                    className="flex-1 px-6 py-3 border-2 border-gray-300 dark:border-dark-border rounded-lg focus:ring-2 focus:ring-accent-red focus:border-transparent outline-none bg-white dark:bg-dark-card dark:text-gray-100"
                   />
                   <button
                     type="submit"
@@ -302,17 +302,17 @@ function SearchContent() {
             </div>
 
             {isSearching ? (
-              <div className="text-center py-12">
+              <div className="text-center py-12 dark:text-gray-100">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-accent-red"></div>
-                <p className="mt-4 text-gray-600">Đang tìm kiếm...</p>
+                <p className="mt-4 text-gray-600 dark:text-gray-400">Đang tìm kiếm...</p>
               </div>
             ) : results.length > 0 ? (
               <div className="flex flex-col lg:flex-row gap-8">
                 {/* Sidebar Filters */}
                 <aside className="lg:w-72 flex-shrink-0">
-                  <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
+                  <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border p-6 sticky top-4 transition-colors">
                     <div className="flex items-center justify-between mb-4">
-                      <h3 className="font-bold text-lg">Bộ lọc</h3>
+                      <h3 className="font-bold text-lg dark:text-gray-100">Bộ lọc</h3>
                       {(priceFilter || selectedCategory || statusFilters.inStock || statusFilters.preorder || statusFilters.onSale) && (
                         <button
                           onClick={() => {
@@ -332,39 +332,39 @@ function SearchContent() {
 
                     {/* Price Range */}
                     <div className="mb-6">
-                      <h4 className="font-semibold mb-3">Khoảng giá</h4>
+                      <h4 className="font-semibold mb-3 dark:text-gray-200">Khoảng giá</h4>
                       <div className="space-y-2">
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="rounded" 
+                          <input
+                            type="checkbox"
+                            className="rounded"
                             checked={priceFilter === 'under1m'}
                             onChange={() => handlePriceFilterChange('under1m')}
                           />
                           <span className="text-sm">Dưới 1,000,000đ</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="rounded" 
+                          <input
+                            type="checkbox"
+                            className="rounded"
                             checked={priceFilter === '1m-3m'}
                             onChange={() => handlePriceFilterChange('1m-3m')}
                           />
                           <span className="text-sm">1,000,000đ - 3,000,000đ</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="rounded" 
+                          <input
+                            type="checkbox"
+                            className="rounded"
                             checked={priceFilter === '3m-5m'}
                             onChange={() => handlePriceFilterChange('3m-5m')}
                           />
                           <span className="text-sm">3,000,000đ - 5,000,000đ</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="rounded" 
+                          <input
+                            type="checkbox"
+                            className="rounded"
                             checked={priceFilter === 'over5m'}
                             onChange={() => handlePriceFilterChange('over5m')}
                           />
@@ -375,7 +375,7 @@ function SearchContent() {
 
                     {/* Category */}
                     <div className="mb-6 border-t pt-6">
-                      <h4 className="font-semibold mb-3">Danh mục</h4>
+                      <h4 className="font-semibold mb-3 dark:text-gray-200">Danh mục</h4>
                       <div className="space-y-2">
                         <label className="flex items-center gap-2 cursor-pointer">
                           <input
@@ -404,30 +404,30 @@ function SearchContent() {
 
                     {/* Status */}
                     <div className="border-t pt-6">
-                      <h4 className="font-semibold mb-3">Trạng thái</h4>
+                      <h4 className="font-semibold mb-3 dark:text-gray-200">Trạng thái</h4>
                       <div className="space-y-2">
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="rounded" 
+                          <input
+                            type="checkbox"
+                            className="rounded"
                             checked={statusFilters.inStock}
                             onChange={() => handleStatusFilterChange('inStock')}
                           />
                           <span className="text-sm">Còn hàng</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="rounded" 
+                          <input
+                            type="checkbox"
+                            className="rounded"
                             checked={statusFilters.preorder}
                             onChange={() => handleStatusFilterChange('preorder')}
                           />
                           <span className="text-sm">Pre-order</span>
                         </label>
                         <label className="flex items-center gap-2 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            className="rounded" 
+                          <input
+                            type="checkbox"
+                            className="rounded"
                             checked={statusFilters.onSale}
                             onChange={() => handleStatusFilterChange('onSale')}
                           />
@@ -441,10 +441,10 @@ function SearchContent() {
                 {/* Results */}
                 <div className="flex-1">
                   <div className="mb-6">
-                    <p className="text-gray-600">
-                      Tìm thấy <span className="font-semibold text-gray-900">{totalResults}</span> kết quả
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Tìm thấy <span className="font-semibold text-gray-900 dark:text-gray-100">{totalResults}</span> kết quả
                       {queryParam && (
-                        <> cho &quot;<span className="font-semibold text-gray-900">{queryParam}</span>&quot;</>
+                        <> cho &quot;<span className="font-semibold text-gray-900 dark:text-gray-100">{queryParam}</span>&quot;</>
                       )}
                     </p>
                   </div>
@@ -485,8 +485,8 @@ function SearchContent() {
                               key={pageNum}
                               onClick={() => setCurrentPage(pageNum)}
                               className={`px-4 py-2 border rounded-lg ${currentPage === pageNum
-                                  ? 'bg-accent-red text-white border-accent-red'
-                                  : 'border-gray-300 hover:bg-gray-50'
+                                ? 'bg-accent-red text-white border-accent-red'
+                                : 'border-gray-300 hover:bg-gray-50'
                                 }`}
                             >
                               {pageNum}
@@ -506,13 +506,13 @@ function SearchContent() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-12">
+              <div className="text-center py-12 dark:text-gray-100">
                 <SearchIcon size={64} className="mx-auto text-gray-300 mb-4" />
-                <h3 className="text-xl font-semibold mb-2">Không tìm thấy kết quả</h3>
-                <p className="text-gray-600">
+                <h3 className="text-xl font-semibold mb-2 dark:text-gray-100">Không tìm thấy kết quả</h3>
+                <p className="text-gray-600 dark:text-gray-400">
                   Không tìm thấy sản phẩm nào phù hợp với từ khóa &quot;{queryParam}&quot;
                 </p>
-                <p className="text-gray-600 mt-2">Vui lòng thử lại với từ khóa khác</p>
+                <p className="text-gray-600 dark:text-gray-400 mt-2">Vui lòng thử lại với từ khóa khác</p>
               </div>
             )}
           </div>
@@ -525,7 +525,7 @@ function SearchContent() {
 export default function SearchPage() {
   return (
     <Suspense fallback={
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background-light dark:bg-dark-bg flex items-center justify-center transition-colors">
         <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-accent-red"></div>
       </div>
     }>

@@ -74,13 +74,13 @@ export default function ShippingCalculatorPage() {
   };
 
   return (
-    <div className="bg-gray-50 py-8">
+    <div className="bg-background-light dark:bg-dark-bg transition-colors duration-200 py-8">
       <div className="container-custom">
         {/* Breadcrumb */}
-        <div className="mb-6 text-sm text-gray-600">
+        <div className="mb-6 text-sm text-gray-600 dark:text-gray-400">
           <Link href="/" className="hover:text-accent-red">Trang chủ</Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">Tính giá gom hàng</span>
+          <span className="text-gray-900 dark:text-gray-100">Tính giá gom hàng</span>
         </div>
 
         {/* Page Header */}
@@ -123,7 +123,7 @@ export default function ShippingCalculatorPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
           {/* Calculator Form */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
               <Calculator size={24} className="text-accent-red" />
               Máy tính chi phí
@@ -217,9 +217,9 @@ export default function ShippingCalculatorPage() {
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-6">
               <div className="flex items-start gap-3 mb-4">
                 <Info className="text-blue-600 flex-shrink-0 mt-1" size={20} />
-                <h3 className="text-lg font-bold text-gray-900">Hướng dẫn sử dụng</h3>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Hướng dẫn sử dụng</h3>
               </div>
-              <ul className="space-y-2 text-sm text-gray-700">
+              <ul className="space-y-2 text-sm text-gray-700 dark:text-gray-300">
                 <li className="flex items-start gap-2">
                   <span className="text-blue-600 font-bold">1.</span>
                   <span>Nhập giá sản phẩm bằng Yên Nhật (đã bao gồm thuế)</span>
@@ -240,25 +240,25 @@ export default function ShippingCalculatorPage() {
             </div>
 
             {/* Formula */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
                 <Calculator size={20} className="text-accent-red" />
                 Công thức tính
               </h3>
-              <div className="space-y-4 text-sm text-gray-700">
-                <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="space-y-4 text-sm text-gray-700 dark:text-gray-300">
+                <div className="bg-gray-50 dark:bg-dark-border/50 p-4 rounded-lg">
                   <div className="font-semibold text-gray-900 mb-2">1. Giá sản phẩm (VND)</div>
                   <code className="text-accent-red">= Giá JPY × Tỷ giá ({EXCHANGE_RATE}đ)</code>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 dark:bg-dark-border/50 p-4 rounded-lg">
                   <div className="font-semibold text-gray-900 mb-2">2. Phí vận chuyển (VND)</div>
                   <code className="text-accent-red">
                     = Cân nặng (kg) × {SHIPPING_RATE_PER_KG.toLocaleString()}đ/kg
                   </code>
                 </div>
 
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 dark:bg-dark-border/50 p-4 rounded-lg">
                   <div className="font-semibold text-gray-900 mb-2">3. Phí dịch vụ (VND)</div>
                   <code className="text-accent-red">= (Giá SP + Phí ship) × 10%</code>
                 </div>
@@ -273,7 +273,7 @@ export default function ShippingCalculatorPage() {
             {/* Note */}
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <h4 className="font-semibold text-gray-900 mb-2">Lưu ý:</h4>
-              <ul className="space-y-1 text-sm text-gray-700">
+              <ul className="space-y-1 text-sm text-gray-700 dark:text-gray-300">
                 <li>• Tỷ giá có thể thay đổi theo thời gian thực</li>
                 <li>• Phí ship thực tế phụ thuộc vào kích thước và trọng lượng</li>
                 <li>• Một số sản phẩm có thể phát sinh phí đặc biệt</li>

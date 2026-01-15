@@ -149,19 +149,19 @@ function OrderTrackingContent() {
   });
 
   return (
-    <div className="bg-gray-50 py-8">
+    <div className="bg-background-light dark:bg-dark-bg transition-colors duration-200 py-8">
       <div className="container-custom">
         {/* Breadcrumb */}
-        <div className="mb-6 text-sm text-gray-600">
+        <div className="mb-6 text-sm text-gray-600 dark:text-gray-400">
           <Link href="/" className="hover:text-accent-red">Trang chủ</Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">Tra cứu đơn hàng</span>
+          <span className="text-gray-900 dark:text-gray-100">Tra cứu đơn hàng</span>
         </div>
 
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Tra cứu đơn hàng</h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Quản lý và theo dõi tình trạng đơn hàng của bạn
           </p>
         </div>
@@ -169,10 +169,10 @@ function OrderTrackingContent() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           {/* Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border overflow-hidden transition-colors">
               {/* User Info */}
               {user && (
-                <div className="p-6 bg-gradient-to-br from-primary to-primary-light border-b border-gray-200">
+                <div className="p-6 bg-gradient-to-br from-primary to-primary-light border-b border-gray-200 dark:border-dark-border">
                   <div className="flex items-center gap-3">
                     {user.avatar ? (
                       <Image 
@@ -188,8 +188,8 @@ function OrderTrackingContent() {
                       </div>
                     )}
                     <div>
-                      <h3 className="font-bold text-gray-900">{user.username}</h3>
-                      <p className="text-sm text-gray-700">{user.email}</p>
+                      <h3 className="font-bold text-gray-900 dark:text-gray-100">{user.username}</h3>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{user.email}</p>
                     </div>
                   </div>
                 </div>
@@ -221,9 +221,9 @@ function OrderTrackingContent() {
           {/* Main Content */}
           <div className="lg:col-span-3">
             {activeTab === 'orders' || activeTab === 'preorders' ? (
-              <div className="bg-white rounded-lg shadow-sm">
+              <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors">
                 {/* Search & Filter */}
-                <div className="p-6 border-b border-gray-200">
+                <div className="p-6 border-b border-gray-200 dark:border-dark-border">
                   <div className="flex flex-col md:flex-row gap-4">
                     {/* Search */}
                     <div className="flex-1 relative">
@@ -263,7 +263,7 @@ function OrderTrackingContent() {
                 {loading ? (
                   <div className="p-12 text-center">
                     <Loader2 size={48} className="text-accent-red animate-spin mx-auto mb-4" />
-                    <p className="text-gray-600">Đang tìm kiếm đơn hàng...</p>
+                    <p className="text-gray-600 dark:text-gray-400">Đang tìm kiếm đơn hàng...</p>
                   </div>
                 ) : filteredOrders.length === 0 ? (
                   <div className="p-12 text-center">
@@ -291,7 +291,7 @@ function OrderTrackingContent() {
                           <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-4">
                               <div>
-                                <h3 className="font-bold text-gray-900">{order.orderNumber}</h3>
+                                <h3 className="font-bold text-gray-900 dark:text-gray-100">{order.orderNumber}</h3>
                                 <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                                   <Calendar size={14} />
                                   <span>{formatDate(order.createdAt)}</span>
@@ -307,14 +307,14 @@ function OrderTrackingContent() {
 
                           {/* Customer Info */}
                           <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                            <p className="text-sm text-gray-700">
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
                               <span className="font-semibold">Khách hàng:</span> {order.customerName}
                             </p>
-                            <p className="text-sm text-gray-700">
+                            <p className="text-sm text-gray-700 dark:text-gray-300">
                               <span className="font-semibold">SĐT:</span> {order.customerPhone}
                             </p>
                             {order.customerEmail && (
-                              <p className="text-sm text-gray-700">
+                              <p className="text-sm text-gray-700 dark:text-gray-300">
                                 <span className="font-semibold">Email:</span> {order.customerEmail}
                               </p>
                             )}
@@ -375,14 +375,14 @@ function OrderTrackingContent() {
               </div>
             ) : (
               // Other tabs placeholder
-              <div className="bg-white rounded-lg shadow-sm p-12 text-center">
+              <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-12 text-center">
                 <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Package size={40} className="text-gray-400" />
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Tính năng đang phát triển
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-400">
                   Chức năng này sẽ sớm được cập nhật
                 </p>
               </div>
@@ -393,7 +393,7 @@ function OrderTrackingContent() {
         {/* Order Detail Modal */}
         {showOrderModal && selectedOrder && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white dark:bg-dark-card rounded-3xl shadow-2xl dark:shadow-none dark:border dark:border-dark-border transition-colors max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-sm text-slate-500">#{selectedOrder.orderNumber}</p>
@@ -488,10 +488,10 @@ function OrderTrackingContent() {
 // Loading fallback component
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-red mx-auto mb-4"></div>
-        <p className="text-gray-600">Đang tải trang tra cứu...</p>
+        <p className="text-gray-600 dark:text-gray-400">Đang tải trang tra cứu...</p>
       </div>
     </div>
   );

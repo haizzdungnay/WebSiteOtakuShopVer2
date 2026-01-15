@@ -1,6 +1,6 @@
 export default function CheckoutLoading() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
       <div className="container mx-auto px-4 py-8">
         {/* Breadcrumb Skeleton */}
         <div className="flex gap-2 mb-6">
@@ -16,7 +16,7 @@ export default function CheckoutLoading() {
           {/* Left Column - Form */}
           <div className="lg:col-span-2 space-y-6">
             {/* Shipping Info Card */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
               <div className="h-6 bg-gray-200 rounded w-40 mb-4 animate-pulse"></div>
               <div className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
@@ -34,7 +34,7 @@ export default function CheckoutLoading() {
             </div>
 
             {/* Payment Method Card */}
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6">
               <div className="h-6 bg-gray-200 rounded w-48 mb-4 animate-pulse"></div>
               <div className="space-y-3">
                 {Array.from({ length: 4 }).map((_, i) => (
@@ -50,7 +50,7 @@ export default function CheckoutLoading() {
 
           {/* Right Column - Order Summary */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-24">
+            <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-6 sticky top-24">
               <div className="h-6 bg-gray-200 rounded w-32 mb-4 animate-pulse"></div>
               
               {/* Cart Items */}

@@ -71,9 +71,9 @@ function VerifyEmailContent() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+        <div className="bg-white dark:bg-dark-card rounded-2xl shadow-lg dark:shadow-none dark:border dark:border-dark-border transition-colors p-8 text-center">
           {/* Loading */}
           {status === 'loading' && (
             <>
@@ -81,7 +81,7 @@ function VerifyEmailContent() {
                 <Loader2 size={40} className="text-blue-500 animate-spin" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">Đang xác nhận email...</h1>
-              <p className="text-gray-600">Vui lòng đợi trong giây lát</p>
+              <p className="text-gray-600 dark:text-gray-400">Vui lòng đợi trong giây lát</p>
             </>
           )}
 
@@ -189,14 +189,14 @@ function VerifyEmailContent() {
 // Loading fallback
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
-        <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+        <div className="bg-white dark:bg-dark-card rounded-2xl shadow-lg dark:shadow-none dark:border dark:border-dark-border transition-colors p-8 text-center">
           <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <Loader2 size={40} className="text-blue-500 animate-spin" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Đang tải...</h1>
-          <p className="text-gray-600">Vui lòng đợi trong giây lát</p>
+          <p className="text-gray-600 dark:text-gray-400">Vui lòng đợi trong giây lát</p>
         </div>
       </div>
     </div>

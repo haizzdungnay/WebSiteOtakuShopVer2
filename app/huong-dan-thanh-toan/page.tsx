@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function PaymentGuidePage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 py-12">
       <div className="container-custom max-w-4xl">
         <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">Hướng dẫn thanh toán</h1>
 
@@ -51,7 +51,7 @@ export default function PaymentGuidePage() {
                     <p className="text-gray-500 text-sm">Momo, ZaloPay</p>
                   </div>
                 </div>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-400">
                   Quét mã QR hoặc chuyển tiền trực tiếp đến ví điện tử của shop.
                   Liên hệ hotline để nhận thông tin ví.
                 </p>
@@ -90,7 +90,7 @@ export default function PaymentGuidePage() {
                     <p className="text-gray-500 text-sm">Nhận hàng rồi mới thanh toán</p>
                   </div>
                 </div>
-                <div className="text-gray-600">
+                <div className="text-gray-600 dark:text-gray-400">
                   <p>Áp dụng cho đơn hàng dưới 5.000.000đ.</p>
                   <p className="text-sm text-amber-600 mt-2">
                     * Lưu ý: Đơn hàng COD có thể yêu cầu đặt cọc 30-50% với sản phẩm pre-order.
@@ -103,7 +103,7 @@ export default function PaymentGuidePage() {
           {/* Notes */}
           <div className="bg-white rounded-2xl p-8 shadow-lg">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Lưu ý quan trọng</h2>
-            <ul className="space-y-3 text-gray-600">
+            <ul className="space-y-3 text-gray-600 dark:text-gray-400">
               <li className="flex items-start gap-2">
                 <span className="w-2 h-2 bg-pink-500 rounded-full mt-2 flex-shrink-0"></span>
                 <span>Đơn hàng sẽ được xử lý sau khi xác nhận thanh toán thành công.</span>

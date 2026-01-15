@@ -51,19 +51,19 @@ export default function NewsPage() {
   }, [currentPage]);
 
   return (
-    <div className="bg-gray-50 py-8">
+    <div className="bg-background-light dark:bg-dark-bg transition-colors duration-200 py-8">
       <div className="container-custom">
         {/* Breadcrumb */}
-        <div className="mb-6 text-sm text-gray-600">
+        <div className="mb-6 text-sm text-gray-600 dark:text-gray-400">
           <Link href="/" className="hover:text-accent-red">Trang chủ</Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900">Tin tức</span>
+          <span className="text-gray-900 dark:text-gray-100">Tin tức</span>
         </div>
 
         {/* Page Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Tin tức & Blog</h1>
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Cập nhật những tin tức mới nhất về figure, anime và manga
           </p>
         </div>
@@ -81,12 +81,12 @@ export default function NewsPage() {
               </div>
             ) : articles.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-lg">
-                <p className="text-gray-600">Chưa có tin tức nào</p>
+                <p className="text-gray-600 dark:text-gray-400">Chưa có tin tức nào</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {articles.map((article) => (
-                  <article key={article.id} className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                  <article key={article.id} className="bg-white dark:bg-dark-card rounded-lg overflow-hidden shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors hover:shadow-md transition-shadow">
                     {/* Featured Image */}
                     <Link href={`/tin-tuc/${article.id}`} className="block overflow-hidden">
                       {article.imageUrl ? (
@@ -181,8 +181,8 @@ export default function NewsPage() {
           <div className="lg:col-span-1">
             <div className="space-y-6">
               {/* Recent Posts */}
-              <div className="bg-white rounded-lg p-6 shadow-sm">
-                <h3 className="text-xl font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200">
+              <div className="bg-white dark:bg-dark-card rounded-lg dark:border dark:border-dark-border transition-colors p-6 shadow-sm">
+                <h3 className="text-xl font-bold text-gray-900 mb-4 pb-3 border-b border-gray-200 dark:border-dark-border">
                   Bài viết mới nhất
                 </h3>
                 <div className="space-y-4">
@@ -199,7 +199,7 @@ export default function NewsPage() {
                         <h4 className="text-sm font-semibold text-gray-900 line-clamp-2 group-hover:text-indigo-600 transition-colors mb-1">
                           {post.title}
                         </h4>
-                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                        <div className="flex items-center gap-1 text-xs text-gray-600 dark:text-gray-400">
                           <Calendar size={12} />
                           <span>{new Date(post.createdAt).toLocaleDateString('vi-VN')}</span>
                         </div>

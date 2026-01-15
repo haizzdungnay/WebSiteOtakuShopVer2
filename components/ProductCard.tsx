@@ -59,16 +59,16 @@ export default function ProductCard({
 
   return (
     <Link href={`/products/${slug}`} className="block">
-      <div className="product-card group relative">
+      <div className="product-card group relative bg-white dark:bg-dark-card border border-gray-100 dark:border-dark-border rounded-lg overflow-hidden transition-all duration-200 hover:shadow-lg dark:hover:shadow-dark-border/20">
         {/* Wishlist Button */}
         <button
           onClick={handleWishlistClick}
-          className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-20 p-1.5 sm:p-2 rounded-full bg-white/80 hover:bg-white shadow-sm transition-all duration-200 hover:scale-110"
+          className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 z-20 p-1.5 sm:p-2 rounded-full bg-white/80 dark:bg-dark-card/80 hover:bg-white dark:hover:bg-dark-card shadow-sm transition-all duration-200 hover:scale-110"
           title={isWishlisted ? "Bỏ yêu thích" : "Thêm vào yêu thích"}
         >
           <Heart
             size={16}
-            className={`sm:w-[18px] sm:h-[18px] transition-colors ${isWishlisted ? 'fill-accent-red text-accent-red' : 'text-gray-600 hover:text-accent-red'}`}
+            className={`sm:w-[18px] sm:h-[18px] transition-colors ${isWishlisted ? 'fill-accent-red text-accent-red' : 'text-gray-600 dark:text-dark-muted hover:text-accent-red'}`}
           />
         </button>
 
@@ -88,7 +88,7 @@ export default function ProductCard({
         </div>
 
         {/* Image */}
-        <div className="relative w-full aspect-square overflow-hidden bg-gray-50">
+        <div className="relative w-full aspect-square overflow-hidden bg-gray-50 dark:bg-dark-border">
           <Image
             src={image || '/images/placeholder.jpg'}
             alt={name}
@@ -101,7 +101,7 @@ export default function ProductCard({
         {/* Content */}
         <div className="p-2 sm:p-3">
           {/* Title */}
-          <h3 className="text-xs sm:text-sm text-gray-700 mb-1.5 sm:mb-2 line-clamp-2 min-h-[32px] sm:min-h-[40px] group-hover:text-accent-red transition-colors">
+          <h3 className="text-xs sm:text-sm text-gray-700 dark:text-dark-text mb-1.5 sm:mb-2 line-clamp-2 min-h-[32px] sm:min-h-[40px] group-hover:text-accent-red transition-colors">
             {name}
           </h3>
 
@@ -109,7 +109,7 @@ export default function ProductCard({
           <div className="flex flex-col gap-0.5 sm:gap-1 min-h-[40px] sm:min-h-[48px] justify-end">
             {discountPrice ? (
               <>
-                <span className="text-gray-400 line-through text-[10px] sm:text-xs">
+                <span className="text-gray-400 dark:text-dark-muted line-through text-[10px] sm:text-xs">
                   {formatPrice(price)}
                 </span>
                 <span className="text-accent-red font-bold text-sm sm:text-lg">

@@ -83,7 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="icon" href="/favicon.png" sizes="32x32" />
         <link rel="icon" href="/favicon.png" sizes="192x192" />
         <link rel="apple-touch-icon" href="/favicon.png" />
-        
+
         {/* Structured Data - JSON-LD */}
         <OrganizationJsonLd
           name="Otaku Shop"
@@ -117,7 +117,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                   Chuyển đến nội dung chính
                 </a>
                 <Header />
-                <main id="main-content" className="min-h-screen bg-white dark:bg-dark-bg transition-colors duration-200">
+                <main id="main-content" className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
                   {children}
                 </main>
                 <Footer />

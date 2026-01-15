@@ -81,7 +81,7 @@ export default function SalePage() {
   const totalPages = Math.ceil(totalProducts / limit);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
       {/* Header */}
       <div className="bg-gradient-to-r from-orange-500 to-red-500 text-white">
         <div className="container-custom py-12">
@@ -106,8 +106,8 @@ export default function SalePage() {
 
       <div className="container-custom py-8">
         {/* Sort & Filter Bar */}
-        <div className="bg-white rounded-lg p-4 mb-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div className="text-gray-600">
+        <div className="bg-white dark:bg-dark-card rounded-lg dark:border dark:border-dark-border transition-colors p-4 mb-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="text-gray-600 dark:text-gray-400">
             {totalProducts > 0 ? (
               <span>Hiển thị <strong>{products.length}</strong> / <strong>{totalProducts}</strong> sản phẩm</span>
             ) : (
@@ -116,7 +116,7 @@ export default function SalePage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600">Sắp xếp:</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">Sắp xếp:</span>
             <div className="relative">
               <select
                 value={sortBy}
@@ -143,7 +143,7 @@ export default function SalePage() {
             <Loader2 className="w-10 h-10 animate-spin text-accent-red" />
           </div>
         ) : products.length === 0 ? (
-          <div className="bg-white rounded-lg p-12 text-center shadow-sm">
+          <div className="bg-white dark:bg-dark-card rounded-lg dark:border dark:border-dark-border transition-colors p-12 text-center shadow-sm">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Percent size={40} className="text-gray-400" />
             </div>

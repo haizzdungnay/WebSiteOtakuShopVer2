@@ -45,7 +45,7 @@ const stores: Store[] = [
 
 export default function StoresPage() {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200">
       {/* Header */}
       <div className="bg-gradient-to-r from-accent-red to-red-600 text-white">
         <div className="container-custom py-12">
@@ -65,7 +65,7 @@ export default function StoresPage() {
           {stores.map((store) => (
             <div
               key={store.id}
-              className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-lg transition-shadow"
+              className="bg-white dark:bg-dark-card rounded-xl shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors overflow-hidden hover:shadow-lg transition-shadow"
             >
               {/* Store Image */}
               <div className="relative h-48 bg-gray-200">
@@ -78,7 +78,7 @@ export default function StoresPage() {
               <div className="p-6">
                 <h3 className="font-bold text-lg text-gray-900 mb-4">{store.name}</h3>
 
-                <div className="space-y-3 text-sm text-gray-600">
+                <div className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
                   <div className="flex items-start gap-3">
                     <MapPin size={18} className="text-accent-red flex-shrink-0 mt-0.5" />
                     <span>{store.address}</span>

@@ -2890,7 +2890,7 @@ export default function AdminPage() {
         {/* Order detail modal */}
         {showOrderModal && selectedOrder && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
+            <div className="bg-white dark:bg-dark-card rounded-3xl shadow-2xl dark:shadow-none dark:border dark:border-dark-border transition-colors max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto">
               <div className="flex items-center justify-between mb-4">
                 <div>
                   <p className="text-sm text-slate-500">#{selectedOrder.orderNumber}</p>
@@ -3008,7 +3008,7 @@ export default function AdminPage() {
         {/* Shipping Modal - Nhập thông tin vận chuyển */}
         {showShippingModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full p-6">
+            <div className="bg-white dark:bg-dark-card rounded-3xl shadow-2xl dark:shadow-none dark:border dark:border-dark-border transition-colors max-w-md w-full p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-slate-900">Thông tin vận chuyển</h2>
                 <button

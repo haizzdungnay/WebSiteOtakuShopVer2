@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function ReturnPolicyPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 py-12">
       <div className="container-custom max-w-4xl">
         <h1 className="text-4xl font-bold text-gray-900 mb-8 text-center">Chính sách đổi trả</h1>
 
@@ -17,8 +17,8 @@ export default function ReturnPolicyPage() {
           <div className="bg-pink-50 rounded-xl p-6 flex items-center gap-4">
             <RotateCcw className="w-12 h-12 text-pink-600 flex-shrink-0" />
             <div>
-              <h3 className="font-bold text-lg text-gray-900">Đổi trả trong 7 ngày</h3>
-              <p className="text-gray-600">Đổi trả miễn phí nếu sản phẩm bị lỗi từ nhà sản xuất</p>
+              <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">Đổi trả trong 7 ngày</h3>
+              <p className="text-gray-600 dark:text-gray-400">Đổi trả miễn phí nếu sản phẩm bị lỗi từ nhà sản xuất</p>
             </div>
           </div>
 

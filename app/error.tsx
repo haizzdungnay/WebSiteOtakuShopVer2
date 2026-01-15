@@ -17,7 +17,7 @@ export default function Error({
   }, [error]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 flex items-center justify-center px-4">
       <div className="max-w-lg w-full text-center">
         {/* Error Icon */}
         <div className="mb-8">
@@ -38,7 +38,7 @@ export default function Error({
 
         {/* Error Details (only in development) */}
         {process.env.NODE_ENV === 'development' && (
-          <div className="bg-gray-100 rounded-lg p-4 mb-8 text-left">
+          <div className="bg-gray-100 dark:bg-dark-border rounded-lg p-4 mb-8 text-left">
             <p className="text-sm text-gray-500 mb-2 font-medium">Chi tiết lỗi:</p>
             <p className="text-sm text-red-600 font-mono break-all">
               {error.message}

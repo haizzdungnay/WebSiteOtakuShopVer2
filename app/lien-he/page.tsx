@@ -8,11 +8,11 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-background-light dark:bg-dark-bg transition-colors duration-200 py-12">
       <div className="container-custom">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">Liên hệ với chúng tôi</h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 dark:text-gray-400">
             Chúng tôi luôn sẵn sàng hỗ trợ bạn. Hãy liên hệ qua các kênh dưới đây.
           </p>
         </div>
@@ -28,8 +28,8 @@ export default function ContactPage() {
                     <MapPin className="w-6 h-6 text-pink-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Địa chỉ</h3>
-                    <p className="text-gray-600">123 Đường ABC, Quận 1, TP. Hồ Chí Minh</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">Địa chỉ</h3>
+                    <p className="text-gray-600 dark:text-gray-400">123 Đường ABC, Quận 1, TP. Hồ Chí Minh</p>
                   </div>
                 </div>
 
@@ -38,7 +38,7 @@ export default function ContactPage() {
                     <Phone className="w-6 h-6 text-blue-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Hotline</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">Hotline</h3>
                     <a href="tel:0389836514" className="text-pink-600 hover:underline font-semibold text-lg">
                       0389 836 514
                     </a>
@@ -50,7 +50,7 @@ export default function ContactPage() {
                     <Mail className="w-6 h-6 text-green-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Email</h3>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">Email</h3>
                     <a href="mailto:tuanduongtempproject@gmail.com" className="text-pink-600 hover:underline">
                       tuanduongtempproject@gmail.com
                     </a>
@@ -62,8 +62,8 @@ export default function ContactPage() {
                     <Clock className="w-6 h-6 text-purple-600" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Giờ làm việc</h3>
-                    <p className="text-gray-600">Thứ 2 - Chủ nhật: 9:00 - 21:00</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-gray-100">Giờ làm việc</h3>
+                    <p className="text-gray-600 dark:text-gray-400">Thứ 2 - Chủ nhật: 9:00 - 21:00</p>
                   </div>
                 </div>
               </div>

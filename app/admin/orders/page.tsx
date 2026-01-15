@@ -203,7 +203,7 @@ export default function AdminOrdersPage() {
             >
               <ChevronLeft size={20} />
             </button>
-            <h1 className="text-xl font-bold text-gray-900">Quản lý đơn hàng</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Quản lý đơn hàng</h1>
           </div>
           <button
             onClick={fetchOrders}
@@ -217,7 +217,7 @@ export default function AdminOrdersPage() {
 
       <main className="max-w-7xl mx-auto px-4 py-6">
         {/* Filters */}
-        <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+        <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-4 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             {/* Search */}
             <form onSubmit={handleSearch} className="flex-1">
@@ -271,12 +271,12 @@ export default function AdminOrdersPage() {
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accent-red"></div>
           </div>
         ) : orders.length === 0 ? (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center text-gray-500">
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border transition-colors p-8 text-center text-gray-500 dark:text-gray-400">
             <Package size={48} className="mx-auto mb-4 text-gray-300" />
             <p>Không có đơn hàng nào</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="bg-white dark:bg-dark-card rounded-lg shadow-sm dark:shadow-none dark:border dark:border-dark-border overflow-hidden transition-colors">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-gray-50 border-b">
@@ -306,17 +306,17 @@ export default function AdminOrdersPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-200">
                   {orders.map(order => (
-                    <tr key={order.id} className="hover:bg-gray-50">
+                    <tr key={order.id} className="hover:bg-background-light dark:bg-dark-bg transition-colors duration-200">
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <span className="font-mono text-sm font-medium text-gray-900">
+                        <span className="font-mono text-sm font-medium text-gray-900 dark:text-gray-100">
                           {order.orderNumber}
                         </span>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="text-sm font-medium text-gray-900">
+                        <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
                           {order.user?.fullName || order.customerName || 'Khách vãng lai'}
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
                           {order.user?.email || order.customerEmail || order.customerPhone || '-'}
                         </div>
                       </td>
@@ -334,7 +334,7 @@ export default function AdminOrdersPage() {
                       <td className="px-4 py-4">
                         {order.note ? (
                           <div className="max-w-xs">
-                            <div className="flex items-start gap-1 text-sm text-gray-600">
+                            <div className="flex items-start gap-1 text-sm text-gray-600 dark:text-gray-400">
                               <FileText size={14} className="flex-shrink-0 mt-0.5 text-orange-500" />
                               <span className="line-clamp-2">{order.note}</span>
                             </div>
@@ -343,7 +343,7 @@ export default function AdminOrdersPage() {
                           <span className="text-gray-400 text-sm">-</span>
                         )}
                       </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {formatDate(order.createdAt)}
                       </td>
                       <td className="px-4 py-4 whitespace-nowrap text-center">
@@ -364,7 +364,7 @@ export default function AdminOrdersPage() {
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="px-4 py-3 border-t flex items-center justify-between">
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 dark:text-gray-400">
                   Trang {currentPage} / {totalPages}
                 </div>
                 <div className="flex gap-2">
@@ -396,7 +396,7 @@ export default function AdminOrdersPage() {
             {/* Modal Header */}
             <div className="px-6 py-4 border-b flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-lg text-gray-900">
+                <h3 className="font-bold text-lg text-gray-900 dark:text-gray-100">
                   Chi tiết đơn hàng
                 </h3>
                 <p className="text-sm text-gray-500 font-mono">
@@ -464,9 +464,9 @@ export default function AdminOrdersPage() {
                   Thông tin khách hàng
                 </h4>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  <p><span className="text-gray-500">Tên:</span> {selectedOrder.user?.fullName || selectedOrder.customerName || 'Khách vãng lai'}</p>
-                  <p><span className="text-gray-500">Email:</span> {selectedOrder.user?.email || selectedOrder.customerEmail || '-'}</p>
-                  <p><span className="text-gray-500">SĐT:</span> {selectedOrder.user?.phone || selectedOrder.customerPhone || '-'}</p>
+                  <p><span className="text-gray-500 dark:text-gray-400">Tên:</span> {selectedOrder.user?.fullName || selectedOrder.customerName || 'Khách vãng lai'}</p>
+                  <p><span className="text-gray-500 dark:text-gray-400">Email:</span> {selectedOrder.user?.email || selectedOrder.customerEmail || '-'}</p>
+                  <p><span className="text-gray-500 dark:text-gray-400">SĐT:</span> {selectedOrder.user?.phone || selectedOrder.customerPhone || '-'}</p>
                 </div>
               </div>
 
@@ -477,7 +477,7 @@ export default function AdminOrdersPage() {
                   Địa chỉ giao hàng
                 </h4>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  <p><span className="text-gray-500">Người nhận:</span> {selectedOrder.shippingFullName || selectedOrder.customerName || '-'}</p>
+                  <p><span className="text-gray-500 dark:text-gray-400">Người nhận:</span> {selectedOrder.shippingFullName || selectedOrder.customerName || '-'}</p>
                   <p className="flex items-center gap-1">
                     <Phone size={14} className="text-gray-400" />
                     {selectedOrder.shippingPhone || selectedOrder.customerPhone || '-'}
@@ -490,13 +490,13 @@ export default function AdminOrdersPage() {
                   </p>
                   {selectedOrder.shipping?.trackingCode && (
                     <p className="mt-2">
-                      <span className="text-gray-500">Mã vận đơn:</span>{' '}
+                      <span className="text-gray-500 dark:text-gray-400">Mã vận đơn:</span>{' '}
                       <span className="font-mono">{selectedOrder.shipping.trackingCode}</span>
                     </p>
                   )}
                   {selectedOrder.shipping?.carrier && (
                     <p>
-                      <span className="text-gray-500">Đơn vị vận chuyển:</span> {selectedOrder.shipping.carrier}
+                      <span className="text-gray-500 dark:text-gray-400">Đơn vị vận chuyển:</span> {selectedOrder.shipping.carrier}
                     </p>
                   )}
                 </div>
@@ -511,11 +511,11 @@ export default function AdminOrdersPage() {
                   </h4>
                   <div className="bg-gray-50 rounded-lg p-4">
                     <p>
-                      <span className="text-gray-500">Phương thức:</span>{' '}
+                      <span className="text-gray-500 dark:text-gray-400">Phương thức:</span>{' '}
                       {selectedOrder.payment.method === 'COD' ? 'Thanh toán khi nhận hàng' : selectedOrder.payment.method}
                     </p>
                     <p>
-                      <span className="text-gray-500">Trạng thái:</span>{' '}
+                      <span className="text-gray-500 dark:text-gray-400">Trạng thái:</span>{' '}
                       <span className={selectedOrder.payment.status === 'PAID' ? 'text-green-600' : 'text-yellow-600'}>
                         {selectedOrder.payment.status === 'PAID' ? 'Đã thanh toán' : 'Chưa thanh toán'}
                       </span>
@@ -547,7 +547,7 @@ export default function AdminOrdersPage() {
                           {item.product.name}
                         </p>
                         <div className="flex items-center justify-between mt-1">
-                          <span className="text-sm text-gray-500">x{item.quantity}</span>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">x{item.quantity}</span>
                           <span className="font-semibold text-accent-red">
                             {formatCurrency(item.price * item.quantity)}
                           </span>
@@ -559,7 +559,7 @@ export default function AdminOrdersPage() {
 
                 {/* Total */}
                 <div className="mt-4 pt-4 border-t flex items-center justify-between">
-                  <span className="font-semibold text-gray-900">Tổng cộng</span>
+                  <span className="font-semibold text-gray-900 dark:text-gray-100">Tổng cộng</span>
                   <span className="text-xl font-bold text-accent-red">
                     {formatCurrency(selectedOrder.totalAmount)}
                   </span>
